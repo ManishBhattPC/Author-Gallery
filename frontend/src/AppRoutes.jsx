@@ -11,7 +11,6 @@ import Contact from "./pages/Contact.jsx"
 import Login from "./pages/Login.jsx"
 import Signup from "./pages/SignUp.jsx"
 import NotFound from "./pages/NotFound.jsx"
-
 import AuthorDashboard from "./pages/AuthorDashboard.jsx"
 import BookDetails from "./components/BookDetails.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx"
@@ -34,7 +33,7 @@ const AppRoutes = () => {
         <Route
           path="author-dashboard"
           element={
-            <ProtectedRoute role="author">
+            <ProtectedRoute >
               <AuthorDashboard />
             </ProtectedRoute>
           }

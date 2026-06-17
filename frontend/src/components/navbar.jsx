@@ -55,14 +55,14 @@ const Navbar = () => {
             </>
           ) : (
             <div className="flex flex-wrap gap-2 items-center">
-              {user.role === "author" && (
+              {/* {user.role === "author" && ()} this will be use when we use admin  */}
                 <Link
                   to="/author-dashboard"
                   className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-amber-400 hover:text-amber-700"
                 >
                   Dashboard
                 </Link>
-              )}
+              
               <button
                 type="button"
                 onClick={logout}
@@ -123,7 +123,7 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                {user.role === "author" && (
+                {/* {user.role === "author" && ()} this will used when we create role */}
                   <Link
                     to="/author-dashboard"
                     onClick={() => setMenuOpen(false)}
@@ -131,7 +131,7 @@ const Navbar = () => {
                   >
                     Dashboard
                   </Link>
-                )}
+                
                 <button
                   type="button"
                   onClick={() => {

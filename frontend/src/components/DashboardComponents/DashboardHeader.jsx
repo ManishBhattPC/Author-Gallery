@@ -1,13 +1,17 @@
+import { useAuth } from "../../AuthContext.jsx"
+
 const DashboardHeader = () => {
+  const { user } = useAuth()
+
   return (
     <div className="bg-white p-4 rounded-lg shadow flex justify-between items-center">
       <div>
         <h2 className="text-2xl font-bold">
-          Welcome Back, Sarah!
+          Welcome Back, {user?.name}!
         </h2>
 
         <p className="text-gray-500">
-          Pen Name: Elara Vance
+          {user?.email}
         </p>
       </div>
 
@@ -28,7 +32,7 @@ const DashboardHeader = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default DashboardHeader;
+export default DashboardHeader

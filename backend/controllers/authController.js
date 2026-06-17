@@ -34,7 +34,7 @@ export const loginUser = async (req, res) => {
 
   if(!user){
     return res.status(404).json({
-      message:"user illeeee"
+      message:"user illeeee"      
     })
   }
 
@@ -48,7 +48,7 @@ export const loginUser = async (req, res) => {
   process.env.JWT_SECRET,
   { expiresIn: "7d" }
 )
-
+    //  IN THIS I HAVE TO MAKE SECURE: TRUE DURING DEPLOYMENT 
 res.cookie("token", token, {
   httpOnly: true,
   secure: false,
