@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AuthorCard from "./AuthorCard";
-import { fetchTopAuthors } from "../services/authorService.js";
+import { fetchTopAuthors } from "../../services/authorService.js";
 
 const fallbackAuthors = [
   {

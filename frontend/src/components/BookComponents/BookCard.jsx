@@ -1,27 +1,27 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { FaBookOpen, FaDownload, FaStar } from "react-icons/fa";
+import React, { useState } from "react"
+import { Link } from "react-router-dom"
+import { FaBookOpen, FaDownload, FaStar } from "react-icons/fa"
 
 const BookCard = ({ book = {} }) => {
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
+  const [isImageLoaded, setIsImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
-  const coverUrl = book?.formats?.["image/jpeg"];
-  const title = book?.title || "Untitled Book";
+  const coverUrl = book?.formats?.["image/jpeg"]
+  const title = book?.title || "Untitled Book"
   const authors =
-    book?.authors?.map((a) => a.name).join(", ") || "Unknown Author";
+    book?.authors?.map((a) => a.name).join(", ") || "Unknown Author"
   const downloads = book?.download_count
     ? book.download_count.toLocaleString()
     : "0";
-  const rating = book?.rating || Math.floor(Math.random() * 3) + 3;
+  const rating = book?.rating || Math.floor(Math.random() * 3) + 3
 
   const handleImageLoad = () => {
-    setIsImageLoaded(true);
-  };
+    setIsImageLoaded(true)
+  }
 
   const handleImageError = () => {
     setImageError(true);
-  };
+  }
 
   return (
     <div className="group h-full bg-white rounded-xl md:rounded-2xl shadow-md hover:shadow-2xl overflow-hidden transition-all duration-300 transform hover:-translate-y-2 cursor-pointer flex flex-col">
@@ -97,10 +97,10 @@ const BookCard = ({ book = {} }) => {
         </Link>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default BookCard;
+export default BookCard
 
 
 

@@ -12,7 +12,7 @@ import Login from "./pages/Login.jsx"
 import Signup from "./pages/SignUp.jsx"
 import NotFound from "./pages/NotFound.jsx"
 import AuthorDashboard from "./pages/AuthorDashboard.jsx"
-import BookDetails from "./components/BookDetails.jsx"
+import BookDetails from "./components/BookComponents/BookDetails.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx"
 
 const AppRoutes = () => {

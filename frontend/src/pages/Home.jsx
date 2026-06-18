@@ -1,6 +1,6 @@
 
 import HeroSection from "../components/HomeComponents/HeroSection"
-import FeaturedAuthors from "../components/FeaturedAuthors"
+import FeaturedAuthors from "../components/AuthorComponents/FeaturedAuthors"
 import TrendingWorks from "../components/TrendingWorks"
 
 

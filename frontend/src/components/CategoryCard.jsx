@@ -20,4 +20,4 @@ const CategoryCard = ({ title, description, icon }) => {
   );
 };
 
-export default CategoryCard;
+export default CategoryCard

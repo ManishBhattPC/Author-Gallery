@@ -12,6 +12,8 @@ connectDB()
 
 const app = express()
 
+
+
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -21,13 +23,14 @@ app.use(
 
 app.use(cookieParser())
 app.use(express.json())
+app.use("/api/books", bookRoutes)
 
 app.get("/", (req, res) => {
   res.send("Author Gallery API is running...")
 })
 
 app.use("/api/auth", authRoutes)
-app.use("/api/books", bookRoutes)
+// app.use("/api/books", bookRoutes)
 
 const PORT = process.env.PORT || 5000
 

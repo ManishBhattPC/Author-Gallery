@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchBookById } from "../services/bookService.js";
+import { fetchBookById } from "../../services/bookService.js";
 import {
   FaDownload,
   FaStar,

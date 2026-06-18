@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import SearchBar from "../components/SearchBar"
-import BookCard from "../components/BookCard"
+import BookCard from "../components/BookComponents/BookCard"
 import { searchBooks } from "../services/bookService.js"
 
 

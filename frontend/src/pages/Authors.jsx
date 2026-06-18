@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import SearchBar from "../components/SearchBar";
-import FollowedAuthors from "../components/FollowedAuthors";
-import FeaturedAuthors from "../components/FeaturedAuthors";
-import RecentlyExploredAuthors from "../components/RecentlyExploredAuthors";
-import AuthorsGrid from "../components/AuthorsGrid";
+import React, { useState } from "react"
+import SearchBar from "../components/SearchBar"
+import FollowedAuthors from "../components/AuthorComponents/FollowedAuthors"
+import FeaturedAuthors from "../components/AuthorComponents/FeaturedAuthors"
+import RecentlyExploredAuthors from "../components/AuthorComponents/RecentlyExploredAuthors"
+import AuthorsGrid from "../components/AuthorComponents/AuthorsGrid"
 
 const Authors = () => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("")
 
   const handleSearch = (event) => {
-    event.preventDefault();
+    event.preventDefault()
     // TODO: wire backend search endpoint for authors.
   };
 
@@ -54,7 +54,7 @@ const Authors = () => {
       <RecentlyExploredAuthors />
       <AuthorsGrid />
     </div>
-  );
-};
+  )
+}
 
-export default Authors;
+export default Authors

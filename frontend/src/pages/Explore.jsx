@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import SearchBar from "../components/SearchBar";
 import TrendingWorks from "../components/TrendingWorks";
-import AuthorFeatured from "../components/FeaturedAuthors";
+import AuthorFeatured from "../components/AuthorComponents/FeaturedAuthors"
 import CategoryCard from "../components/CategoryCard";
 
 import {
