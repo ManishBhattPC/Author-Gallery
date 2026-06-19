@@ -3,31 +3,52 @@ import {
   getBooks,
   getBookById,
   createBook,
+  getMyBooks,
   updateBook,
   deleteBook,
 } from "../controllers/bookController.js";
+import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+router.get("/", getBooks); // Public: Explore all books
 
-// 📚 GET all books (+ search)
-router.get("/", getBooks);
+router.get("/my-books", protect, getMyBooks); // Logged-in author's books
 
+router.get("/:id", getBookById); // Public: Single book details
 
-// 📖 GET single book
-router.get("/:id", getBookById);
+router.post("/", protect, createBook); // Create new book
 
+router.put("/:id", protect, updateBook); // Update own book
 
-// ➕ CREATE book
-router.post("/", createBook);
-
-
-// ✏️ UPDATE book
-router.put("/:id", updateBook);
-
-
-// ❌ DELETE book
-router.delete("/:id", deleteBook);
-
+router.delete("/:id", protect, deleteBook); // Delete own book
 
 export default router;
+
+/*
+Future Roadmap
+
+1. Add Admin Routes
+--------------------------------
+- Admin can update any book
+- Admin can delete any book
+
+2. Advanced Search
+--------------------------------
+- Search by author name
+- Multiple genre filtering
+
+3. Book Moderation
+--------------------------------
+- Hide inappropriate books
+- Flag reported books
+
+4. Analytics Routes
+--------------------------------
+- Most viewed books
+- Most downloaded books
+
+Current Version:
+- Public read access
+- Author-owned CRUD
+*/
