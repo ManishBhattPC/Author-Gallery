@@ -1,4 +1,5 @@
 import express from "express";
+import upload from "../middleware/uploadMiddleware.js";
 import {
   getBooks,
   getBookById,
@@ -17,7 +18,15 @@ router.get("/my-books", protect, getMyBooks); // Logged-in author's books
 
 router.get("/:id", getBookById); // Public: Single book details
 
-router.post("/", protect, createBook); // Create new book
+router.post(
+  "/",
+  protect, // User must be logged in
+  upload.fields([
+    { name: "coverImage", maxCount: 1 }, // Cover image file
+    { name: "pdfFile", maxCount: 1 }, // PDF file
+  ]),
+  createBook
+);
 
 router.put("/:id", protect, updateBook); // Update own book
 

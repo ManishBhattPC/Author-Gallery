@@ -1,5 +1,5 @@
 import Book from "../models/Book.js";
-
+import uploadToCloudinary from "../utils/uploadToCloudinary.js";
 export const getBooks = async (req, res) => {
   try {
     const { search, genre, page = 1, limit = 10 } = req.query;
@@ -59,11 +59,46 @@ export const getBookById = async (req, res) => {
   }
 };
 
+
+
 export const createBook = async (req, res) => {
   try {
+    console.log("BODY:", req.body); // Debug
+    console.log("FILES:", req.files); // Debug
+
+    const { title, description, genres, price, publishDate } = req.body;
+
+    const coverFile = req.files?.coverImage?.[0];
+    const pdfFile = req.files?.pdfFile?.[0];
+
+    if (!coverFile || !pdfFile) {
+      return res.status(400).json({
+        message: "Cover image and PDF file are required",
+      });
+    }
+
+    // Upload cover image
+    const coverUpload = await uploadToCloudinary(
+      coverFile.buffer,
+      "book-covers"
+    );
+
+    // Upload PDF
+    const pdfUpload = await uploadToCloudinary(
+      pdfFile.buffer,
+      "book-pdfs"
+    );
+
     const book = await Book.create({
-      ...req.body,
-      author: req.user._id, // Logged-in user becomes book owner
+      title,
+      description,
+      genres: Array.isArray(genres) ? genres : [genres],
+      price,
+      publishDate,
+      author: req.user._id,
+
+      coverImage: coverUpload.secure_url,
+      pdfFile: pdfUpload.secure_url,
     });
 
     res.status(201).json(book);
@@ -73,7 +108,6 @@ export const createBook = async (req, res) => {
     });
   }
 };
-
 export const getMyBooks = async (req, res) => {
   try {
     const books = await Book.find({
