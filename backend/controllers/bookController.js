@@ -1,16 +1,16 @@
-import Book from "../models/Book.js";
-import uploadToCloudinary from "../utils/uploadToCloudinary.js";
+import Book from "../models/Book.js"
+import uploadToCloudinary from "../utils/uploadToCloudinary.js"
 export const getBooks = async (req, res) => {
   try {
-    const { search, genre, page = 1, limit = 10 } = req.query;
+    const { search, genre, page = 1, limit = 10 } = req.query
 
-    const query = {};
+    const query = {}
 
     if (search) {
       query.title = {
         $regex: search,
         $options: "i",
-      }; // Case-insensitive title search
+      } // Case-insensitive title search
     }
 
     if (genre) {
@@ -21,43 +21,43 @@ export const getBooks = async (req, res) => {
       .populate("author", "name email") // Include author details
       .sort({ createdAt: -1 }) // Newest books first
       .skip((page - 1) * limit) // Pagination
-      .limit(Number(limit));
+      .limit(Number(limit))
 
-    const totalBooks = await Book.countDocuments(query); // Total matching books
+    const totalBooks = await Book.countDocuments(query) // Total matching books
 
     res.status(200).json({
       books,
       currentPage: Number(page),
       totalPages: Math.ceil(totalBooks / limit),
       totalBooks,
-    });
+    })
   } catch (error) {
     res.status(500).json({
       message: error.message,
-    });
+    })
   }
-};
+}
 
 export const getBookById = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id).populate(
       "author",
       "name email"
-    ); // Include author information
+    ) // Include author information
 
     if (!book) {
       return res.status(404).json({
         message: "Book not found",
-      });
+      })
     }
 
     res.status(200).json(book);
   } catch (error) {
     res.status(500).json({
       message: error.message,
-    });
+    })
   }
-};
+}
 
 
 
@@ -68,26 +68,26 @@ export const createBook = async (req, res) => {
 
     const { title, description, genres, price, publishDate } = req.body;
 
-    const coverFile = req.files?.coverImage?.[0];
-    const pdfFile = req.files?.pdfFile?.[0];
+    const coverFile = req.files?.coverImage?.[0]
+    const pdfFile = req.files?.pdfFile?.[0]
 
     if (!coverFile || !pdfFile) {
       return res.status(400).json({
         message: "Cover image and PDF file are required",
-      });
+      })
     }
 
     // Upload cover image
     const coverUpload = await uploadToCloudinary(
       coverFile.buffer,
       "book-covers"
-    );
+    )
 
     // Upload PDF
     const pdfUpload = await uploadToCloudinary(
       pdfFile.buffer,
       "book-pdfs"
-    );
+    )
 
     const book = await Book.create({
       title,
@@ -99,42 +99,42 @@ export const createBook = async (req, res) => {
 
       coverImage: coverUpload.secure_url,
       pdfFile: pdfUpload.secure_url,
-    });
+    })
 
-    res.status(201).json(book);
+    res.status(201).json(book)
   } catch (error) {
     res.status(500).json({
       message: error.message,
-    });
+    })
   }
-};
+}
 export const getMyBooks = async (req, res) => {
   try {
     const books = await Book.find({
       author: req.user._id, // Only logged-in user's books
     })
       .sort({ createdAt: -1 })
-      .populate("author", "name email");
+      .populate("author", "name email")
 
-    res.status(200).json(books);
+    res.status(200).json(books)
   } catch (error) {
     res.status(500).json({
       message: error.message,
-    });
+    })
   }
-};
+}
 
 export const updateBook = async (req, res) => {
   try {
     const book = await Book.findOne({
       _id: req.params.id,
       author: req.user._id, // Ownership check
-    });
+    })
 
     if (!book) {
       return res.status(404).json({
         message: "Book not found or unauthorized",
-      });
+      })
     }
 
     const updatedBook = await Book.findByIdAndUpdate(
@@ -144,40 +144,40 @@ export const updateBook = async (req, res) => {
         new: true, // Return updated document
         runValidators: true, // Validate updated fields
       }
-    );
+    )
 
-    res.status(200).json(updatedBook);
+    res.status(200).json(updatedBook)
   } catch (error) {
     res.status(500).json({
       message: error.message,
-    });
+    })
   }
-};
+}
 
 export const deleteBook = async (req, res) => {
   try {
     const book = await Book.findOne({
       _id: req.params.id,
       author: req.user._id, // Ownership check
-    });
+    })
 
     if (!book) {
       return res.status(404).json({
         message: "Book not found or unauthorized",
-      });
+      })
     }
 
-    await book.deleteOne(); // Delete book
+    await book.deleteOne() // Delete book
 
     res.status(200).json({
       message: "Book deleted successfully",
-    });
+    })
   } catch (error) {
     res.status(500).json({
       message: error.message,
-    });
+    })
   }
-};
+}
 
 /*
 Future Roadmap
