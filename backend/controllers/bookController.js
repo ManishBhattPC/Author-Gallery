@@ -103,6 +103,7 @@ export const createBook = async (req, res) => {
 
     res.status(201).json(book)
   } catch (error) {
+    console.error("CREATE BOOK ERROR:", error);
     res.status(500).json({
       message: error.message,
     })

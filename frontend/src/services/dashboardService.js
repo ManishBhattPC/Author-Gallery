@@ -1,36 +1,17 @@
+import apiClient from "./apiClient.js";
 import { getMyBooks } from "./bookService.js";
+
+export const getAuthorDashboard = async () => {
+  const response = await apiClient.get("/api/dashboard/stats");
+
+  return response.data;
+};
 
 export const getAuthorStats = async () => {
   try {
-    const books = await getMyBooks(); // Fetch all author's books
+    const data = await getAuthorDashboard();
 
-    // Calculate total value by summing all book prices
-    const totalValue = books.reduce(
-      (sum, book) => sum + Number(book.price || 0),
-      0
-    );
-
-    // Get all unique genres across books
-    const allGenres = books.flatMap((book) => book.genres || []);
-    const totalGenres = new Set(allGenres).size; // Count unique genres
-
-    // Sort books by publish date (newest first)
-    const sortedBooks = books
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(b.publishDate || b.createdAt) -
-          new Date(a.publishDate || a.createdAt)
-      );
-
-    return {
-      published: books.length, // Total published books
-      totalValue, // Sum of all book prices
-      totalGenres, // Unique genre count
-      lastPublished: sortedBooks[0]?.publishDate || sortedBooks[0]?.createdAt || null, // Most recent book
-      followers: 0, // Placeholder - followers system coming later
-      following: 0, // Placeholder - following system coming later
-    };
+    return data.stats;
   } catch (error) {
     console.error("Error fetching author stats:", error);
     return {
@@ -46,17 +27,9 @@ export const getAuthorStats = async () => {
 
 export const getAuthorActivity = async () => {
   try {
-    const books = await getMyBooks(); // Fetch all author's books
+    const data = await getAuthorDashboard();
 
-    // Sort by creation date (newest first) and get last 3 books
-    return books
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(b.createdAt || b.publishDate) -
-          new Date(a.createdAt || a.publishDate)
-      )
-      .slice(0, 3); // Return only 3 most recent books
+    return data.recentBooks || [];
   } catch (error) {
     console.error("Error fetching author activity:", error);
     return [];

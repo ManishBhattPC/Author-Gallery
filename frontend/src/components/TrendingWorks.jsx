@@ -89,6 +89,10 @@ const TrendingWorks = () => {
                   src={work.coverImage || work.image}
                   alt={work.title}
                   className="w-full h-56 sm:h-64 md:h-72 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
+                    e.currentTarget.onerror = null;
+                  }}
                 />
 
                 <div className="p-4 sm:p-5">

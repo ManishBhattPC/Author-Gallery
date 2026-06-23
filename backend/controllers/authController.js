@@ -48,11 +48,11 @@ export const loginUser = async (req, res) => {
   process.env.JWT_SECRET,
   { expiresIn: "7d" }
 )
-    //  IN THIS I HAVE TO MAKE SECURE: TRUE DURING DEPLOYMENT 
 res.cookie("token", token, {
   httpOnly: true,
   secure: false,
-  sameSite: "strict"
+  sameSite: "strict",
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days persistent cookie
 })
 
 return res.status(200).json({
