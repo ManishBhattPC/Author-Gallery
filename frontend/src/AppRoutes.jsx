@@ -12,6 +12,8 @@ import Login from "./pages/Login.jsx"
 import Signup from "./pages/SignUp.jsx"
 import NotFound from "./pages/NotFound.jsx"
 import AuthorDashboard from "./pages/AuthorDashboard.jsx"
+import AuthorProfile from "./pages/AuthorProfile.jsx"
+import AuthorDetails from "./pages/AuthorDetails.jsx"
 import BookDetails from "./components/BookComponents/BookDetails.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx"
 
@@ -38,6 +40,17 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="dashboard/author-profile"
+          element={
+            <ProtectedRoute>
+              <AuthorProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route path="authors/:id" element={<AuthorDetails />} />
 
         <Route path="not-found" element={<NotFound />} />
         <Route path="*" element={<Navigate to="/not-found" replace />} />

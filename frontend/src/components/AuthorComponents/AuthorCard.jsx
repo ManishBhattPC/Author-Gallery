@@ -1,6 +1,7 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
-const AuthorCard = ({ image, name, genre, works }) => {
+const AuthorCard = ({ id, image, name, genre, works }) => {
   return (
     <div className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition duration-300">
       <img
@@ -10,21 +11,24 @@ const AuthorCard = ({ image, name, genre, works }) => {
       />
 
       <div className="p-5">
-        <h3 className="text-xl font-semibold text-gray-900">
-          {name}
-        </h3>
+        <h3 className="text-xl font-semibold text-gray-900">{name}</h3>
 
-        <p className="text-gray-500 mt-1">
-          {genre}
-        </p>
+        <p className="text-gray-500 mt-1">{genre}</p>
 
-        <p className="text-sm text-gray-600 mt-3">
-          {works} Published Works
-        </p>
+        <p className="text-sm text-gray-600 mt-3">{works} Published Works</p>
 
-        <button className="mt-4 text-[#A05A3A] font-medium">
-          View Profile →
-        </button>
+        {id ? (
+          <Link
+            to={`/authors/${id}`}
+            className="mt-4 inline-block text-[#A05A3A] font-medium hover:text-amber-700"
+          >
+            View Profile →
+          </Link>
+        ) : (
+          <span className="mt-4 inline-block text-[#A05A3A] font-medium">
+            View Profile →
+          </span>
+        )}
       </div>
     </div>
   );

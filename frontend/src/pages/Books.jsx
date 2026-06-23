@@ -23,12 +23,16 @@ const Books = () => {
       setError(err.message || "Unable to load books.");
     } finally {
       setLoading(false);
+      // setSearch(query)
     }
   };
 
+  
   useEffect(() => {
-    handleSearch();
-  }, []);
+  if (search === "") {
+    handleSearch("");
+  }
+}, [search]);
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -53,7 +57,7 @@ const Books = () => {
             search={search}
             setSearch={setSearch}
             onSearch={onSubmit}
-            placeholder="Search books..."
+            placeholder="Search books.."
           />
         </div>
 

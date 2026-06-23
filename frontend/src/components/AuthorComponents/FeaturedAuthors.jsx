@@ -78,11 +78,12 @@ const FeaturedAuthors = () => {
           <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             {authors.map((author) => (
               <AuthorCard
-                key={author.id}
-                image={author.image}
+                key={author._id || author.id}
+                id={author._id || author.id}
+                image={author.profileImage || author.image || "/default-avatar.png"}
                 name={author.name}
-                genre={author.genre}
-                works={author.works}
+                genre={author.role || author.genre || "Author"}
+                works={author.works ?? 0}
               />
             ))}
           </div>

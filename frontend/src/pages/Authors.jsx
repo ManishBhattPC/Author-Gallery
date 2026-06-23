@@ -9,8 +9,7 @@ const Authors = () => {
   const [search, setSearch] = useState("")
 
   const handleSearch = (event) => {
-    event.preventDefault()
-    // TODO: wire backend search endpoint for authors.
+    event.preventDefault();
   };
 
   return (
@@ -52,9 +51,9 @@ const Authors = () => {
       <FollowedAuthors />
       <FeaturedAuthors />
       <RecentlyExploredAuthors />
-      <AuthorsGrid />
+      <AuthorsGrid search={search} />
     </div>
-  )
+  );
 }
 
 export default Authors

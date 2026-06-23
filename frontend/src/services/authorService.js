@@ -8,9 +8,17 @@ export const fetchTopAuthors = async () => {
   return response.data;
 };
 
-export const fetchAuthors = async () => {
+export const fetchAuthors = async (search = "") => {
   // API CALL: Connects to backend endpoint (GET /api/authors)
-  const response = await apiClient.get("/api/authors");
+  const params = {};
+  if (search?.trim()) {
+    params.search = search.trim();
+  }
+
+  const response = await apiClient.get("/api/authors", {
+    params,
+  });
+
   return response.data;
 };
 
@@ -19,3 +27,6 @@ export const fetchAuthorById = async (id) => {
   const response = await apiClient.get(`/api/authors/${id}`);
   return response.data;
 };
+
+
+            // PUBLIC AUTHOR PAGE
