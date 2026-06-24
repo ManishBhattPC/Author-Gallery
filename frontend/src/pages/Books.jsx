@@ -1,49 +1,65 @@
 import React, { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import BookCard from "../components/BookComponents/BookCard";
-import { searchBooks } from "../services/bookService.js";
+import { getBooks } from "../services/bookService.js";
 
 const Books = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParam = searchParams.get("search") || "";
+  const genreParam = searchParams.get("genre") || "";
+
   const [books, setBooks] = useState([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParam || genreParam || "");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const handleSearch = async (query = "") => {
+  const loadBooks = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const data = await searchBooks(query);
+      const params = {};
+      if (searchParam.trim()) params.search = searchParam.trim();
+      if (genreParam.trim()) params.genre = genreParam.trim();
 
-      // Backend returns:
-      // { books, currentPage, totalPages, totalBooks }
+      const data = await getBooks(params);
       setBooks(data.books || []);
     } catch (err) {
       setError(err.message || "Unable to load books.");
     } finally {
       setLoading(false);
-      // setSearch(query)
     }
   };
 
-  
   useEffect(() => {
-  if (search === "") {
-    handleSearch("");
-  }
-}, [search]);
+    loadBooks();
+  }, [searchParam, genreParam]);
+
+  useEffect(() => {
+    setSearch(searchParam || genreParam || "");
+  }, [searchParam, genreParam]);
+
+  useEffect(() => {
+    if (search === "") {
+      setSearchParams({});
+    }
+  }, [search, setSearchParams]);
 
   const onSubmit = (e) => {
     e.preventDefault();
-    handleSearch(search);
+    if (search.trim()) {
+      setSearchParams({ search: search.trim() });
+    } else {
+      setSearchParams({});
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 py-12">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="space-y-4 text-center">
-          <h1 className="text-4xl font-semibold text-slate-900">
+          <h1 className="font-serif text-4xl font-semibold text-slate-900">
             Explore Books
           </h1>
 

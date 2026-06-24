@@ -50,7 +50,11 @@ const AuthorsGrid = ({ search = "" }) => {
               id={author._id || author.id}
               image={author.profileImage || author.image || "/default-avatar.png"}
               name={author.name}
-              genre={author.role || author.genre || "Author"}
+              genre={
+                Array.isArray(author.genres) && author.genres.length > 0
+                  ? author.genres.join(", ")
+                  : (author.role || author.genre || "Author")
+              }
               works={author.works ?? 0}
             />
           ))}

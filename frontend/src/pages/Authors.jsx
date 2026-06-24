@@ -1,22 +1,28 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import SearchBar from "../components/SearchBar"
-import FollowedAuthors from "../components/AuthorComponents/FollowedAuthors"
 import FeaturedAuthors from "../components/AuthorComponents/FeaturedAuthors"
-import RecentlyExploredAuthors from "../components/AuthorComponents/RecentlyExploredAuthors"
 import AuthorsGrid from "../components/AuthorComponents/AuthorsGrid"
 
 const Authors = () => {
   const [search, setSearch] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
 
   const handleSearch = (event) => {
     event.preventDefault();
+    setSearchQuery(search);
   };
+
+  useEffect(() => {
+    if (search === "") {
+      setSearchQuery("");
+    }
+  }, [search]);
 
   return (
     <div className="bg-slate-50 min-h-screen">
       <section className="border-b border-slate-200 bg-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl text-center">
-          <h1 className="text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
+          <h1 className="font-serif text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
             Discover Remarkable Authors
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base">
@@ -33,25 +39,28 @@ const Authors = () => {
           </div>
 
           <div className="mt-6 flex flex-wrap justify-center gap-3 text-sm text-slate-500">
-            <span>Fiction</span>
-            <span>•</span>
-            <span>Poetry</span>
-            <span>•</span>
-            <span>Shayari</span>
-            <span>•</span>
-            <span>Education</span>
-            <span>•</span>
-            <span>Fantasy</span>
-            <span>•</span>
-            <span>History</span>
+            {["Fiction", "Poetry", "Shayari", "Education", "Fantasy", "History"].map((tag, idx, arr) => (
+              <React.Fragment key={tag}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nextVal = search === tag ? "" : tag;
+                    setSearch(nextVal);
+                    setSearchQuery(nextVal);
+                  }}
+                  className={`hover:text-amber-700 transition font-medium ${search === tag ? "text-amber-700 underline" : ""}`}
+                >
+                  {tag}
+                </button>
+                {idx < arr.length - 1 && <span>•</span>}
+              </React.Fragment>
+            ))}
           </div>
         </div>
       </section>
 
-      <FollowedAuthors />
       <FeaturedAuthors />
-      <RecentlyExploredAuthors />
-      <AuthorsGrid search={search} />
+      <AuthorsGrid search={searchQuery} />
     </div>
   );
 }

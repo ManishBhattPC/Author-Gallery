@@ -2,10 +2,17 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const AuthorCard = ({ id, image, name, genre, works }) => {
+  const avatarUrl =
+    image && image !== "/default-avatar.png"
+      ? image
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          name || "Author"
+        )}&background=d97706&color=fff&size=256`;
+
   return (
     <div className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition duration-300">
       <img
-        src={image}
+        src={avatarUrl}
         alt={name}
         className="w-full h-64 object-cover"
       />

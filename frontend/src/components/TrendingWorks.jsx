@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { getBooks } from "../services/bookService.js";
 
 const TrendingWorks = () => {
@@ -83,34 +84,43 @@ const TrendingWorks = () => {
             {trendingWorks.map((work) => (
               <div
                 key={work._id || work.id}
-                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300"
+                className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition duration-300 flex flex-col justify-between"
               >
-                <img
-                  src={work.coverImage || work.image}
-                  alt={work.title}
-                  className="w-full h-56 sm:h-64 md:h-72 object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
-                    e.currentTarget.onerror = null;
-                  }}
-                />
+                <div>
+                  <Link to={`/books/${work._id || work.id}`}>
+                    <img
+                      src={work.coverImage || work.image}
+                      alt={work.title}
+                      className="w-full h-56 sm:h-64 md:h-72 object-cover hover:opacity-90 transition duration-200"
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
+                        e.currentTarget.onerror = null;
+                      }}
+                    />
+                  </Link>
 
-                <div className="p-4 sm:p-5">
-                  <span className="text-xs sm:text-sm text-indigo-600 font-semibold uppercase tracking-wide">
-                    {work.category || work.genre || "Book"}
-                  </span>
+                  <div className="p-4 sm:p-5">
+                    <span className="text-xs sm:text-sm text-indigo-600 font-semibold uppercase tracking-wide">
+                      {work.category || work.genre || "Book"}
+                    </span>
 
-                  <h3 className="text-lg sm:text-xl font-semibold mt-3 text-gray-900 leading-tight">
-                    {work.title}
-                  </h3>
+                    <h3 className="text-lg sm:text-xl font-semibold mt-3 text-gray-900 leading-tight line-clamp-2">
+                      {work.title}
+                    </h3>
 
-                  <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                    by {work.author?.name || work.author || "Unknown"}
-                  </p>
+                    <p className="text-gray-600 mt-2 text-sm sm:text-base">
+                      by {work.author?.name || work.author || "Unknown"}
+                    </p>
+                  </div>
+                </div>
 
-                  <button className="mt-4 inline-flex items-center text-indigo-600 font-medium hover:text-indigo-800 text-sm sm:text-base">
+                <div className="px-4 sm:px-5 pb-4 sm:pb-5">
+                  <Link
+                    to={`/books/${work._id || work.id}`}
+                    className="inline-flex items-center text-indigo-600 font-medium hover:text-indigo-800 text-sm sm:text-base"
+                  >
                     Read More →
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}

@@ -59,10 +59,11 @@ const authorProfileSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-
+ 
     profileImage: {
       type: String,
       default: "",
+      trim: true,
     },
   },
   {

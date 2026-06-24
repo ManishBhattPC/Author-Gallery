@@ -1,44 +1,74 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
   return (
-    <footer className="bg-amber-50 border-t border-amber-100 py-8 sm:py-12 mt-10">
+    <footer className="bg-[#1E1916] text-[#EFE9DF] border-t border-[#3A2F28] py-12 sm:py-16 mt-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
-          <div className="flex flex-col items-center sm:items-start">
-            <h3 className="text-base sm:text-lg font-semibold text-amber-900 mb-1 sm:mb-2">
-              Authors Gallery
-            </h3>
-            <p className="text-amber-700 text-xs sm:text-sm text-center sm:text-left">
-              Discover exceptional authors and their masterpieces
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-12 mb-10 pb-10 border-b border-[#3A2F28]">
+          <div className="flex flex-col items-center sm:items-start space-y-4">
+            <Link to="/" className="text-xl sm:text-2xl font-serif font-bold text-amber-200 hover:text-amber-300 transition">
+              Author Gallery
+            </Link>
+            <p className="text-stone-400 text-xs sm:text-sm text-center sm:text-left leading-relaxed max-w-xs">
+              A premium digital gallery for exceptional authors to share their masterpieces, stories, and building their legacies.
             </p>
           </div>
 
-          <div className="flex flex-col items-center">
-            <h4 className="text-sm sm:text-base text-amber-900 font-semibold mb-2 sm:mb-3">Quick Links</h4>
-            <ul className="space-y-1 sm:space-y-2 text-center">
-              <li><a href="#explore" className="text-amber-700 hover:text-amber-600 text-xs sm:text-sm transition">Explore Authors</a></li>
-              <li><a href="#books" className="text-amber-700 hover:text-amber-600 text-xs sm:text-sm transition">Featured Books</a></li>
-              <li><a href="#about" className="text-amber-700 hover:text-amber-600 text-xs sm:text-sm transition">About Us</a></li>
+          <div className="flex flex-col items-center space-y-4">
+            <h4 className="text-sm sm:text-base text-amber-200 font-semibold uppercase tracking-wider">Quick Links</h4>
+            <ul className="space-y-2 text-center text-xs sm:text-sm font-medium">
+              <li>
+                <Link to="/explore" className="text-stone-400 hover:text-amber-200 transition">
+                  Explore Creative Worlds
+                </Link>
+              </li>
+              <li>
+                <Link to="/authors" className="text-stone-400 hover:text-amber-200 transition">
+                  Discover Authors
+                </Link>
+              </li>
+              <li>
+                <Link to="/books" className="text-stone-400 hover:text-amber-200 transition">
+                  Featured Books
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="text-stone-400 hover:text-amber-200 transition">
+                  About Us
+                </Link>
+              </li>
             </ul>
           </div>
 
-          <div className="flex flex-col items-center sm:items-start lg:items-end">
-            <h4 className="text-sm sm:text-base text-amber-900 font-semibold mb-2 sm:mb-3">Connect</h4>
-            <ul className="space-y-1 sm:space-y-2 text-center sm:text-right">
-              <li><a href="#" className="text-amber-700 hover:text-amber-600 text-xs sm:text-sm transition">Contact</a></li>
-              <li><a href="#" className="text-amber-700 hover:text-amber-600 text-xs sm:text-sm transition">Support</a></li>
-              <li><a href="#" className="text-amber-700 hover:text-amber-600 text-xs sm:text-sm transition">Privacy</a></li>
+          <div className="flex flex-col items-center sm:items-start lg:items-end space-y-4">
+            <h4 className="text-sm sm:text-base text-amber-200 font-semibold uppercase tracking-wider">Connect & Support</h4>
+            <ul className="space-y-2 text-center sm:text-right text-xs sm:text-sm font-medium">
+              <li>
+                <Link to="/contact" className="text-stone-400 hover:text-amber-200 transition">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-stone-400 hover:text-amber-200 transition">
+                  Support Helpdesk
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="text-stone-400 hover:text-amber-200 transition">
+                  Privacy & Terms
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
 
-        <div className="border-t border-amber-100 pt-4 sm:pt-6 flex flex-col items-center">
-          <p className="text-amber-600 text-xs sm:text-sm font-medium mb-1">
-            Where Stories Come Alive
+        <div className="flex flex-col items-center text-center space-y-3">
+          <p className="text-amber-200 font-serif italic text-sm sm:text-base tracking-wide">
+            "Where stories come alive and writers build their legacy."
           </p>
-          <p className="text-amber-700 text-xs">
-            © 2026 Authors Gallery. All Rights Reserved.
+          <p className="text-stone-500 text-xs sm:text-sm">
+            © 2026 Author Gallery. All Rights Reserved.
           </p>
         </div>
       </div>

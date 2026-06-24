@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchAuthorById } from "../services/authorService.js";
+import BookCard from "../components/BookComponents/BookCard.jsx";
 
 const AuthorDetails = () => {
   const { id } = useParams();
@@ -62,7 +63,13 @@ const AuthorDetails = () => {
       <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <img
-            src={author.profileImage || "/default-avatar.png"}
+            src={
+              author.profileImage && author.profileImage !== "/default-avatar.png"
+                ? author.profileImage
+                : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    author.name || "Author"
+                  )}&background=d97706&color=fff&size=256`
+            }
             alt={author.name}
             className="h-80 w-full rounded-3xl object-cover"
           />
@@ -93,17 +100,23 @@ const AuthorDetails = () => {
           </div>
 
           <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h3 className="text-xl font-semibold text-slate-900">Author Books</h3>
-            <div className="mt-6 grid gap-4">
+            <h3 className="text-xl font-semibold text-slate-900 mb-6">Author Books</h3>
+            <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
               {Array.isArray(author.books) && author.books.length > 0 ? (
                 author.books.map((book) => (
-                  <div key={book._id || book.id} className="rounded-3xl border border-slate-200 p-4">
-                    <h4 className="font-semibold text-slate-900">{book.title}</h4>
-                    <p className="text-sm text-slate-500 mt-1">{book.genres?.join(", ")}</p>
-                  </div>
+                  <BookCard
+                    key={book._id || book.id}
+                    book={{
+                      ...book,
+                      author: {
+                        _id: author._id,
+                        name: author.name,
+                      },
+                    }}
+                  />
                 ))
               ) : (
-                <p className="text-sm text-slate-500">No books found for this author.</p>
+                <p className="col-span-full text-sm text-slate-500">No books found for this author.</p>
               )}
             </div>
           </div>

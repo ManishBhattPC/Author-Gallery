@@ -15,10 +15,13 @@ const Navbar = () => {
   const { user, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 border-b border-slate-200 backdrop-blur-sm shadow-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <Link to="/" className="text-xl font-semibold tracking-tight text-amber-900">
-          Author Gallery
+    <header className="sticky top-0 z-40 bg-slate-50/95 border-b border-slate-200/60 backdrop-blur-md shadow-sm">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
+        <Link to="/" className="flex items-center gap-2.5 text-xl font-serif font-bold text-amber-950">
+          <span className="flex items-center justify-center bg-amber-800 text-[#FAF6F0] w-8 h-8 rounded-lg font-serif font-semibold text-sm shadow-sm select-none">
+            AG
+          </span>
+          <span className="tracking-tight hover:text-amber-700 transition">Author Gallery</span>
         </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">
@@ -27,8 +30,8 @@ const Navbar = () => {
               key={item.label}
               to={item.to}
               className={({ isActive }) =>
-                `text-sm font-medium transition ${
-                  isActive ? "text-amber-700" : "text-slate-600 hover:text-amber-700"
+                `text-sm font-semibold transition ${
+                  isActive ? "text-amber-700 underline underline-offset-4 decoration-2" : "text-slate-600 hover:text-amber-700"
                 }`
               }
             >
@@ -42,13 +45,13 @@ const Navbar = () => {
             <>
               <Link
                 to="/login"
-                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-amber-400 hover:text-amber-700"
+                className="rounded-full border border-amber-800/20 px-5 py-2 text-sm font-semibold text-amber-900 transition hover:border-amber-600 hover:text-amber-700"
               >
                 Login
               </Link>
               <Link
                 to="/signup"
-                className="rounded-full bg-amber-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-800"
+                className="rounded-full bg-amber-700 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800"
               >
                 Sign Up
               </Link>
@@ -58,7 +61,7 @@ const Navbar = () => {
               {/* {user.role === "author" && ()} this will be use when we use admin  */}
                 <Link
                   to="/author-dashboard"
-                  className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-amber-400 hover:text-amber-700"
+                  className="rounded-full border border-amber-800/20 px-5 py-2 text-sm font-semibold text-amber-900 transition hover:border-amber-600 hover:text-amber-700"
                 >
                   Dashboard
                 </Link>
@@ -66,7 +69,7 @@ const Navbar = () => {
               <button
                 type="button"
                 onClick={logout}
-                className="rounded-full bg-rose-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-rose-700"
+                className="rounded-full bg-rose-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
               >
                 Logout
               </button>

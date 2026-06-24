@@ -1,8 +1,58 @@
 @import "tailwindcss";
 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
+@theme {
+  /* Fonts */
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+
+  /* Theme Overrides for Warm Parchment Aesthetics */
+  --color-slate-50: #FAF6F0;
+  --color-slate-100: #F4EFEB;
+  --color-slate-200: #EFE9DF;
+  --color-slate-300: #E5DBCE;
+  --color-slate-400: #D0C2AE;
+  --color-slate-500: #8A7A65;
+  --color-slate-600: #6D5E4D;
+  --color-slate-700: #534537;
+  --color-slate-800: #3E3227;
+  --color-slate-900: #2B2118;
+
+  --color-gray-50: #FAF6F0;
+  --color-gray-100: #F4EFEB;
+  --color-gray-200: #EFE9DF;
+  --color-gray-300: #E5DBCE;
+  --color-gray-400: #D0C2AE;
+  --color-gray-500: #8A7A65;
+  --color-gray-600: #6D5E4D;
+  --color-gray-700: #534537;
+  --color-gray-800: #3E3227;
+  --color-gray-900: #2B2118;
+
+  --color-amber-50: #FDF8F3;
+  --color-amber-100: #FBF0E4;
+  --color-amber-200: #F7DFCA;
+  --color-amber-300: #F0C4A1;
+  --color-amber-400: #E5A170;
+  --color-amber-500: #D87F4A;
+  --color-amber-600: #C26335;
+  --color-amber-700: #A05A3A;
+  --color-amber-800: #8C4E35;
+  --color-amber-900: #5C3220;
+  --color-amber-950: #2C180E;
+
+  --color-indigo-50: #F5EFEB;
+  --color-indigo-100: #EBE0D6;
+  --color-indigo-200: #D1BCAB;
+  --color-indigo-600: #A05A3A;
+  --color-indigo-700: #8C4E35;
+  --color-indigo-800: #5C3220;
+}
+
 :root {
   color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-sans);
 }
 
 * {
@@ -16,8 +66,8 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--color-slate-50);
+  color: var(--color-slate-900);
 }
 
 button,

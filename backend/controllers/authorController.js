@@ -1,6 +1,7 @@
 import mongoose from "mongoose"
 import User from "../models/User.js"
 import Book from "../models/Book.js"
+import AuthorProfile from "../models/authorProfile.js"
 
 // Match authors (users with role "author" or default role)
 const authorMatch = {
@@ -11,23 +12,22 @@ export const getAuthors = async (req, res) => {
   try {
     const { featured, search } = req.query // featured=true returns top 5 authors
 
-    const queryMatch = search
-      ? {
-          $and: [
-            authorMatch,
-            {
-              $or: [
-                { name: { $regex: search, $options: "i" } },
-                { bio: { $regex: search, $options: "i" } },
-                { role: { $regex: search, $options: "i" } },
-              ],
-            },
-          ],
-        }
-      : authorMatch
-
     const pipeline = [
-      { $match: queryMatch }, // Filter only authors and optional search
+      { $match: authorMatch }, // Match only authors/users first to keep pipeline fast
+      {
+        $lookup: {
+          from: "authorprofiles",
+          localField: "_id",
+          foreignField: "user",
+          as: "profile",
+        },
+      },
+      {
+        $unwind: {
+          path: "$profile",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $lookup: {
           from: "books", // Join with books collection
@@ -39,23 +39,47 @@ export const getAuthors = async (req, res) => {
       {
         $addFields: {
           works: { $size: "$books" }, // Count total books per author
-        },
-      },
-      {
-        $project: {
-          name: 1,
-          role: 1,
-          profileImage: 1,
-          bio: 1,
-          works: 1, // Include book count
+          resolvedName: { $ifNull: ["$profile.displayName", "$name"] },
+          resolvedBio: { $ifNull: ["$profile.bio", { $ifNull: ["$bio", ""] }] },
+          resolvedProfileImage: { $ifNull: ["$profile.profileImage", { $ifNull: ["$profileImage", ""] }] },
+          resolvedGenres: { $ifNull: ["$profile.genres", []] },
         },
       },
     ]
+
+    // If search exists, filter resolved name, bio, genres, or role
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), "i");
+      pipeline.push({
+        $match: {
+          $or: [
+            { resolvedName: { $regex: searchRegex } },
+            { resolvedBio: { $regex: searchRegex } },
+            { resolvedGenres: { $regex: searchRegex } },
+            { role: { $regex: searchRegex } },
+          ],
+        },
+      });
+    }
+
+    // Project fields matching frontend expected names
+    pipeline.push({
+      $project: {
+        name: "$resolvedName",
+        role: 1,
+        profileImage: "$resolvedProfileImage",
+        bio: "$resolvedBio",
+        works: 1,
+        genres: "$resolvedGenres",
+      },
+    });
 
     // If featured query param is true, get top 5 authors by book count
     if (featured === "true") {
       pipeline.push({ $sort: { works: -1, name: 1 } }) // Sort by works descending
       pipeline.push({ $limit: 5 }) // Limit to 5 authors
+    } else {
+      pipeline.push({ $sort: { name: 1 } }) // Standard sort alphabetically
     }
 
     const authors = await User.aggregate(pipeline)
@@ -84,20 +108,28 @@ export const getAuthorById = async (req, res) => {
       return res.status(404).json({ message: "Author not found" })
     }
 
+    // Fetch profile details from AuthorProfile
+    const profile = await AuthorProfile.findOne({ user: author._id })
+
     // Fetch all books by this author
     const books = await Book.find({ author: author._id })
       .sort({ createdAt: -1 }) // Newest books first
-      .select("title coverImage price publishDate genres") // Only needed fields
+      .select("title coverImage price publishDate genres description pdfFile") // Include all details needed for BookCard
 
     const works = books.length // Total published books
 
     res.status(200).json({
       author: {
         _id: author._id,
-        name: author.name,
+        name: profile?.displayName || author.name,
         email: author.email,
-        profileImage: author.profileImage || "",
-        bio: author.bio || "",
+        profileImage: profile?.profileImage || author.profileImage || "",
+        bio: profile?.bio || author.bio || "",
+        genres: profile?.genres || [],
+        location: profile?.location || "",
+        instagram: profile?.instagram || "",
+        twitter: profile?.twitter || "",
+        website: profile?.website || "",
         works, // Total books count
         followers: author.followers?.length || 0, // Follower count
         following: author.following?.length || 0, // Following count

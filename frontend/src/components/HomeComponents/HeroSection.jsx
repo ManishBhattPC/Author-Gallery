@@ -15,7 +15,7 @@ const HeroSection = () => {
             </div>
 
             {/* Heading */}
-            <h1 className="text-5xl md:text-6xl font-bold text-[#1F1F1F] leading-tight mb-6">
+            <h1 className="font-serif text-5xl md:text-6xl font-bold text-[#1F1F1F] leading-tight mb-6">
               Where Great Writers
               <br />
               Build Their Legacy

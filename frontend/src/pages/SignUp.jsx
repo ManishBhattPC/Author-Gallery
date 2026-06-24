@@ -14,11 +14,35 @@ const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true)
     setError(null)
 
+    // 1. Client-side name validation
+    if (!form.name.trim()) {
+      setError("Name is required.")
+      return
+    }
+
+    // 2. Client-side email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!form.email.trim() || !emailRegex.test(form.email.trim())) {
+      setError("Please enter a valid email address.")
+      return
+    }
+
+    // 3. Client-side password validation
+    if (!form.password || form.password.length < 6) {
+      setError("Password must be at least 6 characters long.")
+      return
+    }
+
+    setLoading(true)
+
     try {
-      await registerUser({ ...form, role: "author" })
+      await registerUser({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+      })
       navigate("/login")
     } catch (err) {
       setError(err.message || "Unable to register. Please try again.")

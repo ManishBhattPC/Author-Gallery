@@ -14,12 +14,29 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError(null)
+
+    // 1. Client-side email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!form.email.trim() || !emailRegex.test(form.email.trim())) {
+      setError("Please enter a valid email address.")
+      return
+    }
+
+    // 2. Client-side password validation
+    if (!form.password || form.password.length < 6) {
+      setError("Password must be at least 6 characters long.")
+      return
+    }
+
     setLoading(true)
 
     try {
-      const data = await loginUser(form);
+      const data = await loginUser({
+        email: form.email.trim(),
+        password: form.password,
+      });
       login(data.user)
-      navigate(data.user.role === "admin" ? "/admin" : "/author-dashboard")
+      navigate("/author-dashboard")
     } catch (err) {
       setError(err.message || "Unable to login. Please try again.")
     } finally {

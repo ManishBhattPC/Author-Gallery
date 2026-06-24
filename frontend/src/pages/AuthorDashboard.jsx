@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardHeader from "../components/DashboardComponents/DashboardHeader";
 import CreateWork from "../components/DashboardComponents/CreateWork";
-import QuickUpload from "../components/DashboardComponents/QuickUpload"; // Import separately now
+import QuickUpload from "../components/DashboardComponents/QuickUpload";
 import AuthorStats from "../components/DashboardComponents/AuthorStats";
 import MyCollection from "../components/DashboardComponents/MyCollection";
 import RecentActivity from "../components/DashboardComponents/RecentActivity";
