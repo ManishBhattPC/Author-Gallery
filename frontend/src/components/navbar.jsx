@@ -211,12 +211,17 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Drawer Overlay */}
+      {/* Mobile Drawer */}
       {menuOpen && (
-        <div className="lg:hidden fixed inset-0 top-[60px] bg-slate-900/20 backdrop-blur-sm z-30 transition-opacity" onClick={() => setMenuOpen(false)}>
+        <>
+          {/* Mobile Drawer Overlay Backdrop */}
           <div 
-            className="absolute right-0 top-0 bottom-0 w-72 bg-[#FAF6F0] border-l border-slate-200/50 p-6 flex flex-col justify-between shadow-2xl transition-transform"
-            onClick={(e) => e.stopPropagation()}
+            className="lg:hidden fixed inset-0 top-[60px] bg-slate-900/20 backdrop-blur-sm z-30 transition-opacity" 
+            onClick={() => setMenuOpen(false)}
+          />
+          {/* Mobile Drawer Content */}
+          <div 
+            className="lg:hidden fixed right-0 top-[60px] bottom-0 w-72 bg-[#FAF6F0] border-l border-slate-200/50 p-6 flex flex-col justify-between shadow-2xl z-40 transition-transform"
           >
             <div className="space-y-6">
               {/* User Profile Card (Mobile) */}
@@ -320,7 +325,7 @@ const Navbar = () => {
               )}
             </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );
