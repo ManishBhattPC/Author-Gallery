@@ -47,7 +47,7 @@ export const getAuthors = async (req, res) => {
       },
     ]
 
-    // If search exists, filter resolved name, bio, genres, or role
+    // If search exists, filter resolved name, bio, genres
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.trim(), "i");
       pipeline.push({
@@ -56,7 +56,6 @@ export const getAuthors = async (req, res) => {
             { resolvedName: { $regex: searchRegex } },
             { resolvedBio: { $regex: searchRegex } },
             { resolvedGenres: { $regex: searchRegex } },
-            { role: { $regex: searchRegex } },
           ],
         },
       });

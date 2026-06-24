@@ -7,7 +7,7 @@ const AuthorCard = ({ id, image, name, genre, works }) => {
       ? image
       : `https://ui-avatars.com/api/?name=${encodeURIComponent(
           name || "Author"
-        )}&background=d97706&color=fff&size=256`;
+        )}&background=8C4E35&color=FAF6F0&bold=true&size=256`;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition duration-300">

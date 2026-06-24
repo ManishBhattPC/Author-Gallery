@@ -78,6 +78,10 @@ const MyCollection = ({
                 <img
                   src={book.coverImage}
                   alt={book.title}
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
+                    e.currentTarget.onerror = null;
+                  }}
                   className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 {book.genres && (

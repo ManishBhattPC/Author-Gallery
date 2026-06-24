@@ -110,9 +110,9 @@ const Explore = () => {
             <h2 className="font-serif text-3xl font-semibold text-slate-900">Trending Works</h2>
             <p className="mt-2 text-slate-600">Discover the most popular stories, books, poems and articles.</p>
           </div>
-          <button className="self-start rounded-full bg-amber-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-800 md:self-auto">
+          <Link to="/books" className="self-start rounded-full bg-amber-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-800 md:self-auto text-center">
             View All
-          </button>
+          </Link>
         </div>
 
         <TrendingWorks />
@@ -124,9 +124,9 @@ const Explore = () => {
             <h2 className="font-serif text-3xl font-semibold text-slate-900">Featured Authors</h2>
             <p className="mt-2 text-slate-600">Meet talented creators shaping the community.</p>
           </div>
-          <button className="self-start rounded-full bg-amber-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-800 md:self-auto">
+          <Link to="/authors" className="self-start rounded-full bg-amber-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-800 md:self-auto text-center">
             View All
-          </button>
+          </Link>
         </div>
 
         <AuthorFeatured />

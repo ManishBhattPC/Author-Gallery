@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import AuthorProfileDetails from "../components/DashboardComponents/AuthorProfileDetails.jsx";
+import { useAuth } from "../AuthContext.jsx";
 import {
   getMyAuthorProfile,
   createAuthorProfile,
@@ -10,6 +11,7 @@ const AuthorProfile = () => {
   const [profile, setProfile] = useState({});
   const [loading, setLoading] = useState(true);
   const [profileExists, setProfileExists] = useState(false);
+  const { updateUser } = useAuth();
 
   useEffect(() => {
     loadProfile();
@@ -49,10 +51,18 @@ const AuthorProfile = () => {
       formData.append("profileImage", values.profileImage);
     }
 
+    let updated;
     if (profileExists) {
-      await updateAuthorProfile(formData);
+      updated = await updateAuthorProfile(formData);
     } else {
-      await createAuthorProfile(formData);
+      updated = await createAuthorProfile(formData);
+    }
+
+    if (updated && updated.profile) {
+      updateUser({
+        profileImage: updated.profile.profileImage,
+        name: updated.profile.displayName,
+      });
     }
 
     await loadProfile();

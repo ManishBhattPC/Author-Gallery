@@ -1,6 +1,8 @@
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
 import User from "../models/User.js"
+import AuthorProfile from "../models/authorProfile.js"
+
 
 // Simple email regex for validation
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -98,12 +100,15 @@ export const loginUser = async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days persistent cookie
     })
 
+    const profile = await AuthorProfile.findOne({ user: user._id })
+
     return res.status(200).json({
       message: "Login successful",
       user: {
         _id: user._id,
-        name: user.name,
+        name: profile?.displayName || user.name,
         email: user.email,
+        profileImage: profile?.profileImage || "",
       }
     })
   } catch (error) {

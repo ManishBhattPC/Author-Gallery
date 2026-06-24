@@ -24,7 +24,16 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem(AUTH_STORAGE_KEY);
   };
 
-  const value = useMemo(() => ({ user, login, logout, isAuthenticated: Boolean(user) }), [user]);
+  const updateUser = (updatedFields) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      const newUser = { ...prev, ...updatedFields };
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
+      return newUser;
+    });
+  };
+
+  const value = useMemo(() => ({ user, login, logout, updateUser, isAuthenticated: Boolean(user) }), [user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

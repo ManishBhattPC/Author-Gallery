@@ -1,4 +1,6 @@
 import Book from "../models/Book.js"
+import User from "../models/User.js"
+import AuthorProfile from "../models/authorProfile.js"
 import uploadToCloudinary from "../utils/uploadToCloudinary.js"
 export const getBooks = async (req, res) => {
   try {
@@ -6,11 +8,30 @@ export const getBooks = async (req, res) => {
 
     const query = {}
 
-    if (search) {
-      query.title = {
-        $regex: search,
-        $options: "i",
-      } // Case-insensitive title search
+    if (search && search.trim()) {
+      const searchRegex = new RegExp(search.trim(), "i");
+
+      // Find matching authors (users) by name
+      const matchingUsers = await User.find({
+        name: { $regex: searchRegex }
+      }).select("_id");
+      const userIds = matchingUsers.map(u => u._id);
+
+      // Find matching author profiles by displayName
+      const matchingProfiles = await AuthorProfile.find({
+        displayName: { $regex: searchRegex }
+      }).select("user");
+      const profileUserIds = matchingProfiles.map(p => p.user);
+
+      // Combine matching author IDs
+      const allMatchingAuthorIds = [...new Set([...userIds, ...profileUserIds])];
+
+      query.$or = [
+        { title: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } },
+        { genres: { $regex: searchRegex } },
+        { author: { $in: allMatchingAuthorIds } }
+      ];
     }
 
     if (genre) {

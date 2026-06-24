@@ -68,7 +68,7 @@ const AuthorDetails = () => {
                 ? author.profileImage
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(
                     author.name || "Author"
-                  )}&background=d97706&color=fff&size=256`
+                  )}&background=8C4E35&color=FAF6F0&bold=true&size=256`
             }
             alt={author.name}
             className="h-80 w-full rounded-3xl object-cover"
