@@ -71,7 +71,7 @@ const Navbar = () => {
   const userAvatar = user?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "User")}&background=8C4E35&color=FAF6F0&bold=true&size=128`;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FAF6F0]/90 border-b border-slate-200/50 backdrop-blur-md shadow-sm">
+    <header className="sticky top-0 z-40 bg-[#FAF6F0] border-b border-slate-200/50 shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         
         {/* Brand Logo */}
@@ -221,12 +221,12 @@ const Navbar = () => {
           />
           {/* Mobile Drawer Content */}
           <div 
-            className="lg:hidden fixed right-0 top-[60px] bottom-0 w-72 bg-[#FAF6F0] border-l border-slate-200/50 p-6 flex flex-col justify-between shadow-2xl z-40 transition-transform"
+            className="lg:hidden fixed right-0 top-[60px] bottom-0 w-72 bg-white border-l border-slate-200/50 p-6 flex flex-col justify-between shadow-2xl z-40 transition-transform"
           >
             <div className="space-y-6">
               {/* User Profile Card (Mobile) */}
               {user && (
-                <div className="flex items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200/40">
+                <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl shadow-sm border border-slate-200/40">
                   <img
                     src={userAvatar}
                     alt={user.name}
