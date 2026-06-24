@@ -32,10 +32,10 @@ export const resendOTP = async (email) => {
   return response.data;
 };
 
-export const googleLogin = async (idToken) => {
+export const googleLogin = async (idToken, password = null) => {
   const response = await apiClient.post(
     "/api/auth/google",
-    { idToken }
+    { idToken, password }
   );
   return response.data;
 };

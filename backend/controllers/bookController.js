@@ -126,8 +126,9 @@ export const createBook = async (req, res) => {
         doc.moveDown(2.5);
 
         // Body content
-        doc.font("Helvetica").fontSize(11).leading(1.6).text(content, {
-          align: "justify"
+        doc.font("Helvetica").fontSize(11).text(content, {
+          align: "justify",
+          lineGap: 4
         });
         doc.end();
       });

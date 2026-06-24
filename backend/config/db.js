@@ -23,7 +23,8 @@ const seedAdmin = async () => {
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+    await mongoose.connect(mongoURI);
     console.log("MongoDB Connected")
     await seedAdmin();
   } catch (error) {

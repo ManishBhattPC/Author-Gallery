@@ -5,9 +5,21 @@ import AuthorProfile from "../models/authorProfile.js";
 import OTP from "../models/OTP.js";
 import { sendOTPEmail } from "../utils/mailService.js";
 import { OAuth2Client } from "google-auth-library";
+import { promises as dnsPromises } from "dns";
 
-// Simple email regex for validation
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Strict email regex for validation
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+const verifyEmailDomain = async (email) => {
+  const domain = email.split("@")[1];
+  if (!domain) return false;
+  try {
+    const addresses = await dnsPromises.resolveMx(domain);
+    return addresses && addresses.length > 0;
+  } catch (error) {
+    return false;
+  }
+};
 
 export const registerUser = async (req, res) => {
   try {
@@ -21,9 +33,44 @@ export const registerUser = async (req, res) => {
     }
 
     // 2. Validate email format
-    if (!emailRegex.test(email.trim())) {
+    const trimmedEmail = email.trim();
+    if (!emailRegex.test(trimmedEmail)) {
       return res.status(400).json({
         message: "Please enter a valid email address",
+      });
+    }
+
+    // Strict validation of the email username (local part before @)
+    const localPart = trimmedEmail.split("@")[0];
+    if (localPart.length > 64) {
+      return res.status(400).json({
+        message: "Email username (before @) cannot exceed 64 characters",
+      });
+    }
+
+    if (localPart.startsWith(".") || localPart.endsWith(".")) {
+      return res.status(400).json({
+        message: "Email username (before @) cannot start or end with a dot",
+      });
+    }
+
+    if (localPart.includes("..")) {
+      return res.status(400).json({
+        message: "Email username (before @) cannot contain consecutive dots",
+      });
+    }
+
+    if (/^\d+$/.test(localPart)) {
+      return res.status(400).json({
+        message: "Email username (before @) cannot consist entirely of numbers",
+      });
+    }
+
+    // Verify email domain MX records
+    const isDomainValid = await verifyEmailDomain(email.trim());
+    if (!isDomainValid) {
+      return res.status(400).json({
+        message: "The email domain is invalid or cannot receive emails",
       });
     }
 
@@ -44,28 +91,39 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // Generate random 6-digit OTP code
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Save temporary registration details under OTP collection
-    await OTP.findOneAndUpdate(
-      { email: email.toLowerCase().trim() },
-      {
-        name: name.trim(),
-        password: hashedPassword,
-        otp,
-        createdAt: new Date(), // Refresh expiration window
-      },
-      { upsert: true, new: true }
+    // Create active user directly
+    const user = await User.create({
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
+      password: hashedPassword,
+      role: "user",
+    });
+
+    // Auto-login after registration
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
     );
 
-    // Send OTP to email
-    await sendOTPEmail(email.toLowerCase().trim(), otp);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
-    res.status(200).json({
-      message: "Verification code sent to your email",
-      email: email.toLowerCase().trim(),
+    res.status(201).json({
+      message: "Registration successful",
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        profileImage: "",
+      },
     });
   } catch (error) {
     res.status(500).json({
@@ -235,7 +293,7 @@ export const loginUser = async (req, res) => {
 
 export const googleLogin = async (req, res) => {
   try {
-    const { idToken } = req.body;
+    const { idToken, password } = req.body;
     if (!idToken) {
       return res.status(400).json({ message: "Google ID Token is required." });
     }
@@ -271,12 +329,26 @@ export const googleLogin = async (req, res) => {
     let user = await User.findOne({ email: email.toLowerCase().trim() });
 
     if (!user) {
-      // Create user if not exists
-      const randomPassword = await bcrypt.hash(Math.random().toString(36).slice(-10), 10);
+      if (!password) {
+        return res.status(200).json({
+          isNewUser: true,
+          email: email.toLowerCase().trim(),
+          name: name || "Google User",
+        });
+      }
+
+      // Validate password length
+      if (password.length < 6) {
+        return res.status(400).json({
+          message: "Password must be at least 6 characters long",
+        });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
       user = await User.create({
         name: name || "Google User",
         email: email.toLowerCase().trim(),
-        password: randomPassword,
+        password: hashedPassword,
         role: "user",
       });
     }

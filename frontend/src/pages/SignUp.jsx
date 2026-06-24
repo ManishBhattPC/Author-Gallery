@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { registerUser, verifyOTP, resendOTP, googleLogin } from "../services/authService.js";
+import { registerUser, googleLogin } from "../services/authService.js";
 import { useAuth } from "../AuthContext.jsx";
 import { FcGoogle } from "react-icons/fc";
 
@@ -8,12 +8,13 @@ const Signup = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   
-  const [step, setStep] = useState("details"); // details, otp
+  const [step, setStep] = useState("details"); // details, google-password
   const [form, setForm] = useState({ name: "", email: "", password: "" });
-  const [otpCode, setOtpCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  const [googleRegistration, setGoogleRegistration] = useState(null); // { credential, email, name }
+  const [googlePassword, setGooglePassword] = useState("");
+  const [googleConfirmPassword, setGoogleConfirmPassword] = useState("");
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -22,7 +23,6 @@ const Signup = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    setSuccess(null);
 
     // 1. Client-side name validation
     if (!form.name.trim()) {
@@ -31,9 +31,31 @@ const Signup = () => {
     }
 
     // 2. Client-side email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!form.email.trim() || !emailRegex.test(form.email.trim())) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const trimmedEmail = form.email.trim();
+    if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
       setError("Please enter a valid email address.");
+      return;
+    }
+
+    const localPart = trimmedEmail.split("@")[0];
+    if (localPart.length > 64) {
+      setError("Email username (before @) cannot exceed 64 characters.");
+      return;
+    }
+
+    if (localPart.startsWith(".") || localPart.endsWith(".")) {
+      setError("Email username (before @) cannot start or end with a dot.");
+      return;
+    }
+
+    if (localPart.includes("..")) {
+      setError("Email username (before @) cannot contain consecutive dots.");
+      return;
+    }
+
+    if (/^\d+$/.test(localPart)) {
+      setError("Email username (before @) cannot consist entirely of numbers.");
       return;
     }
 
@@ -48,50 +70,13 @@ const Signup = () => {
     try {
       const res = await registerUser({
         name: form.name.trim(),
-        email: form.email.trim(),
+        email: trimmedEmail,
         password: form.password,
       });
-      setSuccess(res.message || "Verification code sent to your email!");
-      setStep("otp");
-    } catch (err) {
-      setError(err.message || "Unable to register. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleOtpSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
-
-    if (!otpCode.trim() || otpCode.trim().length !== 6) {
-      setError("Please enter the 6-digit verification code.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const res = await verifyOTP(form.email.trim(), otpCode.trim());
       login(res.user);
       navigate("/author-dashboard");
     } catch (err) {
-      setError(err.message || "Invalid or expired verification code.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleResendCode = async () => {
-    setError(null);
-    setSuccess(null);
-    setLoading(true);
-    try {
-      const res = await resendOTP(form.email.trim());
-      setSuccess(res.message || "New code sent successfully!");
-    } catch (err) {
-      setError(err.message || "Failed to resend code.");
+      setError(err.message || "Unable to register. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -103,8 +88,17 @@ const Signup = () => {
     setLoading(true);
     try {
       const res = await googleLogin(response.credential);
-      login(res.user);
-      navigate("/author-dashboard");
+      if (res.isNewUser) {
+        setGoogleRegistration({
+          credential: response.credential,
+          email: res.email,
+          name: res.name
+        });
+        setStep("google-password");
+      } else {
+        login(res.user);
+        navigate("/author-dashboard");
+      }
     } catch (err) {
       setError(err.message || "Google sign-in failed.");
     } finally {
@@ -122,10 +116,45 @@ const Signup = () => {
       const mockIdToken = `mock_${formattedName}_${mockEmail}`;
       
       const res = await googleLogin(mockIdToken);
+      if (res.isNewUser) {
+        setGoogleRegistration({
+          credential: mockIdToken,
+          email: res.email,
+          name: res.name
+        });
+        setStep("google-password");
+      } else {
+        login(res.user);
+        navigate("/author-dashboard");
+      }
+    } catch (err) {
+      setError(err.message || "Simulated Google sign-in failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGooglePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    if (googlePassword.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    if (googlePassword !== googleConfirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await googleLogin(googleRegistration.credential, googlePassword);
       login(res.user);
       navigate("/author-dashboard");
     } catch (err) {
-      setError(err.message || "Simulated Google sign-in failed.");
+      setError(err.message || "Failed to set password. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -161,12 +190,14 @@ const Signup = () => {
     <div className="min-h-screen bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-lg text-left">
         <h2 className="text-3xl font-semibold text-slate-900">
-          {step === "details" ? "Create your author account" : "Verify your email"}
+          {step === "details"
+            ? "Create your author account"
+            : "Choose a Password"}
         </h2>
         <p className="mt-2 text-sm text-slate-650">
           {step === "details"
             ? "Register once and manage your books, profile, and audience."
-            : `We sent a 6-digit verification code to ${form.email}.`}
+            : "Secure your new account created via Google."}
         </p>
 
         {step === "details" ? (
@@ -207,14 +238,14 @@ const Signup = () => {
               />
             </div>
 
-            {error && <p className="text-sm text-rose-650 font-semibold">{error}</p>}
+            {error && <p className="text-sm text-rose-655 font-semibold">{error}</p>}
 
             <button
               type="submit"
               disabled={loading}
               className="w-full rounded-full bg-amber-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
             >
-              {loading ? "Sending verification..." : "Sign Up"}
+              {loading ? "Creating Account..." : "Sign Up"}
             </button>
 
             {/* Divider */}
@@ -247,47 +278,62 @@ const Signup = () => {
             </p>
           </form>
         ) : (
-          <form className="mt-8 space-y-5" onSubmit={handleOtpSubmit}>
+          <form className="mt-8 space-y-5" onSubmit={handleGooglePasswordSubmit}>
+            <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
+              <p className="text-sm text-amber-900 leading-relaxed">
+                You're signing up with Google as <strong>{googleRegistration?.name}</strong> ({googleRegistration?.email}). Please choose a password to complete registration.
+              </p>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium text-slate-700">Verification Code</label>
+              <label className="block text-sm font-medium text-slate-700">Password</label>
               <input
-                type="text"
-                name="otp"
-                maxLength={6}
-                value={otpCode}
-                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                placeholder="123456"
+                type="password"
+                name="googlePassword"
+                value={googlePassword}
+                onChange={(e) => setGooglePassword(e.target.value)}
                 required
-                className="mt-2 w-full text-center tracking-[0.5em] font-mono rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-lg text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                placeholder="At least 6 characters"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Confirm Password</label>
+              <input
+                type="password"
+                name="googleConfirmPassword"
+                value={googleConfirmPassword}
+                onChange={(e) => setGoogleConfirmPassword(e.target.value)}
+                required
+                placeholder="Re-enter password"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
               />
             </div>
 
             {error && <p className="text-sm text-rose-650 font-semibold">{error}</p>}
-            {success && <p className="text-sm text-emerald-650 font-semibold">{success}</p>}
 
             <button
               type="submit"
               disabled={loading}
               className="w-full rounded-full bg-amber-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
             >
-              {loading ? "Verifying..." : "Verify & Complete Signup"}
+              {loading ? "Creating Account..." : "Create Account & Log In"}
             </button>
 
-            <div className="flex flex-col gap-2 items-center text-xs text-slate-500 mt-4">
+            <div className="flex justify-center text-xs text-slate-550 mt-4">
               <button
                 type="button"
-                onClick={handleResendCode}
-                disabled={loading}
-                className="text-amber-800 font-bold hover:underline cursor-pointer bg-transparent border-none outline-none disabled:opacity-50"
+                onClick={() => {
+                  setStep("details");
+                  setGoogleRegistration(null);
+                  setGooglePassword("");
+                  setGoogleConfirmPassword("");
+                  setError(null);
+                }}
+                className="text-amber-800 font-bold hover:underline cursor-pointer bg-transparent border-none outline-none"
               >
-                Resend verification code
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep("details")}
-                className="text-slate-500 hover:text-slate-700 hover:underline cursor-pointer bg-transparent border-none outline-none"
-              >
-                Back to registration details
+                Cancel
               </button>
             </div>
           </form>
