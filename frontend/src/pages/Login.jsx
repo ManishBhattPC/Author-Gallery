@@ -158,7 +158,7 @@ const Login = () => {
         });
         window.google.accounts.id.renderButton(
           document.getElementById("google-signin-btn"),
-          { theme: "outline", size: "large", width: "100%", shape: "pill" }
+          { theme: "outline", size: "large", width: 380, shape: "pill" }
         );
       }
     };

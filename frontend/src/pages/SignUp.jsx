@@ -175,7 +175,7 @@ const Signup = () => {
         });
         window.google.accounts.id.renderButton(
           document.getElementById("google-signup-btn"),
-          { theme: "outline", size: "large", width: "100%", shape: "pill" }
+          { theme: "outline", size: "large", width: 380, shape: "pill" }
         );
       }
     };
