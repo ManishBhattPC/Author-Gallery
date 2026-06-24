@@ -155,14 +155,25 @@ const Navbar = () => {
                   </div>
                   
                   <div className="py-1">
-                    <Link
-                      to="/author-dashboard"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
-                    >
-                      <LayoutDashboard size={16} className="text-slate-400" />
-                      <span>Author Dashboard</span>
-                    </Link>
+                    {user.role === "admin" ? (
+                      <Link
+                        to="/admin-dashboard"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition font-bold"
+                      >
+                        <LayoutDashboard size={16} className="text-amber-800" />
+                        <span>Admin Panel</span>
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/author-dashboard"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
+                      >
+                        <LayoutDashboard size={16} className="text-slate-400" />
+                        <span>Author Dashboard</span>
+                      </Link>
+                    )}
                     <Link
                       to="/dashboard/author-profile"
                       onClick={() => setDropdownOpen(false)}
@@ -270,14 +281,25 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Link
-                    to="/author-dashboard"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition"
-                  >
-                    <LayoutDashboard size={18} className="text-slate-400" />
-                    <span>Author Dashboard</span>
-                  </Link>
+                  {user.role === "admin" ? (
+                    <Link
+                      to="/admin-dashboard"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition text-amber-800 font-bold"
+                    >
+                      <LayoutDashboard size={18} className="text-amber-800" />
+                      <span>Admin Panel</span>
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/author-dashboard"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition"
+                    >
+                      <LayoutDashboard size={18} className="text-slate-400" />
+                      <span>Author Dashboard</span>
+                    </Link>
+                  )}
                   <Link
                     to="/dashboard/author-profile"
                     onClick={() => setMenuOpen(false)}

@@ -16,6 +16,7 @@ import AuthorProfile from "./pages/AuthorProfile.jsx"
 import AuthorDetails from "./pages/AuthorDetails.jsx"
 import BookDetails from "./components/BookComponents/BookDetails.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx"
+import AdminDashboard from "./pages/AdminDashboard.jsx"
 
 const AppRoutes = () => {
   return (
@@ -46,6 +47,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <AuthorProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="admin-dashboard"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />

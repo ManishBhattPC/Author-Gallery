@@ -1,20 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { PenTool, Trash2, Save, FileText, CheckCircle, RefreshCw } from "lucide-react";
+import { PenTool, Trash2, FileText, CheckCircle, RefreshCw, Upload, Image, AlertCircle, Sparkles } from "lucide-react";
+import apiClient from "../../services/apiClient.js";
 
-const CreateWork = ({ onContentUpdate }) => {
+const CreateWork = ({ onPublished }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [description, setDescription] = useState("");
+  const [genre, setGenre] = useState("");
+  const [price, setPrice] = useState("0");
+  const [publishDate, setPublishDate] = useState(new Date().toISOString().split("T")[0]);
+  const [coverImageFile, setCoverImageFile] = useState(null);
+  const [coverImageName, setCoverImageName] = useState("");
+
   const [wordCount, setWordCount] = useState(0);
   const [lastSaved, setLastSaved] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [message, setMessage] = useState(null);
 
-  // Count words
+  // Count words in editor content
   useEffect(() => {
     const words = content.trim().split(/\s+/).length;
     setWordCount(content.trim() === "" ? 0 : words);
   }, [content]);
 
-  // Auto-save draft to localStorage
+  // Auto-save draft content locally
   useEffect(() => {
     if (title || content) {
       setSaving(true);
@@ -33,20 +43,17 @@ const CreateWork = ({ onContentUpdate }) => {
     return () => clearTimeout(saveTimer);
   }, [title, content]);
 
-  // Notify parent component of content
-  useEffect(() => {
-    if (onContentUpdate) {
-      onContentUpdate({ title, content });
-    }
-  }, [title, content, onContentUpdate]);
-
   // Load draft on mount
   useEffect(() => {
     const draft = localStorage.getItem("draft");
     if (draft) {
-      const { title: draftTitle, content: draftContent } = JSON.parse(draft);
-      setTitle(draftTitle);
-      setContent(draftContent);
+      try {
+        const { title: draftTitle, content: draftContent } = JSON.parse(draft);
+        setTitle(draftTitle || "");
+        setContent(draftContent || "");
+      } catch (e) {
+        console.error("Failed to parse draft", e);
+      }
     }
   }, []);
 
@@ -55,22 +62,164 @@ const CreateWork = ({ onContentUpdate }) => {
       localStorage.removeItem("draft");
       setTitle("");
       setContent("");
+      setDescription("");
+      setCoverImageFile(null);
+      setCoverImageName("");
       setLastSaved(null);
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCoverImageFile(file);
+      setCoverImageName(file.name);
+    }
+  };
+
+  // Generate a beautiful canvas cover if no image is uploaded
+  const generateCanvasCover = (bookTitle) => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 600;
+      canvas.height = 850;
+      const ctx = canvas.getContext("2d");
+
+      // Paint warm elegant copper-gold gradient
+      const grad = ctx.createLinearGradient(0, 0, 0, 850);
+      grad.addColorStop(0, "#8C4E35");  // Copper Accent
+      grad.addColorStop(0.6, "#703b25");
+      grad.addColorStop(1, "#361b10");    // Dark Espresso
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 600, 850);
+
+      // Decorative borders
+      ctx.strokeStyle = "rgba(250, 246, 240, 0.2)";
+      ctx.lineWidth = 15;
+      ctx.strokeRect(20, 20, 560, 810);
+      
+      ctx.strokeStyle = "rgba(250, 246, 240, 0.4)";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(35, 35, 530, 780);
+
+      // Book title typography
+      ctx.fillStyle = "#FAF6F0"; // warm parchment text
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      
+      // Handle title wrapping
+      ctx.font = "bold 38px Georgia, serif";
+      const words = bookTitle.split(" ");
+      let line = "";
+      const lines = [];
+      const maxWidth = 460;
+      const lineHeight = 55;
+
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + " ";
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          lines.push(line);
+          line = words[n] + " ";
+        } else {
+          line = testLine;
+        }
+      }
+      lines.push(line);
+
+      let startY = 300 - ((lines.length - 1) * lineHeight) / 2;
+      for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i].trim(), 300, startY + i * lineHeight);
+      }
+
+      // Author label at the bottom
+      ctx.font = "italic 22px Georgia, serif";
+      ctx.fillStyle = "rgba(250, 246, 240, 0.85)";
+      ctx.fillText("Published at Author Gallery", 300, 700);
+
+      // Convert canvas to base64 data URL
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+      resolve(dataUrl);
+    });
+  };
+
+  const handlePublish = async (e) => {
+    e.preventDefault();
+    setMessage(null);
+
+    if (!title.trim()) {
+      setMessage({ type: "error", text: "Please enter a book title." });
+      return;
+    }
+    if (!content.trim()) {
+      setMessage({ type: "error", text: "Please write some content in the editor." });
+      return;
+    }
+    if (!genre) {
+      setMessage({ type: "error", text: "Please select a genre." });
+      return;
+    }
+
+    setPublishing(true);
+
+    try {
+      const form = new FormData();
+      form.append("title", title.trim());
+      form.append("description", description.trim() || `A text work titled "${title.trim()}"`);
+      form.append("genres", genre);
+      form.append("price", price || "0");
+      form.append("publishDate", publishDate);
+      form.append("content", content); // Send directly as text to generate PDF backend
+
+      if (coverImageFile) {
+        form.append("coverImage", coverImageFile);
+      } else {
+        const base64Cover = await generateCanvasCover(title.trim());
+        form.append("coverImage", base64Cover);
+      }
+
+      await apiClient.post("/api/books", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setMessage({ type: "success", text: "Your work has been published successfully! 🎉" });
+      
+      // Clear forms & localStorage draft
+      setTitle("");
+      setContent("");
+      setDescription("");
+      setCoverImageFile(null);
+      setCoverImageName("");
+      localStorage.removeItem("draft");
+      setLastSaved(null);
+
+      if (onPublished) {
+        onPublished();
+      }
+
+      setTimeout(() => setMessage(null), 4000);
+    } catch (err) {
+      setMessage({
+        type: "error",
+        text: err.response?.data?.message || err.message || "Failed to publish notepad book.",
+      });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   return (
-    <div className="bg-white border border-slate-200/60 rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col h-full">
-      {/* Header */}
+    <div className="bg-white rounded-2xl flex flex-col h-full">
+      {/* Header Info */}
       <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-100 pb-4">
         <div>
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <PenTool className="w-5 h-5 text-amber-700" />
-            Create New Work
+            Write & Publish
           </h2>
-          <p className="text-slate-500 text-xs mt-1">Draft your next book, story, or article here.</p>
+          <p className="text-slate-500 text-xs mt-1">Draft and publish directly as an eBook. We will generate the PDF for you.</p>
         </div>
-        <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
           {saving ? (
             <span className="flex items-center gap-1.5 text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">
               <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -79,7 +228,7 @@ const CreateWork = ({ onContentUpdate }) => {
           ) : lastSaved ? (
             <span className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
               <CheckCircle className="w-3.5 h-3.5" />
-              Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              Draft Saved
             </span>
           ) : (
             <span className="bg-slate-50 px-2.5 py-1 rounded-full">Auto-saves to browser</span>
@@ -87,332 +236,175 @@ const CreateWork = ({ onContentUpdate }) => {
         </div>
       </div>
 
-      {/* Title Input */}
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Untitled Masterpiece..."
-        className="w-full text-xl font-bold text-slate-800 bg-transparent border-b border-slate-100 focus:border-amber-600 pb-3 mb-4 outline-none placeholder-slate-300 transition-colors"
-      />
+      <form onSubmit={handlePublish} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Left notepad editor (2/3 width) */}
+        <div className="lg:col-span-2 space-y-4 flex flex-col">
+          {/* Title Input */}
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Untitled Masterpiece..."
+            className="w-full text-xl font-bold text-slate-800 bg-transparent border-b border-slate-100 focus:border-amber-600 pb-3 outline-none placeholder-slate-350 transition-colors"
+            required
+          />
 
-      {/* Rich Text Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 mb-4 pb-3 border-b border-slate-100 text-slate-400 text-sm">
-        <button type="button" className="p-1.5 hover:bg-slate-50 hover:text-slate-800 rounded font-bold transition-colors w-8 h-8 flex items-center justify-center">B</button>
-        <button type="button" className="p-1.5 hover:bg-slate-50 hover:text-slate-800 rounded italic transition-colors w-8 h-8 flex items-center justify-center">I</button>
-        <button type="button" className="p-1.5 hover:bg-slate-50 hover:text-slate-800 rounded underline transition-colors w-8 h-8 flex items-center justify-center">U</button>
-        <div className="w-px h-6 bg-slate-200 mx-2"></div>
-        <button type="button" className="p-1.5 hover:bg-slate-50 hover:text-slate-800 rounded transition-colors w-8 h-8 flex items-center justify-center">≡</button>
-        <button type="button" className="p-1.5 hover:bg-slate-50 hover:text-slate-800 rounded transition-colors w-8 h-8 flex items-center justify-center">⊙</button>
-      </div>
+          {/* Editor area */}
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Start typing your story, poem, or article here. Your changes will automatically save locally..."
+            className="w-full min-h-[350px] flex-grow p-4 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/30 focus:border-amber-600 rounded-xl text-slate-700 placeholder-slate-400 outline-none transition-all resize-none text-sm leading-relaxed"
+            required
+          />
 
-      {/* Content Editor */}
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Start typing your story, poem, or article content here. Your changes will automatically save locally..."
-        className="w-full min-h-[300px] flex-grow p-4 bg-slate-50/50 border border-slate-200/50 rounded-xl text-slate-700 placeholder-slate-400 focus:outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-50/50 focus:bg-white transition-all resize-none text-sm leading-relaxed"
-      />
+          <div className="flex justify-between items-center text-xs font-semibold text-slate-500">
+            <span className="flex items-center gap-1">
+              <FileText className="w-4 h-4 text-slate-400" />
+              Word Count: <span className="text-slate-800">{wordCount}</span>
+            </span>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleClearDraft}
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Clear Notepad
+              </button>
+            </div>
+          </div>
+        </div>
 
-      {/* Footer Info */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mt-4 text-xs font-semibold text-slate-500">
-        <span className="flex items-center gap-1">
-          <FileText className="w-4 h-4 text-slate-400" />
-          Word Count: <span className="text-slate-800">{wordCount}</span>
-        </span>
+        {/* Right publishing settings panel (1/3 width) */}
+        <div className="bg-slate-50 border border-slate-150 rounded-xl p-5 space-y-4 text-xs font-semibold">
+          <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200/60 pb-2 mb-2">Publish Settings</h3>
+          
+          {/* Synopsis / Description */}
+          <div>
+            <label className="block text-slate-600 mb-1">Synopsis / Description *</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Provide a brief synopsis of your work..."
+              rows={3}
+              required
+              className="w-full px-3 py-2 bg-white border border-slate-200 focus:ring-4 focus:ring-amber-50/30 focus:border-amber-600 rounded-lg text-slate-700 outline-none transition-all placeholder-slate-400 font-normal"
+            />
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 w-full sm:w-auto justify-end">
+          <div className="grid grid-cols-2 gap-3">
+            {/* Genre */}
+            <div>
+              <label className="block text-slate-600 mb-1">Genre *</label>
+              <select
+                value={genre}
+                onChange={(e) => setGenre(e.target.value)}
+                required
+                className="w-full px-2 py-2 bg-white border border-slate-200 focus:ring-4 focus:ring-amber-50/30 focus:border-amber-600 rounded-lg text-slate-700 outline-none transition-all font-normal text-xs"
+              >
+                <option value="">Genre</option>
+                <option value="Novel">Novel</option>
+                <option value="Fiction">Fiction</option>
+                <option value="Non-Fiction">Non-Fiction</option>
+                <option value="Romance">Romance</option>
+                <option value="Thriller">Thriller</option>
+                <option value="Mystery">Mystery</option>
+                <option value="Fantasy">Fantasy</option>
+                <option value="Science Fiction">Science Fiction</option>
+                <option value="Biography">Biography</option>
+                <option value="History">History</option>
+                <option value="Poetry">Poetry</option>
+                <option value="Spiritual">Spiritual</option>
+                <option value="Self-Help">Self-Help</option>
+                <option value="Education">Education</option>
+                <option value="Business">Business</option>
+                <option value="Technology">Technology</option>
+                <option value="Children">Children</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            {/* Price */}
+            <div>
+              <label className="block text-slate-600 mb-1">Price (₹) *</label>
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                required
+                className="w-full px-3 py-2 bg-white border border-slate-200 focus:ring-4 focus:ring-amber-50/30 focus:border-amber-600 rounded-lg text-slate-700 outline-none transition-all placeholder-slate-400 font-normal"
+              />
+            </div>
+          </div>
+
+          {/* Publish Date */}
+          <div>
+            <label className="block text-slate-600 mb-1">Publish Date *</label>
+            <input
+              type="date"
+              value={publishDate}
+              onChange={(e) => setPublishDate(e.target.value)}
+              required
+              className="w-full px-3 py-2 bg-white border border-slate-200 focus:ring-4 focus:ring-amber-50/30 focus:border-amber-600 rounded-lg text-slate-500 focus:text-slate-800 outline-none transition-all font-normal"
+            />
+          </div>
+
+          {/* Optional Book Cover Upload */}
+          <div>
+            <label className="block text-slate-600 mb-1.5 flex justify-between items-center">
+              <span>Book Cover</span>
+              <span className="text-[10px] text-amber-700 font-normal">(Optional)</span>
+            </label>
+            <label className="flex flex-col items-center justify-center p-3 border border-dashed border-slate-300 hover:border-amber-600/50 bg-white hover:bg-amber-50/5 rounded-lg cursor-pointer transition-all duration-300">
+              <Upload className="w-5 h-5 text-slate-400 mb-1" />
+              <span className="text-[10px] text-slate-500 font-normal">Click to upload cover photo</span>
+              <input
+                type="file"
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+            </label>
+            {coverImageName ? (
+              <p className="text-[10px] text-emerald-600 mt-1 flex items-center gap-1 font-medium truncate max-w-full">
+                <Image className="w-3 h-3 shrink-0" />
+                {coverImageName}
+              </p>
+            ) : (
+              <p className="text-[9px] text-slate-400 mt-1 font-normal italic">
+                Leaves empty to generate elegant text-based cover automatically.
+              </p>
+            )}
+          </div>
+
+          {/* Messages */}
+          {message && (
+            <div className={`p-3 rounded-lg text-[11px] font-semibold flex items-center gap-2 border ${
+              message.type === "success" ? "bg-emerald-50 text-emerald-800 border-emerald-100" : "bg-red-50 text-red-800 border-red-100"
+            }`}>
+              {message.type === "success" ? <CheckCircle className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+              <span className="leading-relaxed">{message.text}</span>
+            </div>
+          )}
+
+          {/* Action buttons */}
           <button
-            type="button"
-            onClick={handleClearDraft}
-            className="flex items-center gap-1.5 px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 hover:border-red-300 transition-colors"
+            type="submit"
+            disabled={publishing}
+            className="w-full py-2.5 bg-amber-700 hover:bg-amber-800 text-[#FAF6F0] rounded-lg font-bold text-sm transition-all focus:ring-4 focus:ring-amber-100 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer mt-4"
           >
-            <Trash2 className="w-4 h-4" />
-            Clear
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-1.5 px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition-colors"
-          >
-            <Save className="w-4 h-4" />
-            Keep Draft
+            <Sparkles size={14} />
+            {publishing ? "Publishing..." : "Publish Work"}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };
 
 export default CreateWork;
-
-
-
-// import React, { useState } from "react";
-
-// import apiClient from "../../services/apiClient.js";
-
-// const CreateWork = () => {
-//   // Form state
-//   const [title, setTitle] = useState("");
-//   const [content, setContent] = useState("");
-//   const [genres, setGenres] = useState("");
-//   const [price, setPrice] = useState("");
-//   const [publishDate, setPublishDate] = useState("");
-
-//   // File state
-//   const [fileName, setFileName] = useState("");
-//   const [files, setFiles] = useState({
-//     coverImage: null,
-//     pdfFile: null,
-//   });
-//   const [fileNames, setFileNames] = useState({
-//     cover: "",
-//     pdf: "",
-//   });
-
-//   const [saving, setSaving] = useState(false);
-//   const [message, setMessage] = useState(null);
-
-//   // Handle form input change
-//   const handleInputChange = (e) => {
-//     const { name, value } = e.target;
-//     if (name === "title") setTitle(value);
-//     else if (name === "content") setContent(value);
-//     else if (name === "genres") setGenres(value);
-//     else if (name === "price") setPrice(value);
-//     else if (name === "publishDate") setPublishDate(value);
-//   };
-
-//   // Handle QuickUpload file change
-//   const handleQuickFileChange = (event) => {
-//     setFileName(event.target.files?.[0]?.name || "");
-//   };
-
-//   // Handle detailed file uploads
-//   const handleDetailedFileChange = (e) => {
-//     const { name } = e.target;
-//     const file = e.target.files?.[0];
-
-//     if (file) {
-//       setFiles({ ...files, [name]: file });
-//       setFileNames({
-//         ...fileNames,
-//         [name === "coverImage" ? "cover" : "pdf"]: file.name,
-//       });
-//     }
-//   };
-
-//   // Handle publish
-//   const handlePublish = async (event) => {
-//     event.preventDefault();
-//     setSaving(true);
-//     setMessage(null);
-
-//     try {
-//       // Validation
-//       if (!title || !content || !genres || !price || !publishDate) {
-//         setMessage("Please fill all required fields");
-//         setSaving(false);
-//         return;
-//       }
-
-//       if (!files.coverImage || !files.pdfFile) {
-//         setMessage("Please upload both cover image and PDF file");
-//         setSaving(false);
-//         return;
-//       }
-
-//       // Create FormData
-//       const form = new FormData();
-//       form.append("title", title);
-//       form.append("description", content);
-//       form.append("genres", genres);
-//       form.append("price", price);
-//       form.append("publishDate", publishDate);
-//       form.append("coverImage", files.coverImage);
-//       form.append("pdfFile", files.pdfFile);
-
-//       // Send to backend
-//       await apiClient.post("/api/books", form, {
-//         headers: { "Content-Type": "multipart/form-data" },
-//       });
-
-//       setMessage("Book published successfully! 🎉");
-
-//       // Clear form
-//       setTitle("");
-//       setContent("");
-//       setGenres("");
-//       setPrice("");
-//       setPublishDate("");
-//       setFileName("");
-//       setFiles({ coverImage: null, pdfFile: null });
-//       setFileNames({ cover: "", pdf: "" });
-//     } catch (error) {
-//       setMessage(error.response?.data?.message || "Unable to publish. Please try again.");
-//     } finally {
-//       setSaving(false);
-//     }
-//   };
-
-//   return (
-//     <form className="space-y-5 rounded-3xl bg-white p-6 shadow-sm" onSubmit={handlePublish}>
-      
-//       {/* CREATE WORK SECTION */}
-//       <div>
-//         <h2 className="text-xl font-semibold text-slate-900">Create New Work</h2>
-//         <p className="mt-1 text-sm text-slate-500">Draft your next book, story, or article here.</p>
-//       </div>
-
-//       <div className="space-y-3">
-//         <label className="block text-sm font-medium text-slate-700">Title</label>
-//         <input
-//           type="text"
-//           name="title"
-//           value={title}
-//           onChange={handleInputChange}
-//           placeholder="Enter your title"
-//           className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-//           required
-//         />
-//       </div>
-
-//       <div className="space-y-3">
-//         <label className="block text-sm font-medium text-slate-700">Content</label>
-//         <textarea
-//           rows="8"
-//           name="content"
-//           value={content}
-//           onChange={handleInputChange}
-//           placeholder="Start writing..."
-//           className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-//           required
-//         />
-//       </div>
-
-//       {/* NEW FIELDS FOR BOOK CREATION */}
-//       <div className="space-y-3">
-//         <label className="block text-sm font-medium text-slate-700">Genre</label>
-//         <select
-//           name="genres"
-//           value={genres}
-//           onChange={handleInputChange}
-//           className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-//           required
-//         >
-//           <option value="">Select a genre</option>
-//           <option value="Education">Education</option>
-//           <option value="Fiction">Fiction</option>
-//           <option value="Non-Fiction">Non-Fiction</option>
-//           <option value="Romance">Romance</option>
-//           <option value="Thriller">Thriller</option>
-//           <option value="Mystery">Mystery</option>
-//           <option value="Fantasy">Fantasy</option>
-//           <option value="Science Fiction">Science Fiction</option>
-//           <option value="Biography">Biography</option>
-//           <option value="History">History</option>
-//           <option value="Poetry">Poetry</option>
-//           <option value="Self-Help">Self-Help</option>
-//         </select>
-//       </div>
-
-//       <div className="space-y-3">
-//         <label className="block text-sm font-medium text-slate-700">Price</label>
-//         <input
-//           type="number"
-//           name="price"
-//           value={price}
-//           onChange={handleInputChange}
-//           placeholder="Enter price"
-//           min="0"
-//           step="0.01"
-//           className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-//           required
-//         />
-//       </div>
-
-//       <div className="space-y-3">
-//         <label className="block text-sm font-medium text-slate-700">Publish Date</label>
-//         <input
-//           type="date"
-//           name="publishDate"
-//           value={publishDate}
-//           onChange={handleInputChange}
-//           className="w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-//           required
-//         />
-//       </div>
-
-//       {/* QUICK UPLOAD SECTION */}
-//       <div className="border-t pt-6">
-//         <div>
-//           <h2 className="text-xl font-semibold text-slate-900">Quick Upload</h2>
-//           <p className="mt-2 text-sm text-slate-500">Upload cover images and PDF files instantly.</p>
-//         </div>
-
-//         <div className="mt-6 space-y-4">
-//           {/* Cover Image Upload */}
-//           <div>
-//             <label className="block text-sm font-medium text-slate-700 mb-2">Cover Image</label>
-//             <label className="block rounded-3xl border border-slate-300 bg-slate-50 p-4 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 transition">
-//               <span className="block text-sm font-medium">Select file</span>
-//               <input
-//                 type="file"
-//                 name="coverImage"
-//                 onChange={handleDetailedFileChange}
-//                 accept="image/*"
-//                 className="mt-3 w-full text-sm text-slate-700"
-//                 required
-//               />
-//             </label>
-//             {fileNames.cover && <p className="text-xs text-green-600 mt-2">✓ {fileNames.cover}</p>}
-//           </div>
-
-//           {/* PDF Upload */}
-//           <div>
-//             <label className="block text-sm font-medium text-slate-700 mb-2">PDF File</label>
-//             <label className="block rounded-3xl border border-slate-300 bg-slate-50 p-4 text-sm text-slate-700 cursor-pointer hover:bg-slate-100 transition">
-//               <span className="block text-sm font-medium">Select file</span>
-//               <input
-//                 type="file"
-//                 name="pdfFile"
-//                 onChange={handleDetailedFileChange}
-//                 accept=".pdf"
-//                 className="mt-3 w-full text-sm text-slate-700"
-//                 required
-//               />
-//             </label>
-//             {fileNames.pdf && <p className="text-xs text-green-600 mt-2">✓ {fileNames.pdf}</p>}
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* MESSAGE */}
-//       {message && (
-//         <div className={`rounded-lg px-4 py-3 text-sm ${message.includes("successfully") ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
-//           {message}
-//         </div>
-//       )}
-
-//       {/* BUTTONS */}
-//       <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-//         <button
-//           type="reset"
-//           className="rounded-full border border-slate-300 px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
-//         >
-//           Save Draft
-//         </button>
-//         <button
-//           type="submit"
-//           disabled={saving}
-//           className="rounded-full bg-amber-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800 disabled:opacity-70"
-//         >
-//           {saving ? "Publishing…" : "Publish"}
-//         </button>
-//       </div>
-//     </form>
-//   );
-// };
-
-// export default CreateWork;

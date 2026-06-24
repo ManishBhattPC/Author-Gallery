@@ -2,12 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchAuthorById } from "../services/authorService.js";
 import BookCard from "../components/BookComponents/BookCard.jsx";
+import { useAuth } from "../AuthContext.jsx";
+import { Flag } from "lucide-react";
+import ReviewSection from "../components/ReviewSection.jsx";
+import ReportModal from "../components/ReportModal.jsx";
 
 const AuthorDetails = () => {
   const { id } = useParams();
   const [author, setAuthor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user } = useAuth();
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   useEffect(() => {
     const loadAuthor = async () => {
@@ -75,7 +81,19 @@ const AuthorDetails = () => {
           />
           <div className="mt-6 space-y-4">
             <div>
-              <h1 className="text-3xl font-semibold text-slate-900">{author.name}</h1>
+              <div className="flex justify-between items-start gap-2">
+                <h1 className="text-3xl font-semibold text-slate-900">{author.name}</h1>
+                {user && (
+                  <button
+                    type="button"
+                    onClick={() => setReportModalOpen(true)}
+                    className="flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-800 cursor-pointer pt-1"
+                  >
+                    <Flag size={12} />
+                    Report
+                  </button>
+                )}
+              </div>
               <p className="text-sm text-slate-500 mt-2">{author.email}</p>
             </div>
             <div className="rounded-3xl bg-slate-50 p-4">
@@ -120,8 +138,19 @@ const AuthorDetails = () => {
               )}
             </div>
           </div>
+
+          {/* Reviews Section */}
+          <div className="mt-8">
+            <ReviewSection authorId={id} />
+          </div>
         </div>
       </div>
+
+      <ReportModal
+        isOpen={reportModalOpen}
+        onClose={() => setReportModalOpen(false)}
+        authorId={id}
+      />
     </div>
   );
 };

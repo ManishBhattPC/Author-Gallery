@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import apiClient from "../../services/apiClient.js";
 import { UploadCloud, FileImage, FileText, CheckCircle2, AlertCircle } from "lucide-react";
 
-const QuickUpload = ({ draftContent, onPublished }) => {
+const QuickUpload = ({ onPublished }) => {
   const [formData, setFormData] = useState({
-    title: draftContent?.title || "",
-    description: draftContent?.content || "",
+    title: "",
+    description: "",
     genres: "",
     price: "",
-    publishDate: "",
+    publishDate: new Date().toISOString().split("T")[0],
   });
 
   const [files, setFiles] = useState({
@@ -23,15 +23,6 @@ const QuickUpload = ({ draftContent, onPublished }) => {
 
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState(null);
-
-  // Sync draftContent updates with the upload form data
-  React.useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      title: draftContent?.title || prev.title,
-      description: draftContent?.content || prev.description,
-    }));
-  }, [draftContent]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -57,14 +48,8 @@ const QuickUpload = ({ draftContent, onPublished }) => {
     setMessage(null);
 
     try {
-      if (!formData.title || !formData.genres || !formData.price || !formData.publishDate) {
+      if (!formData.title || !formData.genres || !formData.price || !formData.publishDate || !formData.description) {
         setMessage({ text: "Please fill all required fields", type: "error" });
-        setUploading(false);
-        return;
-      }
-
-      if (!formData.description) {
-        setMessage({ text: "Please write the book description/content in the editor on the left", type: "error" });
         setUploading(false);
         return;
       }
@@ -76,8 +61,8 @@ const QuickUpload = ({ draftContent, onPublished }) => {
       }
 
       const form = new FormData();
-      form.append("title", formData.title);
-      form.append("description", formData.description);
+      form.append("title", formData.title.trim());
+      form.append("description", formData.description.trim());
       form.append("genres", formData.genres);
       form.append("price", formData.price);
       form.append("publishDate", formData.publishDate);
@@ -91,16 +76,15 @@ const QuickUpload = ({ draftContent, onPublished }) => {
       setMessage({ text: "Book published successfully! 🎉", type: "success" });
       
       // Clear form
-      setFormData({ title: "", description: "", genres: "", price: "", publishDate: "" });
+      setFormData({ title: "", description: "", genres: "", price: "", publishDate: new Date().toISOString().split("T")[0] });
       setFiles({ coverImage: null, pdfFile: null });
       setFileNames({ cover: "", pdf: "" });
-      localStorage.removeItem("draft");
 
       if (onPublished) {
         onPublished();
       }
 
-      setTimeout(() => setMessage(null), 3000);
+      setTimeout(() => setMessage(null), 4000);
     } catch (error) {
       setMessage({
         text: error.response?.data?.message || "Failed to publish book",
@@ -112,7 +96,7 @@ const QuickUpload = ({ draftContent, onPublished }) => {
   };
 
   return (
-    <div className="bg-white border border-slate-200/60 rounded-2xl p-6 sm:p-8 shadow-sm">
+    <div className="bg-white border border-slate-200/60 rounded-2xl p-6 sm:p-8 shadow-sm text-left">
       <h3 className="text-xl font-bold text-slate-800 mb-1">Quick Publish</h3>
       <p className="text-slate-500 text-xs mb-6">Fill in details and upload files to publish instantly.</p>
 
@@ -132,6 +116,20 @@ const QuickUpload = ({ draftContent, onPublished }) => {
           />
         </div>
 
+        {/* Synopsis / Description */}
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1">Synopsis / Description *</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            placeholder="Provide a brief synopsis of your book..."
+            rows={3}
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-800 outline-none text-sm transition-all placeholder-slate-400 font-normal resize-none"
+            required
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           {/* Genre */}
           <div>
@@ -140,7 +138,7 @@ const QuickUpload = ({ draftContent, onPublished }) => {
               name="genres"
               value={formData.genres}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-800 outline-none text-sm transition-all"
+              className="w-full px-3 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-850 outline-none text-sm transition-all"
               required
             >
               <option value="">Genre</option>
@@ -176,7 +174,7 @@ const QuickUpload = ({ draftContent, onPublished }) => {
               placeholder="0.00"
               min="0"
               step="0.01"
-              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-800 outline-none text-sm transition-all placeholder-slate-400"
+              className="w-full px-4 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-850 outline-none text-sm transition-all placeholder-slate-400"
               required
             />
           </div>
@@ -190,7 +188,7 @@ const QuickUpload = ({ draftContent, onPublished }) => {
             name="publishDate"
             value={formData.publishDate}
             onChange={handleInputChange}
-            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-800 outline-none text-sm transition-all text-slate-500 focus:text-slate-800"
+            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-850 outline-none text-sm transition-all text-slate-500 focus:text-slate-800"
             required
           />
         </div>
@@ -265,52 +263,3 @@ const QuickUpload = ({ draftContent, onPublished }) => {
 };
 
 export default QuickUpload;
-
-
-
-
-
-// import React, { useState } from "react";
-// import { createBook } from "../../services/bookService";
-
-// const QuickUpload = () => {
-//   const [fileName, setFileName] = useState("");
-
-//   const handleFileChange = (event) => {
-//     setFileName(event.target.files?.[0]?.name || "");
-//   };
-
-//   const handleUpload = async () => {
-//     // API CALL: Connects to backend endpoint (POST /api/uploads)
-//     // send file payload with multipart/form-data to the backend
-//     createBook()
-//   };
-
-//   return (
-//     <div className="rounded-3xl bg-white p-6 shadow-sm">
-//       <div>
-//         <h2 className="text-xl font-semibold text-slate-900">Quick Upload</h2>
-//         <p className="mt-2 text-sm text-slate-500">Upload cover images, drafts, or author assets instantly.</p>
-//       </div>
-
-//       <div className="mt-6 space-y-4">
-//         <label className="block rounded-3xl border border-slate-300 bg-slate-50 p-4 text-sm text-slate-700">
-//           <span className="block text-sm font-medium">Select file</span>
-//           <input type="file" onChange={handleFileChange} className="mt-3 w-full text-sm text-slate-700" />
-//         </label>
-
-//         {fileName && <p className="text-sm text-slate-600">Selected file: {fileName}</p>}
-
-//         <button
-//           type="button"
-//           onClick={handleUpload}
-//           className="w-full rounded-full bg-amber-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-amber-800"
-//         >
-//           Upload Files
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default QuickUpload;

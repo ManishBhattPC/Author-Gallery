@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchBookById } from "../../services/bookService.js";
+import { useAuth } from "../../AuthContext.jsx";
+import { Flag } from "lucide-react";
+import ReviewSection from "../ReviewSection.jsx";
+import ReportModal from "../ReportModal.jsx";
 import {
   FaDownload,
   FaArrowLeft,
@@ -12,6 +16,7 @@ import {
 const BookDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,6 +24,7 @@ const BookDetails = () => {
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
 
   useEffect(() => {
     const loadBook = async () => {
@@ -138,9 +144,22 @@ const BookDetails = () => {
           <div className="p-8 space-y-6">
 
             <div>
-              <span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold mb-4">
-                {book?.genres?.[0] || "Book"}
-              </span>
+              <div className="flex justify-between items-center mb-4">
+                <span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold">
+                  {book?.genres?.[0] || "Book"}
+                </span>
+
+                {user && (
+                  <button
+                    type="button"
+                    onClick={() => setReportModalOpen(true)}
+                    className="flex items-center gap-1 text-xs font-semibold text-rose-600 hover:text-rose-800 cursor-pointer"
+                  >
+                    <Flag size={13} />
+                    Report
+                  </button>
+                )}
+              </div>
 
               <h1 className="text-4xl font-bold mb-3">
                 {book?.title}
@@ -205,6 +224,18 @@ const BookDetails = () => {
 
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <div className="mt-10">
+          <ReviewSection bookId={id} />
+        </div>
+
+        {/* Report Modal */}
+        <ReportModal
+          isOpen={reportModalOpen}
+          onClose={() => setReportModalOpen(false)}
+          bookId={id}
+        />
       </div>
     </div>
   );

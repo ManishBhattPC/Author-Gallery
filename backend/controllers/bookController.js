@@ -2,6 +2,7 @@ import Book from "../models/Book.js"
 import User from "../models/User.js"
 import AuthorProfile from "../models/authorProfile.js"
 import uploadToCloudinary from "../utils/uploadToCloudinary.js"
+import PDFDocument from "pdfkit"
 export const getBooks = async (req, res) => {
   try {
     const { search, genre, page = 1, limit = 10 } = req.query
@@ -87,28 +88,66 @@ export const createBook = async (req, res) => {
     console.log("BODY:", req.body); // Debug
     console.log("FILES:", req.files); // Debug
 
-    const { title, description, genres, price, publishDate } = req.body;
+    const { title, description, genres, price, publishDate, content } = req.body;
 
-    const coverFile = req.files?.coverImage?.[0]
-    const pdfFile = req.files?.pdfFile?.[0]
+    let coverBuffer = req.files?.coverImage?.[0]?.buffer;
 
-    if (!coverFile || !pdfFile) {
-      return res.status(400).json({
-        message: "Cover image and PDF file are required",
-      })
+    // Support base64 cover image if sent as string from client-side canvas
+    if (!coverBuffer && req.body.coverImage && req.body.coverImage.startsWith("data:image")) {
+      const base64Data = req.body.coverImage.split(",")[1];
+      coverBuffer = Buffer.from(base64Data, "base64");
     }
 
-    // Upload cover image
-    const coverUpload = await uploadToCloudinary(
-      coverFile.buffer,
-      "book-covers"
-    )
+    if (!coverBuffer) {
+      return res.status(400).json({
+        message: "Cover image is required",
+      });
+    }
 
-    // Upload PDF
+    let pdfBuffer;
+    const pdfFile = req.files?.pdfFile?.[0];
+
+    if (pdfFile) {
+      // Flow 1: Quick Upload - PDF File was provided
+      pdfBuffer = pdfFile.buffer;
+    } else if (content && content.trim()) {
+      // Flow 2: Create Work - Write directly, generate PDF buffer from text
+      pdfBuffer = await new Promise((resolve, reject) => {
+        const doc = new PDFDocument({ margin: 50 });
+        const chunks = [];
+        doc.on("data", (chunk) => chunks.push(chunk));
+        doc.on("end", () => resolve(Buffer.concat(chunks)));
+        doc.on("error", reject);
+
+        // PDF Layout & Typography
+        doc.font("Helvetica-Bold").fontSize(26).text(title, { align: "center" });
+        doc.moveDown(0.5);
+        doc.font("Helvetica-Oblique").fontSize(14).text(`by ${req.user.name}`, { align: "center" });
+        doc.moveDown(2.5);
+
+        // Body content
+        doc.font("Helvetica").fontSize(11).leading(1.6).text(content, {
+          align: "justify"
+        });
+        doc.end();
+      });
+    } else {
+      return res.status(400).json({
+        message: "eBook PDF file or Notepad text content is required",
+      });
+    }
+
+    // Upload cover image to Cloudinary
+    const coverUpload = await uploadToCloudinary(
+      coverBuffer,
+      "book-covers"
+    );
+
+    // Upload PDF to Cloudinary
     const pdfUpload = await uploadToCloudinary(
-      pdfFile.buffer,
+      pdfBuffer,
       "book-pdfs"
-    )
+    );
 
     const book = await Book.create({
       title,
@@ -117,19 +156,18 @@ export const createBook = async (req, res) => {
       price,
       publishDate,
       author: req.user._id,
-
       coverImage: coverUpload.secure_url,
       pdfFile: pdfUpload.secure_url,
-    })
+    });
 
-    res.status(201).json(book)
+    res.status(201).json(book);
   } catch (error) {
     console.error("CREATE BOOK ERROR:", error);
     res.status(500).json({
       message: error.message,
-    })
+    });
   }
-}
+};
 export const getMyBooks = async (req, res) => {
   try {
     const books = await Book.find({

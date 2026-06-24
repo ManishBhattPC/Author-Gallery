@@ -8,6 +8,9 @@ import cors from "cors"
 import dashboardRoutes from "./routes/dashboardRoutes.js"
 import authorProfileRoutes from "./routes/authorProfileRoutes.js";
 import authorRoutes from "./routes/authorRoutes.js"
+import adminRoutes from "./routes/adminRoutes.js"
+import reviewRoutes from "./routes/reviewRoutes.js"
+import reportRoutes from "./routes/reportRoutes.js"
 
 
 dotenv.config()
@@ -18,9 +21,16 @@ const app = express()
 
 
 
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"];
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 )
@@ -32,6 +42,9 @@ app.use("/api/dashboard", dashboardRoutes)
 app.use("/api/authors", authorRoutes)
 app.use("/api/author-profile", authorProfileRoutes);
 app.use("/api/auth", authRoutes)
+app.use("/api/admin", adminRoutes)
+app.use("/api/reviews", reviewRoutes)
+app.use("/api/reports", reportRoutes)
 
 
 app.get("/", (req, res) => {
