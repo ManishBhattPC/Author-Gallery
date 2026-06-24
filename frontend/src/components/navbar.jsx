@@ -72,7 +72,7 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-[#FAF6F0] border-b border-slate-200/50 shadow-sm">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+      <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-8 md:px-12">
         
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-2.5 text-xl font-serif font-bold text-slate-900 group">
