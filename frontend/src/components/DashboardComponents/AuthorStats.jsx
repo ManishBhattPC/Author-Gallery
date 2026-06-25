@@ -39,8 +39,8 @@ const AuthorStats = ({ stats, loading = false }) => {
   ];
 
   return (
-    <div className="bg-[#FDFCF7] border border-[#EADCC9] p-6 rounded-2xl shadow-sm text-left">
-      <h2 className="text-lg font-bold font-serif text-[#2C1E11] mb-4 flex items-center gap-2">
+    <div className="bg-slate-50 border border-slate-300 p-6 rounded-2xl shadow-sm text-left">
+      <h2 className="text-lg font-bold font-serif text-slate-900 mb-4 flex items-center gap-2">
         Author Metrics
       </h2>
 
@@ -48,21 +48,21 @@ const AuthorStats = ({ stats, loading = false }) => {
         {cards.map((card, idx) => {
           const IconComponent = card.icon;
           return (
-            <div key={idx} className="p-4 rounded-xl border border-[#EADCC9]/55 hover:border-[#EADCC9] transition-colors bg-[#FAF6F0] text-left">
+            <div key={idx} className="p-4 rounded-xl border border-slate-300/60 hover:border-slate-300 transition-colors bg-white text-left shadow-sm">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-[#8C7B6C]">{card.label}</span>
+                <span className="text-xs font-bold text-slate-700">{card.label}</span>
                 <div className={`p-2 rounded-lg ${card.bg}`}>
                   <IconComponent className="w-4 h-4" />
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-[#2C1E11] truncate">{card.value}</h3>
+              <h3 className="text-lg font-bold text-slate-900 truncate">{card.value}</h3>
             </div>
           );
         })}
       </div>
 
       {stats?.lastPublished && (
-        <p className="text-xs text-[#8C7B6C] mt-4 text-center border-t border-[#EADCC9]/50 pt-3 font-semibold">
+        <p className="text-xs text-slate-700 mt-4 text-center border-t border-slate-300/65 pt-3 font-semibold">
           Last published on {new Date(stats.lastPublished).toLocaleDateString()}
         </p>
       )}

@@ -241,6 +241,11 @@ const WriteBook = () => {
     }
   }, [activeDraft, user]);
 
+  // Scroll to top on mobile when tab changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [mobileTab]);
+
   // Debounced auto-save active draft properties
   useEffect(() => {
     if (!activeDraft) return;
@@ -418,42 +423,42 @@ const WriteBook = () => {
   const lastSavedTime = lastSaved ? lastSaved.toLocaleTimeString() : "";
 
   return (
-    <div className="min-h-screen bg-[#ECE2D0] pb-12 transition-all">
+    <div className="min-h-screen bg-slate-300 pb-12 transition-all">
       
       {/* Header Panel */}
-      <div className="bg-[#FDFCF7] border-b border-[#EADCC9] relative sm:sticky sm:top-[60px] z-20 shadow-sm py-4 px-4 sm:px-8">
+      <div className="bg-slate-50 border-b border-slate-300 relative sm:sticky sm:top-[60px] z-20 shadow-sm py-4 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <Link 
               to="/author-dashboard" 
-              className="p-2 hover:bg-[#FAF6F0] text-[#5C4E40] hover:text-amber-800 rounded-xl border border-[#EADCC9] transition-colors shrink-0"
+              className="p-2 hover:bg-slate-200 text-slate-700 hover:text-amber-800 rounded-xl border border-slate-300 transition-colors shrink-0"
               title="Back to Dashboard"
             >
               <ArrowLeft size={18} />
             </Link>
             <div className="text-left">
-              <h1 className="text-lg sm:text-xl font-serif font-bold text-[#2C1E11] flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-serif font-bold text-slate-900 flex items-center gap-2">
                 <PenTool size={18} className="text-amber-800" />
                 Book Writing Notepad
               </h1>
-              <p className="text-xs text-[#8C7B6C] font-semibold">Create your eBook with canvas template covers and download as a formatted PDF.</p>
+              <p className="text-xs text-slate-700 font-semibold">Create your eBook with canvas template covers and download as a formatted PDF.</p>
             </div>
           </div>
 
           {/* Draft status info */}
           <div className="flex items-center gap-3 self-end sm:self-center">
             {saving ? (
-              <span className="flex items-center gap-1.5 text-amber-800 bg-[#FAF1E6] px-3 py-1 rounded-full text-xs font-bold transition-all border border-amber-900/10">
+              <span className="flex items-center gap-1.5 text-amber-800 bg-[#FAF1E6] px-3 py-1 rounded-full text-xs font-bold transition-all border border-slate-300/40">
                 <RefreshCw size={13} className="animate-spin" />
                 Auto-saving...
               </span>
             ) : lastSaved ? (
-              <span className="flex items-center gap-1.5 text-emerald-800 bg-[#E8F3EE] px-3 py-1 rounded-full text-xs font-bold transition-all border border-emerald-900/10">
+              <span className="flex items-center gap-1.5 text-emerald-800 bg-[#E8F3EE] px-3 py-1 rounded-full text-xs font-bold transition-all border border-slate-300/40">
                 <CheckCircle size={13} />
                 Draft saved {lastSavedTime && `at ${lastSavedTime}`}
               </span>
             ) : (
-              <span className="text-[#8C7B6C] bg-[#FAF6F0] border border-[#EADCC9]/65 px-3 py-1 rounded-full text-xs font-bold">
+              <span className="text-slate-700 bg-slate-100 border border-slate-300 px-3 py-1 rounded-full text-xs font-bold">
                 Saves to browser storage
               </span>
             )}
@@ -462,27 +467,27 @@ const WriteBook = () => {
       </div>
 
       {/* Tabs Selector on Mobile */}
-      <div className="lg:hidden bg-[#FDFCF7] border-b border-[#EADCC9]/60 px-4 py-2 relative z-20 flex justify-between gap-1 shadow-sm">
+      <div className="lg:hidden bg-slate-50 border-b border-slate-300 px-4 py-2 relative z-20 flex justify-between gap-1 shadow-sm">
         <button
           onClick={() => setMobileTab("editor")}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-            mobileTab === "editor" ? "bg-amber-800 text-[#FAF6F0]" : "text-[#8C7B6C] hover:bg-[#FAF6F0]"
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            mobileTab === "editor" ? "bg-amber-800 text-[#FAF6F0]" : "text-slate-700 hover:bg-slate-100"
           }`}
         >
           📝 Notepad
         </button>
         <button
           onClick={() => setMobileTab("templates")}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
-            mobileTab === "templates" ? "bg-amber-800 text-[#FAF6F0]" : "text-[#8C7B6C] hover:bg-[#FAF6F0]"
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+            mobileTab === "templates" ? "bg-amber-800 text-[#FAF6F0]" : "text-slate-700 hover:bg-slate-100"
           }`}
         >
           🎨 Cover & Details
         </button>
         <button
           onClick={() => setMobileTab("drafts")}
-          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all relative ${
-            mobileTab === "drafts" ? "bg-amber-800 text-[#FAF6F0]" : "text-[#8C7B6C] hover:bg-[#FAF6F0]"
+          className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all relative cursor-pointer ${
+            mobileTab === "drafts" ? "bg-amber-800 text-[#FAF6F0]" : "text-slate-700 hover:bg-slate-100"
           }`}
         >
           📂 Drafts ({drafts.length})
@@ -492,21 +497,20 @@ const WriteBook = () => {
       {/* Main Panel Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-6">
         {activeDraft ? (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            {/* Sidebar Column: Drafts & Design Options */}
-            <div className={`space-y-6 lg:block ${mobileTab === "editor" ? "hidden" : mobileTab === "drafts" ? "block" : "hidden"}`}>
-              
+            {/* Left Column (col-span-3 on desktop): Drafts List */}
+            <div className={`lg:col-span-3 space-y-6 ${mobileTab === "drafts" ? "block" : "hidden lg:block"}`}>
               {/* Drafts List Card */}
-              <div className="bg-[#FDFCF7] border border-[#EADCC9] rounded-2xl p-4 shadow-sm text-left">
-                <div className="flex justify-between items-center border-b border-[#EADCC9]/50 pb-2 mb-3">
-                  <h3 className="font-bold font-serif text-[#2C1E11] text-sm flex items-center gap-1.5">
+              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left">
+                <div className="flex justify-between items-center border-b border-slate-300 pb-2 mb-3">
+                  <h3 className="font-bold font-serif text-slate-900 text-sm flex items-center gap-1.5">
                     <FileText size={16} className="text-amber-800" />
                     Saved Drafts ({drafts.length})
                   </h3>
                   <button 
                     onClick={handleCreateNewDraft}
-                    className="p-1 hover:bg-[#FAF6F0] text-amber-800 hover:text-amber-900 rounded-lg border border-[#EADCC9] cursor-pointer transition-colors"
+                    className="p-1 hover:bg-slate-200 text-amber-850 hover:text-amber-900 rounded-lg border border-slate-300 cursor-pointer transition-colors"
                     title="Create New Draft"
                   >
                     <Plus size={15} />
@@ -523,21 +527,21 @@ const WriteBook = () => {
                       }}
                       className={`group p-2.5 rounded-xl border text-left cursor-pointer transition-all flex items-center justify-between ${
                         d.id === currentDraftId 
-                          ? "bg-[#FAF1E6] border-[#C5A880]/30 shadow-sm" 
-                          : "border-[#EADCC9]/50 bg-[#FAF6F0]/20 hover:bg-[#FAF6F0]"
+                          ? "bg-[#FAF1E6] border-amber-300/40 shadow-sm" 
+                          : "border-slate-300/60 bg-white hover:bg-slate-100"
                       }`}
                     >
                       <div className="min-w-0 pr-2">
-                        <p className={`text-xs font-bold truncate ${d.id === currentDraftId ? "text-amber-950" : "text-[#5C4E40]"}`}>
+                        <p className={`text-xs font-bold truncate ${d.id === currentDraftId ? "text-amber-955" : "text-slate-800"}`}>
                           {d.title.trim() || "Untitled Draft"}
                         </p>
-                        <p className="text-[10px] text-[#8C7B6C] mt-0.5 font-semibold">
+                        <p className="text-[10px] text-slate-750 mt-0.5 font-semibold">
                           {new Date(d.lastSaved).toLocaleDateString()}
                         </p>
                       </div>
                       <button
                         onClick={(e) => handleDeleteDraft(d.id, e)}
-                        className="p-1 text-[#8C7B6C] hover:text-red-600 rounded hover:bg-red-50/50 transition-colors cursor-pointer"
+                        className="p-1 text-slate-500 hover:text-red-650 rounded hover:bg-red-50/50 transition-colors cursor-pointer"
                         title="Delete Draft"
                       >
                         <Trash2 size={13} />
@@ -548,18 +552,54 @@ const WriteBook = () => {
               </div>
             </div>
 
-            {/* Design Cover & Details Column */}
-            <div className={`space-y-6 lg:block ${mobileTab === "editor" ? "hidden" : mobileTab === "templates" ? "block" : "hidden"}`}>
+            {/* Middle Column (col-span-6 on desktop): Notepad Editor */}
+            <div className={`lg:col-span-6 space-y-4 flex flex-col ${mobileTab === "editor" ? "block" : "hidden lg:block"}`}>
+              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-5 sm:p-6 shadow-sm text-left flex flex-col space-y-4">
+                
+                {/* Title */}
+                <input
+                  type="text"
+                  value={activeDraft.title}
+                  onChange={(e) => handleUpdateActiveDraft("title", e.target.value)}
+                  placeholder="Draft Book Title..."
+                  className="w-full text-lg sm:text-2xl font-bold font-serif text-slate-900 bg-transparent border-b border-slate-300 focus:border-amber-700 pb-2.5 outline-none placeholder-slate-400 transition-colors"
+                  required
+                />
+
+                {/* Content Editor */}
+                <textarea
+                  value={activeDraft.content}
+                  onChange={(e) => handleUpdateActiveDraft("content", e.target.value)}
+                  placeholder="Begin drafting your work directly here. All changes auto-save in your browser..."
+                  className="w-full min-h-[380px] p-4 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-200/30 focus:border-amber-700 rounded-xl text-slate-900 placeholder-slate-400 outline-none text-sm sm:text-base leading-relaxed transition-all resize-none font-serif"
+                  required
+                />
+
+                {/* Counts and stats footer */}
+                <div className="flex justify-between items-center text-xs font-bold text-slate-700 pt-2">
+                  <span className="flex items-center gap-1">
+                    <FileText size={15} />
+                    Words: <span className="text-slate-900">{wordCount}</span>
+                  </span>
+                  <span>
+                    Characters: <span className="text-slate-900">{activeDraft.content ? activeDraft.content.length : 0}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column (col-span-3 on desktop): Cover Design & Publishing Details */}
+            <div className={`lg:col-span-3 space-y-6 ${mobileTab === "templates" ? "block" : "hidden lg:block"}`}>
               
               {/* Cover Selection Canvas */}
-              <div className="bg-[#FDFCF7] border border-[#EADCC9] rounded-2xl p-4 shadow-sm text-left flex flex-col items-center">
-                <h3 className="font-bold font-serif text-[#2C1E11] text-sm border-b border-[#EADCC9]/50 pb-2 mb-4 w-full flex items-center gap-1.5">
+              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left flex flex-col items-center">
+                <h3 className="font-bold font-serif text-slate-900 text-sm border-b border-slate-300 pb-2 mb-4 w-full flex items-center gap-1.5">
                   <Layout size={16} className="text-amber-800" />
                   Live Cover Preview
                 </h3>
                 
                 {/* Live Canvas Cover */}
-                <div className="relative border border-[#EADCC9] bg-[#FAF6F0] rounded-xl overflow-hidden shadow-md max-w-[210px] w-full aspect-[6/8.5]">
+                <div className="relative border border-slate-300 bg-white rounded-xl overflow-hidden shadow-md max-w-[210px] w-full aspect-[6/8.5]">
                   <canvas 
                     ref={canvasRef} 
                     width={420} 
@@ -567,14 +607,14 @@ const WriteBook = () => {
                     className="w-full h-full block object-contain"
                   />
                 </div>
-                <p className="text-[10px] text-[#8C7B6C] mt-2.5 text-center leading-relaxed font-semibold">
+                <p className="text-[10px] text-slate-700 mt-2.5 text-center leading-relaxed font-semibold">
                   Interactive template rendering. Features branding stamp "Published by Author Gallery" on the cover page.
                 </p>
               </div>
 
               {/* Cover Templates Selector */}
-              <div className="bg-[#FDFCF7] border border-[#EADCC9] rounded-2xl p-4 shadow-sm text-left">
-                <h3 className="font-bold font-serif text-[#2C1E11] text-sm border-b border-[#EADCC9]/50 pb-2 mb-3">
+              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left">
+                <h3 className="font-bold font-serif text-slate-900 text-sm border-b border-slate-300 pb-2 mb-3">
                   Cover Templates
                 </h3>
                 <div className="space-y-2">
@@ -585,60 +625,22 @@ const WriteBook = () => {
                       onClick={() => handleUpdateActiveDraft("templateId", t.id)}
                       className={`w-full p-2.5 rounded-xl border text-left cursor-pointer transition-all flex flex-col ${
                         activeDraft.templateId === t.id 
-                          ? "bg-amber-800 border-amber-800 text-[#FAF6F0] shadow-md shadow-amber-850/15" 
-                          : "border-[#EADCC9] bg-[#FAF6F0] text-[#5C4E40] hover:bg-[#F3EAD8]/30"
+                          ? "bg-amber-800 border-amber-800 text-white shadow-md shadow-amber-850/15" 
+                          : "border-slate-300 bg-white text-slate-800 hover:bg-slate-100"
                       }`}
                     >
                       <span className="text-xs font-bold">{t.name}</span>
-                      <span className={`text-[10px] mt-0.5 leading-normal ${activeDraft.templateId === t.id ? "text-amber-100/80" : "text-[#8C7B6C]"}`}>
+                      <span className={`text-[10px] mt-0.5 leading-normal ${activeDraft.templateId === t.id ? "text-amber-100/85" : "text-slate-700"}`}>
                         {t.desc}
                       </span>
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Notepad Editor (2/4 width on desktop, visible in mobile tab "editor") */}
-            <div className={`space-y-4 lg:col-span-2 flex flex-col ${mobileTab === "editor" ? "block" : "hidden lg:block"}`}>
-              <div className="bg-[#FDFCF7] border border-[#EADCC9] rounded-2xl p-5 sm:p-6 shadow-sm text-left flex flex-col space-y-4">
-                
-                {/* Title */}
-                <input
-                  type="text"
-                  value={activeDraft.title}
-                  onChange={(e) => handleUpdateActiveDraft("title", e.target.value)}
-                  placeholder="Draft Book Title..."
-                  className="w-full text-lg sm:text-2xl font-bold font-serif text-[#2C1E11] bg-transparent border-b border-[#EADCC9] focus:border-amber-700 pb-2.5 outline-none placeholder-slate-350 transition-colors"
-                  required
-                />
-
-                {/* Content Editor */}
-                <textarea
-                  value={activeDraft.content}
-                  onChange={(e) => handleUpdateActiveDraft("content", e.target.value)}
-                  placeholder="Begin drafting your work directly here. All changes auto-save in your browser..."
-                  className="w-full min-h-[380px] p-4 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-xl text-[#2C1E11] placeholder-slate-355 outline-none text-sm sm:text-base leading-relaxed transition-all resize-none font-serif"
-                  required
-                />
-
-                {/* Counts and stats footer */}
-                <div className="flex justify-between items-center text-xs font-bold text-[#8C7B6C] pt-2">
-                  <span className="flex items-center gap-1">
-                    <FileText size={15} />
-                    Words: <span className="text-[#2C1E11]">{wordCount}</span>
-                  </span>
-                  <span>
-                    Characters: <span className="text-[#2C1E11]">{activeDraft.content ? activeDraft.content.length : 0}</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Publishing Panel */}
-            <div className={`space-y-6 lg:block ${mobileTab === "editor" ? "hidden" : mobileTab === "templates" ? "block" : "hidden"}`}>
-              <div className="bg-[#FDFCF7] border border-[#EADCC9] rounded-2xl p-5 shadow-sm text-left space-y-4">
-                <h3 className="font-bold font-serif text-[#2C1E11] text-sm border-b border-[#EADCC9]/50 pb-2 flex items-center gap-1">
+              {/* Publishing Panel */}
+              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-5 shadow-sm text-left space-y-4">
+                <h3 className="font-bold font-serif text-slate-900 text-sm border-b border-slate-300 pb-2 flex items-center gap-1">
                   <Sparkles size={15} className="text-amber-800" />
                   Publish Details
                 </h3>
@@ -647,12 +649,12 @@ const WriteBook = () => {
                   
                   {/* Genre */}
                   <div>
-                    <label className="block text-xs font-bold text-[#5C4E40] mb-1">Genre *</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Genre *</label>
                     <select
                       value={activeDraft.genre}
                       onChange={(e) => handleUpdateActiveDraft("genre", e.target.value)}
                       required
-                      className="w-full px-3 py-2.5 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-lg text-[#2C1E11] outline-none transition-all text-xs font-normal"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-250/30 focus:border-amber-700 rounded-lg text-slate-900 outline-none transition-all text-xs font-normal"
                     >
                       <option value="">Select Genre</option>
                       <option value="Novel">Novel</option>
@@ -678,7 +680,7 @@ const WriteBook = () => {
 
                   {/* Price */}
                   <div>
-                    <label className="block text-xs font-bold text-[#5C4E40] mb-1">eBook Price (₹) *</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">eBook Price (₹) *</label>
                     <input
                       type="number"
                       value={activeDraft.price}
@@ -687,32 +689,32 @@ const WriteBook = () => {
                       step="0.01"
                       placeholder="0.00"
                       required
-                      className="w-full px-3 py-2.5 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-lg text-[#2C1E11] outline-none transition-all font-normal"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-255/30 focus:border-amber-700 rounded-lg text-slate-900 outline-none transition-all font-normal"
                     />
                   </div>
 
                   {/* Publish Date */}
                   <div>
-                    <label className="block text-xs font-bold text-[#5C4E40] mb-1">Publish Date *</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Publish Date *</label>
                     <input
                       type="date"
                       value={activeDraft.publishDate}
                       onChange={(e) => handleUpdateActiveDraft("publishDate", e.target.value)}
                       required
-                      className="w-full px-3 py-2.5 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-lg text-slate-500 focus:text-[#2C1E11] outline-none transition-all font-normal"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-255/30 focus:border-amber-700 rounded-lg text-slate-500 focus:text-slate-900 outline-none transition-all font-normal"
                     />
                   </div>
 
                   {/* Synopsis */}
                   <div>
-                    <label className="block text-xs font-bold text-[#5C4E40] mb-1">Book Synopsis *</label>
+                    <label className="block text-xs font-bold text-slate-800 mb-1">Book Synopsis *</label>
                     <textarea
                       value={activeDraft.description}
                       onChange={(e) => handleUpdateActiveDraft("description", e.target.value)}
                       placeholder="Describe your book structure, plot, or key takeaways..."
                       rows={3}
                       required
-                      className="w-full px-3 py-2.5 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-lg text-[#2C1E11] outline-none transition-all font-normal resize-none leading-relaxed"
+                      className="w-full px-3 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-255/30 focus:border-amber-700 rounded-lg text-slate-900 outline-none transition-all font-normal resize-none leading-relaxed"
                     />
                   </div>
 
@@ -732,7 +734,7 @@ const WriteBook = () => {
                   <button
                     type="submit"
                     disabled={publishing}
-                    className="w-full py-2.5 bg-amber-800 hover:bg-amber-900 text-[#FAF6F0] rounded-xl font-bold text-sm transition-all focus:ring-4 focus:ring-amber-100 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer mt-4 active:scale-[0.98] shadow-md"
+                    className="w-full py-2.5 bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-bold text-sm shadow-md hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] transition-all disabled:opacity-50 disabled:transform-none flex items-center justify-center gap-1.5 cursor-pointer mt-4"
                   >
                     {publishing ? (
                       <>
@@ -752,9 +754,9 @@ const WriteBook = () => {
 
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center p-12 bg-[#FDFCF7] border border-[#EADCC9] rounded-2xl shadow-sm text-center max-w-lg mx-auto">
+          <div className="flex flex-col items-center justify-center p-12 bg-slate-50 border border-slate-300 rounded-2xl shadow-sm text-center max-w-lg mx-auto">
             <RefreshCw size={40} className="animate-spin text-amber-800 mb-4" />
-            <h3 className="text-lg font-bold text-[#2C1E11]">Loading your draft notepad...</h3>
+            <h3 className="text-lg font-bold text-slate-900">Loading your draft notepad...</h3>
           </div>
         )}
       </div>

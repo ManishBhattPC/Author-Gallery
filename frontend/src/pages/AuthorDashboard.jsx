@@ -63,7 +63,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#ECE2D0] px-4 py-10 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-300 px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-7xl space-y-8">
         
         {/* Error Message */}
@@ -77,13 +77,13 @@ const Dashboard = () => {
         <DashboardHeader stats={dashboard.stats} loading={loading} />
 
         {/* Main Grid */}
-        <div className="grid gap-6 xl:grid-cols-4">
+        <div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-4">
           
-          {/* Left Section (3/4 width) */}
-          <div className="xl:col-span-3 space-y-6">
+          {/* Left Section (2/3 width on lg, 3/4 width on xl) */}
+          <div className="lg:col-span-2 xl:col-span-3 space-y-6">
             
             {/* Banner card prompting to write a book using template covers */}
-            <div className="bg-gradient-to-r from-amber-800 to-amber-955 rounded-3xl p-6 sm:p-8 text-[#FAF6F0] flex flex-col md:flex-row justify-between items-center gap-6 shadow-md border border-amber-900/30 text-left">
+            <div className="bg-gradient-to-r from-amber-800 to-amber-950 rounded-3xl p-6 sm:p-8 text-[#FAF6F0] flex flex-col md:flex-row justify-between items-center gap-6 shadow-md border border-amber-900/30 text-left">
               <div className="space-y-2 text-center md:text-left">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-700/40 border border-amber-600/30 rounded-full text-xs font-bold tracking-wide">
                   ✨ NEW FEATURE
@@ -114,8 +114,8 @@ const Dashboard = () => {
             />
           </div>
 
-          {/* Right Sidebar (1/4 width) */}
-          <div className="space-y-6">
+          {/* Right Sidebar (1/3 width on lg, 1/4 width on xl) */}
+          <div className="lg:col-span-1 xl:col-span-1 space-y-6">
             
             {/* Author Statistics */}
             <AuthorStats stats={dashboard.stats} loading={loading} />

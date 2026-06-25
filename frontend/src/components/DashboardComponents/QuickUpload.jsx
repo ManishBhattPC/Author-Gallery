@@ -93,39 +93,37 @@ const QuickUpload = ({ onPublished }) => {
     } finally {
       setUploading(false);
     }
-  };
-
-  return (
-    <div className="bg-[#FDFCF7] border border-[#EADCC9] rounded-2xl p-6 sm:p-8 shadow-sm text-left">
-      <h3 className="text-xl font-bold font-serif text-[#2C1E11] mb-1">Quick Publish</h3>
-      <p className="text-[#8C7B6C] text-xs mb-6 font-medium">Fill in details and upload files to publish instantly.</p>
+  };  return (
+    <div className="bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-300 shadow-sm text-left">
+      <h3 className="text-xl font-bold font-serif text-slate-900 mb-1">Quick Publish</h3>
+      <p className="text-slate-700 text-xs mb-6 font-medium">Fill in details and upload files to publish instantly.</p>
 
       <form onSubmit={handlePublish} className="space-y-4">
         
         {/* Title */}
         <div>
-          <label className="block text-xs font-bold text-[#5C4E40] mb-1">Book Title *</label>
+          <label className="block text-xs font-bold text-slate-800 mb-1">Book Title *</label>
           <input
             type="text"
             name="title"
             value={formData.title}
             onChange={handleInputChange}
             placeholder="e.g., Whispers of the Wind"
-            className="w-full px-4 py-2.5 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-xl text-[#2C1E11] outline-none text-sm transition-all placeholder-slate-350 font-normal"
+            className="w-full px-4 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-100/30 focus:border-amber-700 rounded-xl text-slate-900 outline-none text-sm transition-all placeholder-slate-400 font-normal"
             required
           />
         </div>
 
         {/* Synopsis / Description */}
         <div>
-          <label className="block text-xs font-bold text-[#5C4E40] mb-1">Synopsis / Description *</label>
+          <label className="block text-xs font-bold text-slate-800 mb-1">Synopsis / Description *</label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleInputChange}
             placeholder="Provide a brief synopsis of your book..."
             rows={3}
-            className="w-full px-4 py-2.5 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-xl text-[#2C1E11] outline-none text-sm transition-all placeholder-slate-350 font-normal resize-none leading-relaxed"
+            className="w-full px-4 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-100/30 focus:border-amber-700 rounded-xl text-slate-900 outline-none text-sm transition-all placeholder-slate-400 font-normal resize-none leading-relaxed"
             required
           />
         </div>
@@ -133,12 +131,12 @@ const QuickUpload = ({ onPublished }) => {
         <div className="grid grid-cols-2 gap-4">
           {/* Genre */}
           <div>
-            <label className="block text-xs font-bold text-[#5C4E40] mb-1">Genre *</label>
+            <label className="block text-xs font-bold text-slate-800 mb-1">Genre *</label>
             <select
               name="genres"
               value={formData.genres}
               onChange={handleInputChange}
-              className="w-full px-3 py-2.5 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-xl text-[#2C1E11] outline-none text-sm transition-all font-normal text-xs"
+              className="w-full px-3 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-100/30 focus:border-amber-700 rounded-xl text-slate-900 outline-none text-sm transition-all font-normal text-xs"
               required
             >
               <option value="">Genre</option>
@@ -165,7 +163,7 @@ const QuickUpload = ({ onPublished }) => {
 
           {/* Price */}
           <div>
-            <label className="block text-xs font-bold text-[#5C4E40] mb-1">Price (₹) *</label>
+            <label className="block text-xs font-bold text-slate-800 mb-1">Price (₹) *</label>
             <input
               type="number"
               name="price"
@@ -174,7 +172,7 @@ const QuickUpload = ({ onPublished }) => {
               placeholder="0.00"
               min="0"
               step="0.01"
-              className="w-full px-4 py-2.5 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-xl text-[#2C1E11] outline-none text-sm transition-all placeholder-slate-350 font-normal"
+              className="w-full px-4 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-100/30 focus:border-amber-700 rounded-xl text-slate-900 outline-none text-sm transition-all placeholder-slate-400 font-normal"
               required
             />
           </div>
@@ -182,23 +180,23 @@ const QuickUpload = ({ onPublished }) => {
 
         {/* Publish Date */}
         <div>
-          <label className="block text-xs font-bold text-[#5C4E40] mb-1">Publish Date *</label>
+          <label className="block text-xs font-bold text-slate-800 mb-1">Publish Date *</label>
           <input
             type="date"
             name="publishDate"
             value={formData.publishDate}
             onChange={handleInputChange}
-            className="w-full px-4 py-2.5 bg-[#FAF6F0] border border-[#EADCC9] focus:bg-[#FCFBF7] focus:ring-4 focus:ring-amber-100/30 focus:border-amber-750 rounded-xl text-slate-500 focus:text-[#2C1E11] outline-none text-sm transition-all font-normal"
+            className="w-full px-4 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-100/30 focus:border-amber-700 rounded-xl text-slate-500 focus:text-slate-900 outline-none text-sm transition-all font-normal"
             required
           />
         </div>
 
         {/* Cover Image Upload */}
         <div>
-          <label className="block text-xs font-bold text-[#5C4E40] mb-2">Cover Image *</label>
-          <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#EADCC9] hover:border-amber-700/50 bg-[#FAF6F0] hover:bg-[#F3EAD8]/30 rounded-xl cursor-pointer transition-all duration-300">
+          <label className="block text-xs font-bold text-slate-800 mb-2">Cover Image *</label>
+          <label className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-300 hover:border-amber-700/50 bg-white hover:bg-slate-100/20 rounded-xl cursor-pointer transition-all duration-300">
             <UploadCloud className="w-6 h-6 text-amber-700 mb-1" />
-            <span className="text-xs text-[#5C4E40] font-bold">Upload cover photo</span>
+            <span className="text-xs text-slate-850 font-bold">Upload cover photo</span>
             <input
               type="file"
               name="coverImage"
@@ -218,10 +216,10 @@ const QuickUpload = ({ onPublished }) => {
 
         {/* PDF Upload */}
         <div>
-          <label className="block text-xs font-bold text-[#5C4E40] mb-2">PDF Document *</label>
-          <label className="flex flex-col items-center justify-center p-4 border border-dashed border-[#EADCC9] hover:border-amber-700/50 bg-[#FAF6F0] hover:bg-[#F3EAD8]/30 rounded-xl cursor-pointer transition-all duration-300">
+          <label className="block text-xs font-bold text-slate-800 mb-2">PDF Document *</label>
+          <label className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-300 hover:border-amber-700/50 bg-white hover:bg-slate-100/20 rounded-xl cursor-pointer transition-all duration-300">
             <UploadCloud className="w-6 h-6 text-amber-700 mb-1" />
-            <span className="text-xs text-[#5C4E40] font-bold">Upload PDF ebook</span>
+            <span className="text-xs text-slate-850 font-bold">Upload PDF eBook</span>
             <input
               type="file"
               name="pdfFile"
@@ -253,7 +251,7 @@ const QuickUpload = ({ onPublished }) => {
         <button
           type="submit"
           disabled={uploading}
-          className="w-full py-2.5 bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-bold text-sm transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 mt-4 cursor-pointer shadow-md"
+          className="w-full py-2.5 bg-amber-800 hover:bg-amber-900 text-white rounded-xl font-bold text-sm shadow-md hover:scale-[1.01] hover:-translate-y-0.5 active:scale-[0.98] transition-all disabled:opacity-50 disabled:transform-none flex items-center justify-center gap-2 mt-4 cursor-pointer"
         >
           {uploading ? "Publishing…" : "Publish Now"}
         </button>
