@@ -54,17 +54,17 @@
   color-scheme: light dark;
   font-family: var(--font-sans);
 
-  /* Light Theme Values (Warm Parchment Aesthetic) */
-  --slate-50: #FAF6F0;
-  --slate-100: #F4EFEB;
-  --slate-200: #EFE9DF;
-  --slate-300: #E5DBCE;
-  --slate-400: #D0C2AE;
-  --slate-500: #8A7A65;
-  --slate-600: #6D5E4D;
-  --slate-700: #534537;
-  --slate-800: #3E3227;
-  --slate-900: #2B2118;
+  /* Light Theme Values (Warm Parchment Aesthetic - slightly darker & richer) */
+  --slate-50: #F5EFE6;
+  --slate-100: #EBE3D5;
+  --slate-200: #DFD5C6;
+  --slate-300: #D2C5B4;
+  --slate-400: #C0B09A;
+  --slate-500: #8C7B67;
+  --slate-600: #6F5E4E;
+  --slate-700: #544436;
+  --slate-800: #3E3024;
+  --slate-900: #2C1F15;
 
   --amber-50: #FDF8F3;
   --amber-100: #FBF0E4;
@@ -138,6 +138,13 @@
   :root:not(.light) .border-slate-200\/50, :root:not(.light) .border-slate-200\/60 {
     border-color: rgba(229, 219, 206, 0.15) !important;
   }
+
+  :root:not(.light) body {
+    background-image: radial-gradient(rgba(229, 219, 206, 0.03) 1.2px, transparent 1.2px) !important;
+  }
+  :root:not(.light) body::before {
+    background: radial-gradient(circle at 50% 0%, rgba(204, 132, 94, 0.03), transparent 80%) !important;
+  }
 }
 
 .dark {
@@ -190,6 +197,13 @@
   border-color: rgba(229, 219, 206, 0.15) !important;
 }
 
+.dark body {
+  background-image: radial-gradient(rgba(229, 219, 206, 0.03) 1.2px, transparent 1.2px) !important;
+}
+.dark body::before {
+  background: radial-gradient(circle at 50% 0%, rgba(204, 132, 94, 0.03), transparent 80%) !important;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -203,6 +217,22 @@ body {
   min-height: 100vh;
   background-color: var(--color-slate-50);
   color: var(--color-slate-900);
+  position: relative;
+  /* Premium dot-grid pattern for publication look */
+  background-image: radial-gradient(rgba(140, 78, 53, 0.05) 1.2px, transparent 1.2px);
+  background-size: 28px 28px;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 600px;
+  background: radial-gradient(circle at 50% 0%, rgba(216, 127, 74, 0.06), transparent 80%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 button,
