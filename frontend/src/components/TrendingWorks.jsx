@@ -104,7 +104,7 @@ const TrendingWorks = () => {
                       {work.category || work.genre || "Book"}
                     </span>
 
-                    <h3 className="text-base sm:text-lg font-serif font-bold mt-2.5 text-slate-850 dark:text-slate-100 leading-tight line-clamp-2">
+                    <h3 className="text-base sm:text-lg font-serif font-bold mt-2.5 text-slate-900 leading-tight line-clamp-2">
                       {work.title}
                     </h3>
 

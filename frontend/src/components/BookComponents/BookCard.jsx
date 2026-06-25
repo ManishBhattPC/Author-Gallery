@@ -55,7 +55,7 @@ const BookCard = ({ book }) => {
           {genre}
         </span>
 
-        <h2 className="font-serif font-bold text-base sm:text-lg text-slate-850 dark:text-slate-100 line-clamp-2 mb-2">
+        <h2 className="font-serif font-bold text-base sm:text-lg text-slate-900 line-clamp-2 mb-2">
           {title}
         </h2>
 

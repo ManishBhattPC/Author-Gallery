@@ -96,7 +96,7 @@ const HeroSection = () => {
           {/* Left Content */}
           <div className="space-y-6">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2.5 border border-amber-800/15 bg-amber-50/50 dark:bg-amber-950/20 backdrop-blur-sm rounded-full pl-1.5 pr-4 py-1.5 text-xs font-bold text-amber-900 dark:text-amber-300 shadow-sm transition duration-300 hover:scale-[1.02] cursor-default select-none">
+            <div className="inline-flex items-center gap-2.5 border border-amber-800/15 bg-amber-50/50 dark:bg-amber-950/20 backdrop-blur-sm rounded-full pl-1.5 pr-4 py-1.5 text-xs font-bold text-amber-900 shadow-sm transition duration-300 hover:scale-[1.02] cursor-default select-none">
               <span className="flex items-center justify-center bg-gradient-to-tr from-amber-700 to-amber-900 text-[#FAF6F0] w-6 h-6 rounded-full shadow-sm">
                 <Sparkles size={11} className="animate-pulse text-amber-100" />
               </span>

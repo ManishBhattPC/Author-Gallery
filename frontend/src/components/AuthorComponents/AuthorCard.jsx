@@ -18,21 +18,21 @@ const AuthorCard = ({ id, image, name, genre, works }) => {
       />
 
       <div className="p-5">
-        <h3 className="text-xl font-serif font-bold text-slate-850 dark:text-slate-100">{name}</h3>
+        <h3 className="text-xl font-serif font-bold text-slate-900">{name}</h3>
 
-        <p className="text-slate-500 dark:text-slate-400 mt-1.5 text-xs font-semibold uppercase tracking-wider">{genre}</p>
+        <p className="text-slate-500 mt-1.5 text-xs font-semibold uppercase tracking-wider">{genre}</p>
 
-        <p className="text-sm text-slate-600 dark:text-slate-350 mt-3 font-medium">{works} Published Works</p>
+        <p className="text-sm text-slate-600 mt-3 font-medium">{works} Published Works</p>
 
         {id ? (
           <Link
             to={`/authors/${id}`}
-            className="mt-4 inline-block text-amber-700 dark:text-amber-500 font-bold hover:text-amber-900 dark:hover:text-amber-450 transition-colors text-sm"
+            className="mt-4 inline-block text-amber-700 font-bold hover:text-amber-900 transition-colors text-sm"
           >
             View Profile →
           </Link>
         ) : (
-          <span className="mt-4 inline-block text-amber-700 dark:text-amber-500 font-bold text-sm">
+          <span className="mt-4 inline-block text-amber-700 font-bold text-sm">
             View Profile →
           </span>
         )}
