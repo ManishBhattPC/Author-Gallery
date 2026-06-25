@@ -102,3 +102,44 @@ const logContactFallback = (contactData, adminEmail) => {
   console.log(` ${contactData.message}`);
   console.log("==================================================\n");
 };
+
+export const sendResetPasswordOTPEmail = async (email, otp) => {
+  const transporter = getTransporter();
+
+  const mailOptions = {
+    from: `"Author Gallery" <noreply@authorgallery.com>`,
+    to: email,
+    subject: "Reset Your Password - Author Gallery",
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #FAF6F0;">
+        <h2 style="color: #8C4E35; font-family: 'Playfair Display', Georgia, serif; text-align: center;">Reset Your Password</h2>
+        <p style="color: #334155; font-size: 16px; line-height: 1.6;">You have requested to reset your password. Please use the following One-Time Password (OTP) code to complete the process. This code will expire in 10 minutes.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <span style="font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #8C4E35; border: 2px dashed #8C4E35; padding: 10px 35px; border-radius: 8px; background-color: #ffffff; display: inline-block;">
+            ${otp}
+          </span>
+        </div>
+        <p style="color: #64748b; font-size: 13px; text-align: center; margin-top: 40px;">If you did not request a password reset, please ignore this email.</p>
+      </div>
+    `,
+  };
+
+  if (transporter) {
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`Password reset email sent to ${email}`);
+    } catch (err) {
+      console.error("Error sending password reset email via SMTP:", err);
+      logResetFallback(email, otp);
+    }
+  } else {
+    logResetFallback(email, otp);
+  }
+};
+
+const logResetFallback = (email, otp) => {
+  console.log("\n==================================================");
+  console.log(`🔑 [DEV-FALLBACK] PASSWORD RESET CODE FOR ${email.toUpperCase()}:`);
+  console.log(` 👉 ${otp} 👈`);
+  console.log("==================================================\n");
+};

@@ -3,7 +3,8 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import AuthorProfile from "../models/authorProfile.js";
 import OTP from "../models/OTP.js";
-import { sendOTPEmail } from "../utils/mailService.js";
+import PasswordReset from "../models/PasswordReset.js";
+import { sendOTPEmail, sendResetPasswordOTPEmail } from "../utils/mailService.js";
 import { OAuth2Client } from "google-auth-library";
 import { promises as dnsPromises } from "dns";
 
@@ -373,6 +374,123 @@ export const googleLogin = async (req, res) => {
     console.error("Google authentication error:", error);
     res.status(500).json({
       message: error.message || "Google authentication failed",
+    });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || !email.trim()) {
+      return res.status(400).json({
+        message: "Email is required.",
+      });
+    }
+
+    const trimmedEmail = email.toLowerCase().trim();
+
+    // 1. Verify email format
+    if (!emailRegex.test(trimmedEmail)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address.",
+      });
+    }
+
+    // 2. Check if user exists
+    const user = await User.findOne({ email: trimmedEmail });
+    
+    // For security reasons, if user doesn't exist, we still return a generic success message
+    if (!user) {
+      return res.status(200).json({
+        message: "If that email is registered, a password reset code has been sent.",
+        email: trimmedEmail,
+      });
+    }
+
+    // 3. Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // 4. Save/update record in PasswordReset collection
+    await PasswordReset.findOneAndUpdate(
+      { email: trimmedEmail },
+      { otp, createdAt: new Date() },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    // 5. Send Reset Password Email in the background
+    sendResetPasswordOTPEmail(trimmedEmail, otp).catch((err) => {
+      console.error("Failed to send password reset email:", err);
+    });
+
+    return res.status(200).json({
+      message: "If that email is registered, a password reset code has been sent.",
+      email: trimmedEmail,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({
+        message: "Email, OTP code, and new password are required.",
+      });
+    }
+
+    const trimmedEmail = email.toLowerCase().trim();
+
+    // 1. Validate new password length
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long.",
+      });
+    }
+
+    // 2. Find password reset record
+    const record = await PasswordReset.findOne({ email: trimmedEmail });
+
+    if (!record) {
+      return res.status(400).json({
+        message: "Invalid or expired verification code.",
+      });
+    }
+
+    // 3. Verify OTP
+    if (record.otp !== otp.trim()) {
+      return res.status(400).json({
+        message: "Incorrect verification code.",
+      });
+    }
+
+    // 4. Find the user
+    const user = await User.findOne({ email: trimmedEmail });
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+      });
+    }
+
+    // 5. Hash new password and update user record
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    // 6. Delete reset record
+    await record.deleteOne();
+
+    return res.status(200).json({
+      message: "Password reset successful. You can now log in.",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     });
   }
 };
