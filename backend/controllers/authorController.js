@@ -202,6 +202,139 @@ export const getAuthorActivity = async (req, res) => {
   }
 }
 
+// Follow an author
+export const followAuthor = async (req, res) => {
+  try {
+    const authorId = req.params.id;
+    const userId = req.user._id;
+
+    if (authorId === userId.toString()) {
+      return res.status(400).json({ message: "You cannot follow yourself" });
+    }
+
+    const author = await User.findById(authorId);
+    if (!author) {
+      return res.status(404).json({ message: "Author not found" });
+    }
+
+    // Add userId to author's followers
+    if (!author.followers.includes(userId)) {
+      author.followers.push(userId);
+      await author.save();
+    }
+
+    // Add authorId to user's following
+    const user = await User.findById(userId);
+    if (!user.following.includes(authorId)) {
+      user.following.push(authorId);
+      await user.save();
+    }
+
+    res.status(200).json({ message: "Successfully followed author" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Unfollow an author
+export const unfollowAuthor = async (req, res) => {
+  try {
+    const authorId = req.params.id;
+    const userId = req.user._id;
+
+    const author = await User.findById(authorId);
+    if (!author) {
+      return res.status(404).json({ message: "Author not found" });
+    }
+
+    // Remove userId from author's followers
+    author.followers = author.followers.filter(id => id.toString() !== userId.toString());
+    await author.save();
+
+    // Remove authorId from user's following
+    const user = await User.findById(userId);
+    user.following = user.following.filter(id => id.toString() !== authorId.toString());
+    await user.save();
+
+    res.status(200).json({ message: "Successfully unfollowed author" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Check if currently following an author
+export const checkFollowStatus = async (req, res) => {
+  try {
+    const authorId = req.params.id;
+    const userId = req.user._id;
+
+    const user = await User.findById(userId);
+    const isFollowing = user.following.includes(authorId);
+
+    res.status(200).json({ isFollowing });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get list of followers for logged-in user
+export const getMyFollowers = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId).populate({
+      path: "followers",
+      select: "name email profileImage"
+    });
+
+    // Populate resolved values from AuthorProfile
+    const followersList = await Promise.all(
+      user.followers.map(async (follower) => {
+        const profile = await AuthorProfile.findOne({ user: follower._id });
+        return {
+          _id: follower._id,
+          name: profile?.displayName || follower.name,
+          email: follower.email,
+          profileImage: profile?.profileImage || follower.profileImage || "",
+          bio: profile?.bio || "",
+          location: profile?.location || "",
+        };
+      })
+    );
+
+    res.status(200).json({ followers: followersList });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get list of authors followed by logged-in user
+export const getMyFollowing = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+
+    const followingList = await Promise.all(
+      user.following.map(async (followingId) => {
+        const followingUser = await User.findById(followingId).select("name email profileImage");
+        if (!followingUser) return null;
+        const profile = await AuthorProfile.findOne({ user: followingId });
+        return {
+          _id: followingId,
+          name: profile?.displayName || followingUser.name,
+          email: followingUser.email,
+          profileImage: profile?.profileImage || followingUser.profileImage || "",
+          bio: profile?.bio || "",
+          location: profile?.location || "",
+        };
+      })
+    );
+
+    res.status(200).json({ following: followingList.filter(Boolean) });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 /*
 Future Roadmap
 

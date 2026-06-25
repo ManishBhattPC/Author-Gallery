@@ -16,6 +16,7 @@ import ForgotPassword from "./pages/ForgotPassword.jsx"
 import NotFound from "./pages/NotFound.jsx"
 import AuthorDashboard from "./pages/AuthorDashboard.jsx"
 import AuthorProfile from "./pages/AuthorProfile.jsx"
+import AuthorNetwork from "./pages/AuthorNetwork.jsx"
 import WriteBook from "./pages/WriteBook.jsx"
 import AuthorDetails from "./pages/AuthorDetails.jsx"
 import BookDetails from "./components/BookComponents/BookDetails.jsx"
@@ -54,6 +55,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <AuthorProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="dashboard/network"
+          element={
+            <ProtectedRoute>
+              <AuthorNetwork />
             </ProtectedRoute>
           }
         />

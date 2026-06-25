@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../AuthContext.jsx";
 import { Users, BookOpen, Star, User } from "lucide-react";
 
@@ -53,27 +53,41 @@ const DashboardHeader = ({ stats, loading = false }) => {
       </div>
 
       <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:items-center sm:gap-8 sm:w-auto border-t sm:border-t-0 pt-4 sm:pt-0 border-slate-300/65">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="p-2 sm:p-3 bg-[#FAF1E6] rounded-xl text-amber-850 shrink-0">
+        <Link
+          to="/dashboard/network?tab=followers"
+          className="flex items-center gap-2 sm:gap-3 hover:bg-slate-200/50 p-1.5 sm:p-2 rounded-xl transition-all duration-200 cursor-pointer text-left group min-w-0"
+        >
+          <div className="p-2 sm:p-3 bg-[#FAF1E6] rounded-xl text-amber-850 shrink-0 group-hover:scale-105 transition-transform">
             <Users className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </div>
           <div className="text-left min-w-0">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-none">{statValue(stats?.followers)}</h3>
-            <p className="text-[10px] sm:text-xs text-slate-700 mt-1 font-semibold truncate">Followers</p>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-none group-hover:text-amber-800 transition-colors">
+              {statValue(stats?.followers)}
+            </h3>
+            <p className="text-[10px] sm:text-xs text-slate-700 mt-1 font-semibold truncate">
+              Followers
+            </p>
           </div>
-        </div>
+        </Link>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="p-2 sm:p-3 bg-[#F9ECEB] rounded-xl text-rose-800 shrink-0">
+        <Link
+          to="/dashboard/network?tab=following"
+          className="flex items-center gap-2 sm:gap-3 hover:bg-slate-200/50 p-1.5 sm:p-2 rounded-xl transition-all duration-200 cursor-pointer text-left group min-w-0"
+        >
+          <div className="p-2 sm:p-3 bg-[#F9ECEB] rounded-xl text-rose-800 shrink-0 group-hover:scale-105 transition-transform">
             <Star className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </div>
           <div className="text-left min-w-0">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-none">{statValue(stats?.following)}</h3>
-            <p className="text-[10px] sm:text-xs text-slate-700 mt-1 font-semibold truncate">Following</p>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-none group-hover:text-rose-800 transition-colors">
+              {statValue(stats?.following)}
+            </h3>
+            <p className="text-[10px] sm:text-xs text-slate-700 mt-1 font-semibold truncate">
+              Following
+            </p>
           </div>
-        </div>
+        </Link>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2">
           <div className="p-2 sm:p-3 bg-[#E8F3EE] rounded-xl text-emerald-850 shrink-0">
             <BookOpen className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </div>

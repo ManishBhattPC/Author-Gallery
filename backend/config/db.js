@@ -50,12 +50,22 @@ const syncAuthorRoles = async () => {
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
+    console.log("Connecting to primary MongoDB URI...");
     await mongoose.connect(mongoURI);
-    console.log("MongoDB Connected")
+    console.log("MongoDB Connected to Atlas successfully");
     await seedAdmin();
     await syncAuthorRoles();
   } catch (error) {
-    console.log(error)
+    console.log("Primary MongoDB Atlas connection failed:", error.message);
+    console.log("Attempting connection to local fallback MongoDB (127.0.0.1:27017)...");
+    try {
+      await mongoose.connect("mongodb://127.0.0.1:27017/author-gallery");
+      console.log("Connected to local MongoDB successfully");
+      await seedAdmin();
+      await syncAuthorRoles();
+    } catch (localError) {
+      console.error("Local MongoDB connection also failed:", localError.message);
+    }
   }
 }
 

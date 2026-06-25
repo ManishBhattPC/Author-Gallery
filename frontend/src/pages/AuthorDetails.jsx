@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { fetchAuthorById } from "../services/authorService.js";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { fetchAuthorById, followAuthor, unfollowAuthor, checkFollowStatus } from "../services/authorService.js";
 import BookCard from "../components/BookComponents/BookCard.jsx";
 import { useAuth } from "../AuthContext.jsx";
 import { Flag } from "lucide-react";
@@ -9,11 +9,25 @@ import ReportModal from "../components/ReportModal.jsx";
 
 const AuthorDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [author, setAuthor] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuth();
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
+
+  console.log("DEBUG AuthorDetails:", {
+    user,
+    userId: user?._id || user?.id,
+    authorId: author?._id || author?.id,
+    isFollowing,
+    followerCount,
+    followLoading,
+    shouldShowFollowButton: !user || (user?._id || user?.id) !== (author?._id || author?.id)
+  });
 
   useEffect(() => {
     const loadAuthor = async () => {
@@ -21,7 +35,19 @@ const AuthorDetails = () => {
       setError(null);
       try {
         const data = await fetchAuthorById(id);
-        setAuthor(data.author || data);
+        const authObj = data.author || data;
+        setAuthor(authObj);
+        setFollowerCount(authObj.followers ?? 0);
+
+        const loggedInUserId = user?._id || user?.id;
+        if (loggedInUserId && loggedInUserId !== id) {
+          try {
+            const statusRes = await checkFollowStatus(id);
+            setIsFollowing(statusRes.isFollowing);
+          } catch (err) {
+            console.error("Error checking follow status:", err);
+          }
+        }
       } catch (err) {
         setError(err.message || "Unable to load author.");
       } finally {
@@ -32,7 +58,32 @@ const AuthorDetails = () => {
     if (id) {
       loadAuthor();
     }
-  }, [id]);
+  }, [id, user]);
+
+  const handleFollowToggle = async () => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        await unfollowAuthor(id);
+        setIsFollowing(false);
+        setFollowerCount((prev) => Math.max(0, prev - 1));
+      } else {
+        await followAuthor(id);
+        setIsFollowing(true);
+        setFollowerCount((prev) => prev + 1);
+      }
+    } catch (err) {
+      console.error("Error toggling follow:", err);
+      alert(err.message || "Failed to perform follow action.");
+    } finally {
+      setFollowLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -96,13 +147,41 @@ const AuthorDetails = () => {
               </div>
               <p className="text-sm text-slate-500 mt-2">{author.email}</p>
             </div>
+            {(!user || (user?._id || user?.id) !== (author?._id || author?.id)) ? (
+              <button
+                type="button"
+                disabled={followLoading}
+                onClick={handleFollowToggle}
+                className={`w-full py-3 rounded-2xl font-semibold text-sm shadow-sm transition-all duration-300 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2 ${
+                  isFollowing
+                    ? "bg-slate-200/85 hover:bg-slate-350 text-slate-800 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700"
+                    : "bg-amber-800 hover:bg-amber-900 text-white dark:bg-amber-700 dark:hover:bg-amber-600"
+                }`}
+              >
+                {followLoading ? (
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : isFollowing ? (
+                  "Following"
+                ) : (
+                  "Follow Author"
+                )}
+              </button>
+            ) : (
+              <Link
+                to="/dashboard/author-profile"
+                className="w-full py-3 rounded-2xl font-semibold text-sm border border-amber-800 text-amber-800 dark:border-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 transition-all duration-300 flex items-center justify-center gap-2 text-center"
+              >
+                ✍️ Edit Your Profile
+              </Link>
+            )}
+
             <div className="rounded-3xl bg-slate-50 p-4">
               <p className="text-sm text-slate-500">Works</p>
               <p className="text-3xl font-semibold text-slate-900">{author.works}</p>
             </div>
             <div className="rounded-3xl bg-slate-50 p-4">
               <p className="text-sm text-slate-500">Followers</p>
-              <p className="text-3xl font-semibold text-slate-900">{author.followers ?? 0}</p>
+              <p className="text-3xl font-semibold text-slate-900">{followerCount}</p>
             </div>
             <div className="rounded-3xl bg-slate-50 p-4">
               <p className="text-sm text-slate-500">Following</p>

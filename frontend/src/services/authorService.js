@@ -28,5 +28,27 @@ export const fetchAuthorById = async (id) => {
   return response.data;
 };
 
+export const followAuthor = async (id) => {
+  const response = await apiClient.post(`/api/authors/${id}/follow`);
+  return response.data;
+};
 
-            // PUBLIC AUTHOR PAGE
+export const unfollowAuthor = async (id) => {
+  const response = await apiClient.post(`/api/authors/${id}/unfollow`);
+  return response.data;
+};
+
+export const checkFollowStatus = async (id) => {
+  const response = await apiClient.get(`/api/authors/${id}/is-following`);
+  return response.data;
+};
+
+export const fetchMyFollowers = async () => {
+  const response = await apiClient.get("/api/authors/dashboard/followers");
+  return response.data;
+};
+
+export const fetchMyFollowing = async () => {
+  const response = await apiClient.get("/api/authors/dashboard/following");
+  return response.data;
+};
