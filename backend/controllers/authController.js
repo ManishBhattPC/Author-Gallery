@@ -104,32 +104,29 @@ export const registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create active user directly
-    const user = await User.create({
-      name: name.trim(),
-      email: email.toLowerCase().trim(),
-      password: hashedPassword,
-      role: "user",
-    });
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Auto-login after registration
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
+    // Store the pending registration inside the OTP collection
+    await OTP.findOneAndUpdate(
+      { email: email.toLowerCase().trim() },
+      {
+        name: name.trim(),
+        password: hashedPassword,
+        otp,
+        createdAt: new Date(), // Refresh the 10-minute expiry window
+      },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-    res.cookie("token", token, getCookieOptions());
+    // Send the OTP verification email in the background (non-blocking)
+    sendOTPEmail(email.toLowerCase().trim(), otp).catch((err) => {
+      console.error("Failed to send OTP verification email:", err);
+    });
 
-    res.status(201).json({
-      message: "Registration successful",
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        profileImage: "",
-      },
+    res.status(200).json({
+      message: "A verification code has been sent to your email.",
+      email: email.toLowerCase().trim(),
+      requiresVerification: true,
     });
   } catch (error) {
     res.status(500).json({

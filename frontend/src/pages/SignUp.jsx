@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { registerUser, googleLogin } from "../services/authService.js";
+import { registerUser, googleLogin, verifyOTP, resendOTP } from "../services/authService.js";
 import { useAuth } from "../AuthContext.jsx";
 import { FcGoogle } from "react-icons/fc";
 
@@ -8,13 +8,15 @@ const Signup = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   
-  const [step, setStep] = useState("details"); // details, google-password
+  const [step, setStep] = useState("details"); // details, google-password, otp
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [googleRegistration, setGoogleRegistration] = useState(null); // { credential, email, name }
   const [googlePassword, setGooglePassword] = useState("");
   const [googleConfirmPassword, setGoogleConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [resendStatus, setResendStatus] = useState(null);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -73,10 +75,51 @@ const Signup = () => {
         email: trimmedEmail,
         password: form.password,
       });
+      if (res.requiresVerification) {
+        setStep("otp");
+      } else {
+        login(res.user);
+        navigate("/author-dashboard");
+      }
+    } catch (err) {
+      setError(err.message || "Unable to register. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTPSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!otp || otp.trim().length !== 6) {
+      setError("Please enter a valid 6-digit verification code.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await verifyOTP(form.email.trim(), otp.trim());
       login(res.user);
       navigate("/author-dashboard");
     } catch (err) {
-      setError(err.message || "Unable to register. Please try again.");
+      setError(err.message || "Invalid or expired verification code.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    setError(null);
+    setResendStatus(null);
+    setLoading(true);
+    try {
+      await resendOTP(form.email.trim());
+      setResendStatus("New code sent successfully!");
+      setOtp(""); // Reset input
+      setTimeout(() => setResendStatus(null), 3000);
+    } catch (err) {
+      setError(err.message || "Failed to resend code.");
     } finally {
       setLoading(false);
     }
@@ -191,17 +234,17 @@ const Signup = () => {
     <div className="min-h-screen bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-lg text-left">
         <h2 className="text-3xl font-semibold text-slate-900">
-          {step === "details"
-            ? "Create your author account"
-            : "Choose a Password"}
+          {step === "details" && "Create your author account"}
+          {step === "google-password" && "Choose a Password"}
+          {step === "otp" && "Verify Your Email"}
         </h2>
         <p className="mt-2 text-sm text-slate-650">
-          {step === "details"
-            ? "Register once and manage your books, profile, and audience."
-            : "Secure your new account created via Google."}
+          {step === "details" && "Register once and manage your books, profile, and audience."}
+          {step === "google-password" && "Secure your new account created via Google."}
+          {step === "otp" && `We've sent a 6-digit verification code to ${form.email.toLowerCase().trim()}.`}
         </p>
 
-        {step === "details" ? (
+        {step === "details" && (
           <form className="mt-8 space-y-5" onSubmit={handleRegisterSubmit}>
             <div>
               <label className="block text-sm font-medium text-slate-700">Full name</label>
@@ -278,7 +321,9 @@ const Signup = () => {
               </Link>
             </p>
           </form>
-        ) : (
+        )}
+
+        {step === "google-password" && (
           <form className="mt-8 space-y-5" onSubmit={handleGooglePasswordSubmit}>
             <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
               <p className="text-sm text-amber-900 leading-relaxed">
@@ -335,6 +380,63 @@ const Signup = () => {
                 className="text-amber-800 font-bold hover:underline cursor-pointer bg-transparent border-none outline-none"
               >
                 Cancel
+              </button>
+            </div>
+          </form>
+        )}
+
+        {step === "otp" && (
+          <form className="mt-8 space-y-5" onSubmit={handleVerifyOTPSubmit}>
+            <div className="rounded-2xl bg-amber-50 border border-amber-250 p-4">
+              <p className="text-sm text-amber-900 leading-relaxed font-semibold">
+                An email containing your One-Time Password (OTP) verification code has been sent. This code will expire in 10 minutes.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Verification Code (6-digit)</label>
+              <input
+                type="text"
+                name="otp"
+                maxLength={6}
+                value={otp}
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                required
+                placeholder="######"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-center text-xl font-bold tracking-[8px] text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 placeholder:tracking-normal placeholder:font-normal"
+              />
+            </div>
+
+            {error && <p className="text-sm text-rose-650 font-semibold">{error}</p>}
+            {resendStatus && <p className="text-sm text-emerald-700 font-bold">{resendStatus}</p>}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-full bg-amber-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-amber-800 hover:shadow-md active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+            >
+              {loading ? "Verifying Code..." : "Verify & Create Account"}
+            </button>
+
+            <div className="flex justify-between items-center text-xs mt-4 px-2">
+              <button
+                type="button"
+                onClick={handleResendOTP}
+                disabled={loading}
+                className="text-amber-800 font-bold hover:underline cursor-pointer bg-transparent border-none outline-none disabled:opacity-50"
+              >
+                Resend Code
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep("details");
+                  setOtp("");
+                  setError(null);
+                }}
+                className="text-slate-500 font-semibold hover:text-slate-700 cursor-pointer bg-transparent border-none outline-none"
+              >
+                Change Details
               </button>
             </div>
           </form>
