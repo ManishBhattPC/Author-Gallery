@@ -108,7 +108,7 @@ const sendEmail = async ({ to, subject, html, replyTo }) => {
   if (BREVO_API_KEY) {
     try {
       console.log(`Attempting email delivery to ${to} via Brevo HTTP API.`);
-      const fromEmail = process.env.BREVO_FROM_EMAIL || "noreply@authorgallery.com";
+      const fromEmail = process.env.BREVO_FROM_EMAIL || process.env.SMTP_USER || process.env.CONTACT_EMAIL || "noreply@authorgallery.com";
       const body = {
         sender: { name: "Author Gallery", email: fromEmail },
         to: [{ email: to }],
