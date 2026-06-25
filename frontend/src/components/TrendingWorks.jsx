@@ -109,7 +109,14 @@ const TrendingWorks = () => {
                     </h3>
 
                     <p className="text-gray-600 mt-2 text-sm sm:text-base">
-                      by {work.author?.name || work.author || "Unknown"}
+                      by{" "}
+                      {work.author?._id ? (
+                        <Link to={`/authors/${work.author._id}`} className="hover:text-amber-800 hover:underline transition-colors duration-200">
+                          {work.author.name}
+                        </Link>
+                      ) : (
+                        work.author?.name || work.author || "Unknown"
+                      )}
                     </p>
                   </div>
                 </div>

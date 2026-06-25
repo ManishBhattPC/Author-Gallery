@@ -62,6 +62,7 @@ const AuthorProfile = () => {
       updateUser({
         profileImage: updated.profile.profileImage,
         name: updated.profile.displayName,
+        role: "author",
       });
     }
 

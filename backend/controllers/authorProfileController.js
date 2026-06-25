@@ -1,4 +1,5 @@
 import AuthorProfile from "../models/authorProfile.js";
+import User from "../models/User.js";
 import uploadToCloudinary from "../utils/uploadToCloudinary.js"; // Cloudinary upload
 
 // Create Author Profile
@@ -39,6 +40,10 @@ export const createAuthorProfile = async (req, res) => {
       website: req.body.website,
       profileImage: profileImageUrl, // Store Cloudinary URL
     });
+
+    if (req.user && req.user.role === "user") {
+      await User.findByIdAndUpdate(req.user._id, { role: "author" });
+    }
 
     res.status(201).json({
       message: "Author profile created successfully",
@@ -109,6 +114,10 @@ export const updateAuthorProfile = async (req, res) => {
     }
 
     const updatedProfile = await profile.save();
+
+    if (req.user && req.user.role === "user") {
+      await User.findByIdAndUpdate(req.user._id, { role: "author" });
+    }
 
     res.status(200).json({
       message: "Author profile updated successfully",

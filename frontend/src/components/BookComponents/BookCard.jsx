@@ -60,7 +60,13 @@ const BookCard = ({ book }) => {
         </h2>
 
         <p className="text-sm text-slate-500 mb-3">
-          {authorName}
+          {book?.author?._id ? (
+            <Link to={`/authors/${book.author._id}`} className="hover:text-amber-800 hover:underline transition-colors duration-200">
+              {authorName}
+            </Link>
+          ) : (
+            authorName
+          )}
         </p>
 
         <div className="mb-4">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchBookById } from "../../services/bookService.js";
 import { useAuth } from "../../AuthContext.jsx";
 import { Flag } from "lucide-react";
@@ -167,7 +167,13 @@ const BookDetails = () => {
 
               <p className="flex items-center gap-2 text-lg text-slate-700">
                 <FaUser />
-                {authorName}
+                {book?.author?._id ? (
+                  <Link to={`/authors/${book.author._id}`} className="hover:text-amber-800 hover:underline transition-colors duration-200">
+                    {authorName}
+                  </Link>
+                ) : (
+                  authorName
+                )}
               </p>
             </div>
 
