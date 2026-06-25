@@ -13,6 +13,7 @@ const getTransporter = () => {
         user: SMTP_USER,
         pass: SMTP_PASS,
       },
+      family: 4, // Force IPv4 to prevent connect ENETUNREACH errors on IPv6 networks
     });
   }
 
