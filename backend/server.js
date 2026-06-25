@@ -11,6 +11,7 @@ import authorRoutes from "./routes/authorRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"
 import reviewRoutes from "./routes/reviewRoutes.js"
 import reportRoutes from "./routes/reportRoutes.js"
+import contactRoutes from "./routes/contactRoutes.js"
 
 
 dotenv.config()
@@ -49,6 +50,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/reviews", reviewRoutes)
 app.use("/api/reports", reportRoutes)
+app.use("/api/contact", contactRoutes)
 
 
 app.get("/", (req, res) => {

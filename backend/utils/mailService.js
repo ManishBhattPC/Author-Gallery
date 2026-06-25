@@ -60,3 +60,45 @@ const logFallback = (email, otp) => {
   console.log(` 👉 ${otp} 👈`);
   console.log("==================================================\n");
 };
+
+export const sendContactEmail = async (contactData) => {
+  const transporter = getTransporter();
+  const adminEmail = process.env.CONTACT_EMAIL || process.env.SMTP_USER || "admin@authorgallery.com";
+
+  const mailOptions = {
+    from: `"Author Gallery Contact" <noreply@authorgallery.com>`,
+    to: adminEmail,
+    replyTo: contactData.email,
+    subject: `New Contact Inquiry from ${contactData.name}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #FAF6F0;">
+        <h2 style="color: #8C4E35; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; margin-top: 0;">New Contact Form Submission</h2>
+        <p style="color: #334155; font-size: 14px; margin: 5px 0;"><strong>Name:</strong> ${contactData.name}</p>
+        <p style="color: #334155; font-size: 14px; margin: 5px 0;"><strong>Email:</strong> ${contactData.email}</p>
+        <p style="color: #334155; font-size: 14px; margin: 15px 0 5px 0;"><strong>Message:</strong></p>
+        <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; font-size: 14px; line-height: 1.6; color: #1e293b; white-space: pre-wrap;">${contactData.message}</div>
+      </div>
+    `,
+  };
+
+  if (transporter) {
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log(`Contact message from ${contactData.email} forwarded to ${adminEmail}`);
+    } catch (err) {
+      console.error("Error sending contact email via SMTP:", err);
+      logContactFallback(contactData, adminEmail);
+    }
+  } else {
+    logContactFallback(contactData, adminEmail);
+  }
+};
+
+const logContactFallback = (contactData, adminEmail) => {
+  console.log("\n==================================================");
+  console.log(`✉️ [DEV-FALLBACK] CONTACT INQUIRY FOR ${adminEmail.toUpperCase()}:`);
+  console.log(` FROM: ${contactData.name} <${contactData.email}>`);
+  console.log(` MESSAGE:`);
+  console.log(` ${contactData.message}`);
+  console.log("==================================================\n");
+};

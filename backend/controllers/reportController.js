@@ -10,9 +10,7 @@ export const submitReport = async (req, res) => {
       return res.status(400).json({ message: "Reason for reporting is required" });
     }
 
-    if (!book && !author) {
-      return res.status(400).json({ message: "Report must target a book or an author profile" });
-    }
+    // Removed restriction requiring a target book or author profile to allow general support tickets
 
     const reportData = {
       reporter: reporterId,

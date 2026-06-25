@@ -1,6 +1,6 @@
 import apiClient from "./apiClient";
 
-const CONTACT_ENDPOINT = "/contact";
+const CONTACT_ENDPOINT = "/api/contact";
 
 export const sendContactMessage = async (contactData) => {
   const response = await apiClient.post(CONTACT_ENDPOINT, contactData);

@@ -8,6 +8,8 @@ import Books from "./pages/Books.jsx"
 import About from "./pages/About.jsx"
 import Authors from "./pages/Authors.jsx"
 import Contact from "./pages/Contact.jsx"
+import SupportHelpdesk from "./pages/SupportHelpdesk.jsx"
+import PrivacyTerms from "./pages/PrivacyTerms.jsx"
 import Login from "./pages/Login.jsx"
 import Signup from "./pages/SignUp.jsx"
 import NotFound from "./pages/NotFound.jsx"
@@ -29,6 +31,8 @@ const AppRoutes = () => {
         <Route path="about" element={<About />} />
         <Route path="authors" element={<Authors />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="helpdesk" element={<SupportHelpdesk />} />
+        <Route path="privacy-terms" element={<PrivacyTerms />} />
 
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />

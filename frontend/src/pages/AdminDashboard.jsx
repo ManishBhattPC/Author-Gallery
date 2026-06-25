@@ -339,7 +339,9 @@ const AdminDashboard = () => {
                               </Link>
                             </p>
                           ) : (
-                            <p className="text-sm text-slate-500 italic">Target has already been deleted.</p>
+                            <p className="text-sm font-semibold text-slate-800">
+                              General Support & Helpdesk Request
+                            </p>
                           )}
                         </div>
 
