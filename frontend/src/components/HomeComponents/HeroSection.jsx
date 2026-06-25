@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getBooks } from "../../services/bookService.js";
 import { fetchAuthors } from "../../services/authorService.js";
+import { Sparkles } from "lucide-react";
 
 const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=1200&auto=format&fit=crop&q=80",
@@ -95,9 +96,11 @@ const HeroSection = () => {
           {/* Left Content */}
           <div className="space-y-6">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 border border-slate-300 bg-white/50 backdrop-blur-sm rounded-full px-4 py-2 text-xs font-semibold text-slate-600 shadow-sm">
-              <span className="text-amber-800">✦</span>
-              <span>Every great author starts with a single page</span>
+            <div className="inline-flex items-center gap-2.5 border border-amber-800/15 bg-amber-50/50 dark:bg-amber-950/20 backdrop-blur-sm rounded-full pl-1.5 pr-4 py-1.5 text-xs font-bold text-amber-900 dark:text-amber-300 shadow-sm transition duration-300 hover:scale-[1.02] cursor-default select-none">
+              <span className="flex items-center justify-center bg-gradient-to-tr from-amber-700 to-amber-900 text-[#FAF6F0] w-6 h-6 rounded-full shadow-sm">
+                <Sparkles size={11} className="animate-pulse text-amber-100" />
+              </span>
+              <span className="tracking-wide">Every great author starts with a single page</span>
             </div>
 
             {/* Heading */}
