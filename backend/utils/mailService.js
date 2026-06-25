@@ -6,29 +6,67 @@ if (typeof dns.setDefaultResultOrder === "function") {
   dns.setDefaultResultOrder("ipv4first");
 }
 
-const getTransporter = () => {
+const dnsPromises = dns.promises;
+
+// Cache the resolved IP and transporter to avoid repeating DNS lookup on every email
+let cachedTransporter = null;
+let cachedTransporterTime = 0;
+
+const getTransporter = async () => {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
 
-  if (SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS) {
-    console.log("SMTP configurations found. Initializing real mail transporter.");
-    return nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: Number(SMTP_PORT),
-      secure: Number(SMTP_PORT) === 465, // true for 465, false for other ports
-      auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS,
-      },
-      family: 4, // Force IPv4 to prevent connect ENETUNREACH errors on IPv6 networks
-    });
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
+    return null;
   }
 
-  // Developer fallback
-  return null;
+  // Check if we have a valid cached transporter (cache for 5 minutes)
+  const now = Date.now();
+  if (cachedTransporter && (now - cachedTransporterTime < 5 * 60 * 1000)) {
+    return cachedTransporter;
+  }
+
+  console.log("SMTP configurations found. Initializing real mail transporter.");
+  
+  let hostAddress = SMTP_HOST;
+  const isIP = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/.test(SMTP_HOST);
+
+  // If the host is a domain, resolve it to IPv4 explicitly to prevent IPv6 ENETUNREACH errors
+  if (!isIP) {
+    try {
+      const addresses = await dnsPromises.resolve4(SMTP_HOST);
+      if (addresses && addresses.length > 0) {
+        hostAddress = addresses[0];
+        console.log(`Resolved SMTP host ${SMTP_HOST} to IPv4: ${hostAddress}`);
+      }
+    } catch (dnsErr) {
+      console.error(`DNS IPv4 resolution failed for ${SMTP_HOST}, using hostname.`, dnsErr);
+    }
+  }
+
+  const transporterOptions = {
+    host: hostAddress,
+    port: Number(SMTP_PORT),
+    secure: Number(SMTP_PORT) === 465,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS,
+    },
+  };
+
+  // If we resolved a hostname to an IP, we MUST specify the servername for TLS validation
+  if (!isIP && hostAddress !== SMTP_HOST) {
+    transporterOptions.tls = {
+      servername: SMTP_HOST,
+    };
+  }
+
+  cachedTransporter = nodemailer.createTransport(transporterOptions);
+  cachedTransporterTime = now;
+  return cachedTransporter;
 };
 
 export const sendOTPEmail = async (email, otp) => {
-  const transporter = getTransporter();
+  const transporter = await getTransporter();
 
   const mailOptions = {
     from: `"Author Gallery" <noreply@authorgallery.com>`,
@@ -69,7 +107,7 @@ const logFallback = (email, otp) => {
 };
 
 export const sendContactEmail = async (contactData) => {
-  const transporter = getTransporter();
+  const transporter = await getTransporter();
   const adminEmail = process.env.CONTACT_EMAIL || process.env.SMTP_USER || "admin@authorgallery.com";
 
   const mailOptions = {
@@ -111,7 +149,7 @@ const logContactFallback = (contactData, adminEmail) => {
 };
 
 export const sendResetPasswordOTPEmail = async (email, otp) => {
-  const transporter = getTransporter();
+  const transporter = await getTransporter();
 
   const mailOptions = {
     from: `"Author Gallery" <noreply@authorgallery.com>`,
