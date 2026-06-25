@@ -245,6 +245,23 @@ const Navbar = () => {
                       <User size={16} className="text-slate-400" />
                       <span>Edit Profile</span>
                     </Link>
+                    <button
+                      type="button"
+                      onClick={toggleTheme}
+                      className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition cursor-pointer text-left font-normal"
+                    >
+                      {theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? (
+                        <>
+                          <Sun size={16} className="text-amber-500" />
+                          <span>Light Mode</span>
+                        </>
+                      ) : (
+                        <>
+                          <Moon size={16} className="text-slate-400" />
+                          <span>Dark Mode</span>
+                        </>
+                      )}
+                    </button>
                   </div>
 
                   <div className="border-t border-slate-100 pt-1 mt-1">
@@ -262,20 +279,6 @@ const Navbar = () => {
             </div>
           )}
         </div>
-
-        {/* Theme Toggle Button */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          aria-label="Toggle theme"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer mr-1.5"
-        >
-          {theme === "dark" ? (
-            <Sun size={18} className="text-amber-500" />
-          ) : (
-            <Moon size={18} className="text-slate-600" />
-          )}
-        </button>
 
         {/* Mobile Menu Toggle Button */}
         <button
@@ -398,6 +401,26 @@ const Navbar = () => {
                     <Settings size={18} className="text-slate-400" />
                     <span>Profile Settings</span>
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      toggleTheme();
+                      setMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer text-left"
+                  >
+                    {theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? (
+                      <>
+                        <Sun size={18} className="text-amber-500" />
+                        <span>Light Mode</span>
+                      </>
+                    ) : (
+                      <>
+                        <Moon size={18} className="text-slate-600" />
+                        <span>Dark Mode</span>
+                      </>
+                    )}
+                  </button>
                   <button
                     type="button"
                     onClick={handleLogout}
