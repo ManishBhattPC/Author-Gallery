@@ -89,7 +89,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     /* Dark Theme Slate colors (mainly page backgrounds and text) */
     --slate-50: #0f0d0c;      /* Deep dark background */
     --slate-100: #1a1614;     /* Slightly lighter dark background */
@@ -127,20 +127,67 @@
     --card-bg: #171412;
   }
 
-  /* Force background elements with bg-white to use the dark card background */
-  .bg-white {
+  :root:not(.light) .bg-white {
     background-color: var(--card-bg) !important;
   }
 
-  /* Make focused elements that turn white on focus stay dark in dark mode */
-  .focus\:bg-white:focus {
+  :root:not(.light) .focus\:bg-white:focus {
     background-color: var(--slate-100) !important;
   }
 
-  /* SVG / Icon border adjustment for visibility */
-  .border-slate-200\/50, .border-slate-200\/60 {
+  :root:not(.light) .border-slate-200\/50, :root:not(.light) .border-slate-200\/60 {
     border-color: rgba(229, 219, 206, 0.15) !important;
   }
+}
+
+.dark {
+  /* Dark Theme Slate colors (mainly page backgrounds and text) */
+  --slate-50: #0f0d0c;      /* Deep dark background */
+  --slate-100: #1a1614;     /* Slightly lighter dark background */
+  --slate-200: #25201d;     /* Borders / Dividers */
+  --slate-300: #322b27;
+  --slate-400: #4a403a;
+  --slate-500: #87776c;
+  --slate-600: #bcaea5;     /* Readable secondary text in dark mode */
+  --slate-700: #d6cbc2;
+  --slate-800: #ede6df;
+  --slate-900: #FAF6F0;     /* Cream white text for primary headings */
+
+  /* Amber (Accent copper/gold) colors adjusted for dark theme contrast */
+  --amber-50: #1c1511;
+  --amber-100: #2e2019;
+  --amber-200: #4d3326;
+  --amber-300: #734c38;
+  --amber-400: #9e674b;
+  --amber-500: #cc845e;
+  --amber-600: #e59c73;
+  --amber-700: #f0b592;     /* Bright copper for links / emphasis */
+  --amber-800: #f7ceb5;     /* Very bright copper */
+  --amber-900: #fde8db;
+  --amber-950: #ffffff;
+
+  /* Indigo overrides (used as accent color in some templates) */
+  --indigo-50: #1c1511;
+  --indigo-100: #2e2019;
+  --indigo-200: #4d3326;
+  --indigo-600: #f0b592;
+  --indigo-700: #f7ceb5;
+  --indigo-800: #fde8db;
+
+  /* Card background override for dark mode */
+  --card-bg: #171412;
+}
+
+.dark .bg-white {
+  background-color: var(--card-bg) !important;
+}
+
+.dark .focus\:bg-white:focus {
+  background-color: var(--slate-100) !important;
+}
+
+.dark .border-slate-200\/50, .dark .border-slate-200\/60 {
+  border-color: rgba(229, 219, 206, 0.15) !important;
 }
 
 * {

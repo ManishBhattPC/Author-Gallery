@@ -15,7 +15,9 @@ import {
   Users, 
   Info,
   Settings,
-  PenTool
+  PenTool,
+  Sun,
+  Moon
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -32,6 +34,45 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "system";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    
+    const applyTheme = (current) => {
+      if (current === "dark" || (current === "system" && systemPrefersDark)) {
+        root.classList.add("dark");
+        root.classList.remove("light");
+      } else {
+        root.classList.add("light");
+        root.classList.remove("dark");
+      }
+    };
+
+    applyTheme(theme);
+    
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = () => applyTheme("system");
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const currentResolved = prev === "system" 
+        ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        : prev;
+      const nextTheme = currentResolved === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", nextTheme);
+      return nextTheme;
+    });
+  };
 
   // Sync profile details on login/mount
   useEffect(() => {
@@ -208,6 +249,20 @@ const Navbar = () => {
             </div>
           )}
         </div>
+
+        {/* Theme Toggle Button */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+          className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 cursor-pointer mr-1.5"
+        >
+          {theme === "dark" ? (
+            <Sun size={18} className="text-amber-500" />
+          ) : (
+            <Moon size={18} className="text-slate-600" />
+          )}
+        </button>
 
         {/* Mobile Menu Toggle Button */}
         <button
