@@ -172,7 +172,10 @@ const AuthorNetwork = () => {
                         key={follower._id}
                         className="p-5 bg-white border border-slate-200 rounded-3xl flex items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-900 dark:border-slate-800"
                       >
-                        <div className="flex items-center gap-3.5 min-w-0">
+                        <Link
+                          to={`/authors/${follower._id}`}
+                          className="flex items-center gap-3.5 min-w-0 hover:opacity-85 transition-opacity group"
+                        >
                           <img
                             src={
                               follower.profileImage && follower.profileImage !== "/default-avatar.png"
@@ -182,10 +185,10 @@ const AuthorNetwork = () => {
                                   )}&background=8C4E35&color=FAF6F0&bold=true&size=128`
                             }
                             alt={follower.name}
-                            className="h-12 w-12 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800"
+                            className="h-12 w-12 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800 group-hover:scale-105 transition-transform"
                           />
                           <div className="text-left min-w-0">
-                            <h3 className="text-sm font-bold text-slate-900 truncate">
+                            <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition-colors truncate">
                               {follower.name}
                             </h3>
                             <p className="text-xs text-slate-550 truncate">{follower.email}</p>
@@ -195,7 +198,7 @@ const AuthorNetwork = () => {
                               </p>
                             )}
                           </div>
-                        </div>
+                        </Link>
 
                         <button
                           type="button"
@@ -242,7 +245,10 @@ const AuthorNetwork = () => {
                       key={followed._id}
                       className="p-5 bg-white border border-slate-200 rounded-3xl flex items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow dark:bg-slate-900 dark:border-slate-800"
                     >
-                      <div className="flex items-center gap-3.5 min-w-0">
+                      <Link
+                        to={`/authors/${followed._id}`}
+                        className="flex items-center gap-3.5 min-w-0 hover:opacity-85 transition-opacity group"
+                      >
                         <img
                           src={
                             followed.profileImage && followed.profileImage !== "/default-avatar.png"
@@ -252,10 +258,10 @@ const AuthorNetwork = () => {
                                 )}&background=8C4E35&color=FAF6F0&bold=true&size=128`
                           }
                           alt={followed.name}
-                          className="h-12 w-12 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800"
+                          className="h-12 w-12 rounded-full object-cover ring-2 ring-slate-100 dark:ring-slate-800 group-hover:scale-105 transition-transform"
                         />
                         <div className="text-left min-w-0">
-                          <h3 className="text-sm font-bold text-slate-900 truncate">
+                          <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition-colors truncate">
                             {followed.name}
                           </h3>
                           <p className="text-xs text-slate-550 truncate">{followed.email}</p>
@@ -265,7 +271,7 @@ const AuthorNetwork = () => {
                             </p>
                           )}
                         </div>
-                      </div>
+                      </Link>
 
                       <button
                         type="button"
