@@ -15,6 +15,7 @@ import Signup from "./pages/SignUp.jsx"
 import NotFound from "./pages/NotFound.jsx"
 import AuthorDashboard from "./pages/AuthorDashboard.jsx"
 import AuthorProfile from "./pages/AuthorProfile.jsx"
+import WriteBook from "./pages/WriteBook.jsx"
 import AuthorDetails from "./pages/AuthorDetails.jsx"
 import BookDetails from "./components/BookComponents/BookDetails.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx"
@@ -51,6 +52,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <AuthorProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="dashboard/write"
+          element={
+            <ProtectedRoute>
+              <WriteBook />
             </ProtectedRoute>
           }
         />

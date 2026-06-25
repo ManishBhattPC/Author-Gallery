@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import DashboardHeader from "../components/DashboardComponents/DashboardHeader";
-import CreateWork from "../components/DashboardComponents/CreateWork";
 import QuickUpload from "../components/DashboardComponents/QuickUpload";
 import AuthorStats from "../components/DashboardComponents/AuthorStats";
 import MyCollection from "../components/DashboardComponents/MyCollection";
@@ -13,8 +13,6 @@ const Dashboard = () => {
     recentBooks: [],
     books: [],
   });
-  
-  const [publishMode, setPublishMode] = useState("write"); // write, upload
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -84,39 +82,28 @@ const Dashboard = () => {
           {/* Left Section (3/4 width) */}
           <div className="xl:col-span-3 space-y-6">
             
-            {/* Tabs for publishing mode */}
-            <div className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm text-left">
-              <div className="flex gap-2 border-b border-slate-100 pb-3 mb-6">
-                <button
-                  type="button"
-                  onClick={() => setPublishMode("write")}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                    publishMode === "write"
-                      ? "bg-amber-800 text-[#FAF6F0] shadow-md shadow-amber-700/10"
-                      : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-                  }`}
-                >
-                  ✍️ Write a Book (Notepad)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPublishMode("upload")}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                    publishMode === "upload"
-                      ? "bg-amber-800 text-[#FAF6F0] shadow-md shadow-amber-700/10"
-                      : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-                  }`}
-                >
-                  📁 Upload eBook File (PDF)
-                </button>
+            {/* Banner card prompting to write a book using template covers */}
+            <div className="bg-gradient-to-r from-amber-800 to-amber-955 rounded-3xl p-6 sm:p-8 text-[#FAF6F0] flex flex-col md:flex-row justify-between items-center gap-6 shadow-md border border-amber-900/30 text-left">
+              <div className="space-y-2 text-center md:text-left">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-700/40 border border-amber-600/30 rounded-full text-xs font-bold tracking-wide">
+                  ✨ NEW FEATURE
+                </span>
+                <h2 className="text-xl sm:text-2xl font-serif font-bold">Write Your Masterpiece Online</h2>
+                <p className="text-amber-100/70 text-xs sm:text-sm max-w-xl">
+                  Use our premium Book Notepad to draft your thoughts, select stunning Canvas cover templates with official Author Gallery attributions, and publish instantly as a formatted PDF!
+                </p>
               </div>
-
-              {publishMode === "write" ? (
-                <CreateWork onPublished={handleBookPublished} />
-              ) : (
-                <QuickUpload onPublished={handleBookPublished} />
-              )}
+              <Link
+                to="/dashboard/write"
+                className="px-6 py-3 bg-[#FAF6F0] text-amber-900 hover:bg-white rounded-2xl font-bold text-xs sm:text-sm shadow-md transition-all active:scale-[0.98] shrink-0 flex items-center gap-2 group cursor-pointer"
+              >
+                ✍️ Start Writing Now
+                <span className="group-hover:translate-x-1 transition-transform">→</span>
+              </Link>
             </div>
+
+            {/* Quick Upload (PDF File) */}
+            <QuickUpload onPublished={handleBookPublished} />
 
             {/* My Collection */}
             <MyCollection
@@ -148,110 +135,3 @@ export default Dashboard;
 
 
 
-
-
-// import { useEffect, useState } from "react";
-// import DashboardHeader from "../components/DashboardComponents/DashboardHeader";
-// import CreateWork from "../components/DashboardComponents/CreateWork"; // This now includes QuickUpload
-// import AuthorStats from "../components/DashboardComponents/AuthorStats";
-// import MyCollection from "../components/DashboardComponents/MyCollection";
-// import RecentActivity from "../components/DashboardComponents/RecentActivity";
-// import { getAuthorBooks, getAuthorDashboard } from "../services/dashboardService.js";
-
-// const Dashboard = () => {
-//   const [dashboard, setDashboard] = useState({
-//     stats: null,
-//     recentBooks: [],
-//     books: [],
-//   });
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState("");
-
-//   useEffect(() => {
-//     let isMounted = true;
-
-//     const loadDashboard = async () => {
-//       try {
-//         setLoading(true);
-//         setError("");
-
-//         // Fetch dashboard stats and author books
-//         const [dashboardData, books] = await Promise.all([
-//           getAuthorDashboard(),
-//           getAuthorBooks(),
-//         ]);
-
-//         if (!isMounted) {
-//           return;
-//         }
-
-//         setDashboard({
-//           stats: dashboardData.stats || null,
-//           recentBooks: dashboardData.recentBooks || [],
-//           books: books.books || [], // Get books array from response
-//         });
-//       } catch (err) {
-//         if (isMounted) {
-//           setError(err.message || "Unable to load dashboard data.");
-//         }
-//       } finally {
-//         if (isMounted) {
-//           setLoading(false);
-//         }
-//       }
-//     };
-
-//     loadDashboard();
-
-//     return () => {
-//       isMounted = false;
-//     };
-//   }, []);
-
-//   return (
-//     <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6 lg:px-8">
-//       <div className="mx-auto w-full max-w-7xl space-y-8">
-        
-//         {/* Error Message */}
-//         {error && (
-//           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-//             {error}
-//           </div>
-//         )}
-
-//         {/* Dashboard Header */}
-//         <DashboardHeader stats={dashboard.stats} loading={loading} />
-
-//         {/* Main Grid */}
-//         <div className="grid gap-6 xl:grid-cols-4">
-          
-//           {/* Left: Create Work + My Collection */}
-//           <div className="xl:col-span-3 space-y-6">
-            
-//             {/* CreateWork component (includes QuickUpload merged) */}
-//             <CreateWork />
-
-//             {/* My Collection (author's books) */}
-//             <MyCollection
-//               books={dashboard.books}
-//               loading={loading}
-//               error={error}
-//             />
-//           </div>
-
-//           {/* Right Sidebar: Stats + Activity */}
-//           <div className="space-y-6">
-            
-//             {/* Author Statistics Cards */}
-//             <AuthorStats stats={dashboard.stats} loading={loading} />
-            
-//             {/* Recent Activity */}
-//             <RecentActivity books={dashboard.recentBooks} loading={loading} />
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Dashboard;

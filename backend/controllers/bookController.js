@@ -83,6 +83,24 @@ export const getBookById = async (req, res) => {
 
 
 
+const cleanTextForPDF = (text) => {
+  if (!text) return "";
+  return text
+    .replace(/[\u2018\u2019]/g, "'") // smart single quotes
+    .replace(/[\u201C\u201D]/g, '"') // smart double quotes
+    .replace(/[\u2013\u2014]/g, "-") // en/em dashes
+    .replace(/\u2026/g, "...")       // ellipsis
+    .replace(/[^\x00-\x7F]/g, (char) => {
+      // Replace common characters, or map to space
+      const mappings = {
+        'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+        'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+        'ñ': 'n', 'Ñ': 'N', 'ü': 'u', 'Ü': 'U'
+      };
+      return mappings[char] || " ";
+    });
+};
+
 export const createBook = async (req, res) => {
   try {
     console.log("BODY:", req.body); // Debug
@@ -93,8 +111,9 @@ export const createBook = async (req, res) => {
     let coverBuffer = req.files?.coverImage?.[0]?.buffer;
 
     // Support base64 cover image if sent as string from client-side canvas
-    if (!coverBuffer && req.body.coverImage && req.body.coverImage.startsWith("data:image")) {
-      const base64Data = req.body.coverImage.split(",")[1];
+    const base64Str = req.body.coverImageBase64 || req.body.coverImage;
+    if (!coverBuffer && base64Str && base64Str.startsWith("data:image")) {
+      const base64Data = base64Str.split(",")[1];
       coverBuffer = Buffer.from(base64Data, "base64");
     }
 
@@ -112,24 +131,61 @@ export const createBook = async (req, res) => {
       pdfBuffer = pdfFile.buffer;
     } else if (content && content.trim()) {
       // Flow 2: Create Work - Write directly, generate PDF buffer from text
+      const cleanTitle = cleanTextForPDF(title || "Untitled Masterpiece");
+      const cleanContent = cleanTextForPDF(content);
+      const cleanAuthor = cleanTextForPDF(req.user.name || "Unknown Author");
+
       pdfBuffer = await new Promise((resolve, reject) => {
-        const doc = new PDFDocument({ margin: 50 });
+        const doc = new PDFDocument({ 
+          margin: 50,
+          bufferPages: true 
+        });
         const chunks = [];
         doc.on("data", (chunk) => chunks.push(chunk));
         doc.on("end", () => resolve(Buffer.concat(chunks)));
         doc.on("error", reject);
 
-        // PDF Layout & Typography
-        doc.font("Helvetica-Bold").fontSize(26).text(title, { align: "center" });
-        doc.moveDown(0.5);
-        doc.font("Helvetica-Oblique").fontSize(14).text(`by ${req.user.name}`, { align: "center" });
-        doc.moveDown(2.5);
-
-        // Body content
-        doc.font("Helvetica").fontSize(11).text(content, {
+        // --- TITLE PAGE ---
+        doc.moveDown(4);
+        doc.font("Helvetica-Bold").fontSize(28).fillColor("#3A3026").text(cleanTitle, { align: "center" });
+        doc.moveDown(1);
+        doc.font("Helvetica-Oblique").fontSize(14).fillColor("#5C4E40").text(`by ${cleanAuthor}`, { align: "center" });
+        
+        // Brand attribution details
+        doc.moveDown(7);
+        doc.font("Helvetica-Bold").fontSize(11).fillColor("#8C4E35").text("Published via Author Gallery", { align: "center" });
+        doc.font("Helvetica").fontSize(9).fillColor("#7E7262").text("A premium platform for independent authors and readers.", { align: "center" });
+        doc.moveDown(0.8);
+        doc.font("Helvetica-Oblique").fontSize(8).fillColor("#A09485").text(`Published on ${new Date().toLocaleDateString()}`, { align: "center" });
+        
+        // --- CONTENT PAGE ---
+        doc.addPage();
+        
+        // Content body
+        doc.font("Helvetica").fontSize(11).fillColor("#1A1A1A").text(cleanContent, {
           align: "justify",
-          lineGap: 4
+          lineGap: 5
         });
+
+        // Add headers, footers and lines to content pages (i.e. pages after page 1)
+        const range = doc.bufferedPageRange();
+        for (let i = range.start + 1; i < range.start + range.count; i++) {
+          doc.switchToPage(i);
+          
+          // Header title
+          doc.fontSize(8).fillColor("#A09485")
+             .text(cleanTitle, 50, 20, { align: "left", width: doc.page.width - 100 });
+          doc.moveTo(50, 32).lineTo(doc.page.width - 50, 32).strokeColor("#EADCC9").lineWidth(0.5).stroke();
+          
+          // Footer line & attribution
+          doc.moveTo(50, doc.page.height - 45).lineTo(doc.page.width - 50, doc.page.height - 45).strokeColor("#EADCC9").lineWidth(0.5).stroke();
+          doc.fontSize(8).fillColor("#A09485")
+             .text("Published via Author Gallery | www.authorgallery.com", 50, doc.page.height - 35, { align: "center", width: doc.page.width - 100 });
+          
+          // Page Number
+          doc.text(`Page ${i}`, doc.page.width - 80, doc.page.height - 35, { align: "right" });
+        }
+
         doc.end();
       });
     } else {

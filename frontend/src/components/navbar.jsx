@@ -14,7 +14,8 @@ import {
   BookOpen, 
   Users, 
   Info,
-  Settings
+  Settings,
+  PenTool
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -175,6 +176,14 @@ const Navbar = () => {
                       </Link>
                     )}
                     <Link
+                      to="/dashboard/write"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
+                    >
+                      <PenTool size={16} className="text-slate-400" />
+                      <span>Write a Book</span>
+                    </Link>
+                    <Link
                       to="/dashboard/author-profile"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
@@ -305,6 +314,14 @@ const Navbar = () => {
                       <span>Author Dashboard</span>
                     </Link>
                   )}
+                  <Link
+                    to="/dashboard/write"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition"
+                  >
+                    <PenTool size={18} className="text-slate-400" />
+                    <span>Write a Book</span>
+                  </Link>
                   <Link
                     to="/dashboard/author-profile"
                     onClick={() => setMenuOpen(false)}
