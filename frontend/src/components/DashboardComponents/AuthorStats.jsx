@@ -12,35 +12,35 @@ const AuthorStats = ({ stats, loading = false }) => {
       label: "Followers",
       value: statValue(stats?.followers),
       color: "from-blue-500 to-indigo-500",
-      bg: "bg-blue-50 text-blue-600",
+      bg: "bg-[#FAF1E6] text-amber-850",
       icon: Users,
     },
     {
       label: "Published",
       value: statValue(stats?.published),
       color: "from-emerald-500 to-teal-500",
-      bg: "bg-emerald-50 text-emerald-600",
+      bg: "bg-[#E8F3EE] text-emerald-850",
       icon: BookOpen,
     },
     {
       label: "Genres",
       value: statValue(stats?.totalGenres),
       color: "from-amber-500 to-orange-500",
-      bg: "bg-amber-50 text-amber-600",
+      bg: "bg-[#FCF4E7] text-amber-900",
       icon: Tag,
     },
     {
       label: "Total Value",
       value: totalValue,
       color: "from-purple-500 to-pink-500",
-      bg: "bg-purple-50 text-purple-600",
+      bg: "bg-[#FAF1E6] text-[#4E3E2F]",
       icon: IndianRupee,
     },
   ];
 
   return (
-    <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm">
-      <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+    <div className="bg-[#FDFCF7] border border-[#EADCC9] p-6 rounded-2xl shadow-sm text-left">
+      <h2 className="text-lg font-bold font-serif text-[#2C1E11] mb-4 flex items-center gap-2">
         Author Metrics
       </h2>
 
@@ -48,21 +48,21 @@ const AuthorStats = ({ stats, loading = false }) => {
         {cards.map((card, idx) => {
           const IconComponent = card.icon;
           return (
-            <div key={idx} className="p-4 rounded-xl border border-slate-100 hover:border-slate-200 transition-colors bg-slate-50/50">
+            <div key={idx} className="p-4 rounded-xl border border-[#EADCC9]/55 hover:border-[#EADCC9] transition-colors bg-[#FAF6F0] text-left">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-medium text-slate-500">{card.label}</span>
+                <span className="text-xs font-bold text-[#8C7B6C]">{card.label}</span>
                 <div className={`p-2 rounded-lg ${card.bg}`}>
                   <IconComponent className="w-4 h-4" />
                 </div>
               </div>
-              <h3 className="text-lg font-bold text-slate-800 truncate">{card.value}</h3>
+              <h3 className="text-lg font-bold text-[#2C1E11] truncate">{card.value}</h3>
             </div>
           );
         })}
       </div>
 
       {stats?.lastPublished && (
-        <p className="text-xs text-slate-400 mt-4 text-center border-t border-slate-100 pt-3">
+        <p className="text-xs text-[#8C7B6C] mt-4 text-center border-t border-[#EADCC9]/50 pt-3 font-semibold">
           Last published on {new Date(stats.lastPublished).toLocaleDateString()}
         </p>
       )}

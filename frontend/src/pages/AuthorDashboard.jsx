@@ -63,7 +63,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF6F0] px-4 py-10 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#ECE2D0] px-4 py-10 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-7xl space-y-8">
         
         {/* Error Message */}
