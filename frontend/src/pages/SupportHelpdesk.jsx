@@ -65,14 +65,14 @@ const SupportHelpdesk = () => {
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <Link
               to="/login"
-              className="flex-1 flex items-center justify-center gap-2 rounded-full border border-slate-350 bg-white py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition"
+              className="flex-1 flex items-center justify-center gap-2 rounded-full border border-slate-350 bg-white py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:shadow-sm active:scale-95 transition-all duration-200"
             >
               <LogIn className="w-4.5 h-4.5 text-slate-500" />
               Log In
             </Link>
             <Link
               to="/signup"
-              className="flex-1 flex items-center justify-center gap-2 rounded-full bg-amber-800 py-3 text-sm font-semibold text-white hover:bg-amber-900 transition shadow-sm"
+              className="flex-1 flex items-center justify-center gap-2 rounded-full bg-amber-800 py-3 text-sm font-semibold text-white hover:bg-amber-900 hover:shadow-md active:scale-95 transition-all duration-200 shadow-sm"
             >
               <UserPlus className="w-4.5 h-4.5" />
               Sign Up
@@ -185,7 +185,7 @@ const SupportHelpdesk = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto px-6 py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl font-bold text-xs transition-all focus:ring-4 focus:ring-amber-100 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
+                className="w-full sm:w-auto px-6 py-2.5 bg-amber-700 hover:bg-amber-800 hover:shadow-md active:scale-95 text-white rounded-xl font-bold text-xs transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <Send className="w-4 h-4" />
                 {loading ? "Submitting Ticket…" : "Submit Support Ticket"}

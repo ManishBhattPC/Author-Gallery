@@ -173,9 +173,10 @@ const Signup = () => {
           client_id: clientId,
           callback: handleGoogleCallback,
         });
+        const btnWidth = Math.min(380, Math.max(200, window.innerWidth - 80));
         window.google.accounts.id.renderButton(
           document.getElementById("google-signup-btn"),
-          { theme: "outline", size: "large", width: 380, shape: "pill" }
+          { theme: "outline", size: "large", width: btnWidth, shape: "pill" }
         );
       }
     };
@@ -188,7 +189,7 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-lg text-left">
+      <div className="mx-auto w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-lg text-left">
         <h2 className="text-3xl font-semibold text-slate-900">
           {step === "details"
             ? "Create your author account"
@@ -243,7 +244,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-amber-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+              className="w-full rounded-full bg-amber-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-amber-800 hover:shadow-md active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
             >
               {loading ? "Creating Account..." : "Sign Up"}
             </button>
@@ -263,7 +264,7 @@ const Signup = () => {
               <button
                 type="button"
                 onClick={handleSimulatedGoogleLogin}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 transition font-semibold text-slate-700 text-xs cursor-pointer bg-white"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 hover:shadow-sm active:scale-[0.98] transition-all duration-200 font-semibold text-slate-700 text-xs cursor-pointer bg-white"
               >
                 <FcGoogle size={16} />
                 Simulate Google Sign-up (Dev Mode)
@@ -316,7 +317,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-amber-700 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-amber-800 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
+              className="w-full rounded-full bg-amber-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-amber-800 hover:shadow-md active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
             >
               {loading ? "Creating Account..." : "Create Account & Log In"}
             </button>
