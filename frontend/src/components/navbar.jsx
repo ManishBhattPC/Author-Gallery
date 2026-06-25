@@ -63,6 +63,18 @@ const Navbar = () => {
     }
   }, [theme]);
 
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setTheme(localStorage.getItem("theme") || "system");
+    };
+    window.addEventListener("theme-change", handleThemeChange);
+    window.addEventListener("storage", handleThemeChange);
+    return () => {
+      window.removeEventListener("theme-change", handleThemeChange);
+      window.removeEventListener("storage", handleThemeChange);
+    };
+  }, []);
+
   const toggleTheme = () => {
     setTheme((prev) => {
       const currentResolved = prev === "system" 
@@ -70,6 +82,7 @@ const Navbar = () => {
         : prev;
       const nextTheme = currentResolved === "dark" ? "light" : "dark";
       localStorage.setItem("theme", nextTheme);
+      window.dispatchEvent(new Event("theme-change"));
       return nextTheme;
     });
   };

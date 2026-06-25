@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { FaUser, FaInstagram, FaTwitter, FaGlobe, FaSave, FaUserCheck } from "react-icons/fa";
+import { Sun, Moon } from "lucide-react";
 
 const genreOptions = [
   "Fiction",
@@ -32,6 +33,28 @@ const AuthorProfileDetails = ({ initialValues = {}, onSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "system";
+  });
+
+  useEffect(() => {
+    const handleThemeChange = () => {
+      setTheme(localStorage.getItem("theme") || "system");
+    };
+    window.addEventListener("theme-change", handleThemeChange);
+    window.addEventListener("storage", handleThemeChange);
+    return () => {
+      window.removeEventListener("theme-change", handleThemeChange);
+      window.removeEventListener("storage", handleThemeChange);
+    };
+  }, []);
+
+  const handleThemeChange = (newTheme) => {
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    window.dispatchEvent(new Event("theme-change"));
+  };
 
   useEffect(() => {
     setForm((prev) => ({
@@ -347,6 +370,48 @@ const AuthorProfileDetails = ({ initialValues = {}, onSubmit }) => {
                 className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-800 outline-none text-xs transition-all"
                 placeholder="Personal website"
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Theme Settings */}
+        <div className="border-t border-slate-100 pt-6">
+          <label className="block text-xs font-semibold text-slate-600 mb-3">Theme Settings</label>
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-slate-50 border border-slate-200/40 p-4 rounded-xl">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Interface Theme</p>
+              <p className="text-[11px] text-slate-500 mt-0.5">Customize how Author Gallery looks on your device.</p>
+            </div>
+            <div className="flex bg-slate-200/60 p-1 rounded-xl w-full sm:w-auto shadow-inner">
+              <button
+                type="button"
+                onClick={() => handleThemeChange("light")}
+                className={`flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer select-none ${
+                  theme === "light" ? "bg-white text-slate-800 shadow-sm" : "text-slate-600 hover:text-slate-800"
+                }`}
+              >
+                <Sun size={14} />
+                Light
+              </button>
+              <button
+                type="button"
+                onClick={() => handleThemeChange("dark")}
+                className={`flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer select-none ${
+                  theme === "dark" ? "bg-white text-slate-800 shadow-sm" : "text-slate-600 hover:text-slate-800"
+                }`}
+              >
+                <Moon size={14} />
+                Dark
+              </button>
+              <button
+                type="button"
+                onClick={() => handleThemeChange("system")}
+                className={`flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition cursor-pointer select-none ${
+                  theme === "system" ? "bg-white text-slate-800 shadow-sm" : "text-slate-600 hover:text-slate-800"
+                }`}
+              >
+                System
+              </button>
             </div>
           </div>
         </div>
