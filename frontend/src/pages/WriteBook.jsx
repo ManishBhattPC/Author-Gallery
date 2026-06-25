@@ -426,7 +426,7 @@ const WriteBook = () => {
     <div className="min-h-screen bg-slate-300 pb-12 transition-all">
       
       {/* Header Panel */}
-      <div className="bg-slate-50 border-b border-slate-300 relative sm:sticky sm:top-[60px] z-20 shadow-sm py-4 px-4 sm:px-8">
+      <div className="bg-slate-50 border-b border-slate-300 relative z-10 shadow-sm py-4 px-4 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <div className="flex items-center gap-3">
             <Link 
@@ -467,7 +467,7 @@ const WriteBook = () => {
       </div>
 
       {/* Tabs Selector on Mobile */}
-      <div className="lg:hidden bg-slate-50 border-b border-slate-300 px-4 py-2 relative z-20 flex justify-between gap-1 shadow-sm">
+      <div className="md:hidden bg-slate-50 border-b border-slate-300 px-4 py-2 relative z-20 flex justify-between gap-1 shadow-sm">
         <button
           onClick={() => setMobileTab("editor")}
           className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
@@ -497,10 +497,10 @@ const WriteBook = () => {
       {/* Main Panel Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-6">
         {activeDraft ? (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
             
-            {/* Left Column (col-span-3 on desktop): Drafts List */}
-            <div className={`lg:col-span-3 space-y-6 ${mobileTab === "drafts" ? "block" : "hidden lg:block"}`}>
+            {/* Left Column (col-span-4 on tablet, col-span-3 on desktop): Drafts List */}
+            <div className={`md:col-span-4 lg:col-span-3 space-y-6 ${mobileTab === "drafts" ? "block" : "hidden md:block"}`}>
               {/* Drafts List Card */}
               <div className="bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left">
                 <div className="flex justify-between items-center border-b border-slate-300 pb-2 mb-3">
@@ -552,8 +552,8 @@ const WriteBook = () => {
               </div>
             </div>
 
-            {/* Middle Column (col-span-6 on desktop): Notepad Editor */}
-            <div className={`lg:col-span-6 space-y-4 flex flex-col ${mobileTab === "editor" ? "block" : "hidden lg:block"}`}>
+            {/* Middle Column (col-span-8 on tablet, col-span-6 on desktop): Notepad Editor */}
+            <div className={`md:col-span-8 lg:col-span-6 space-y-4 flex flex-col ${mobileTab === "editor" ? "block" : "hidden md:block"}`}>
               <div className="bg-slate-50 border border-slate-300 rounded-2xl p-5 sm:p-6 shadow-sm text-left flex flex-col space-y-4">
                 
                 {/* Title */}
@@ -588,8 +588,8 @@ const WriteBook = () => {
               </div>
             </div>
 
-            {/* Right Column (col-span-3 on desktop): Cover Design & Publishing Details */}
-            <div className={`lg:col-span-3 space-y-6 ${mobileTab === "templates" ? "block" : "hidden lg:block"}`}>
+            {/* Right Column (col-span-12 on tablet, col-span-3 on desktop): Cover Design & Publishing Details */}
+            <div className={`md:col-span-12 lg:col-span-3 space-y-6 ${mobileTab === "templates" ? "block" : "hidden md:block"}`}>
               
               {/* Cover Selection Canvas */}
               <div className="bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left flex flex-col items-center">
