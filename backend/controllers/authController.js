@@ -221,7 +221,10 @@ export const resendOTP = async (req, res) => {
     record.createdAt = new Date(); // Refresh expiration window
     await record.save();
 
-    await sendOTPEmail(record.email, newOtp);
+    // Send OTP email in the background (non-blocking)
+    sendOTPEmail(record.email, newOtp).catch((err) => {
+      console.error("Failed to send OTP email in background:", err);
+    });
 
     res.status(200).json({
       message: "New verification code sent successfully.",

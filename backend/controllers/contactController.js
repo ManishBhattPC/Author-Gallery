@@ -25,8 +25,10 @@ export const submitContactMessage = async (req, res) => {
     // 1. Save message to database
     const savedMessage = await ContactMessage.create(contactData);
 
-    // 2. Send email to admin/owner
-    await sendContactEmail(contactData);
+    // 2. Send email to admin/owner in the background (non-blocking to prevent timeout errors if SMTP is slow/invalid)
+    sendContactEmail(contactData).catch((err) => {
+      console.error("Failed to send contact email in background:", err);
+    });
 
     res.status(201).json({
       message: "Your message has been sent successfully. We will contact you soon!",
