@@ -12,7 +12,8 @@ import adminRoutes from "./routes/adminRoutes.js"
 import reviewRoutes from "./routes/reviewRoutes.js"
 import reportRoutes from "./routes/reportRoutes.js"
 import contactRoutes from "./routes/contactRoutes.js"
-
+import helmet from "helmet"
+import rateLimit from "express-rate-limit"
 
 dotenv.config()
 
@@ -20,7 +21,30 @@ connectDB()
 
 const app = express()
 
+// Enforce secure HTTP headers via helmet
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}))
 
+// Rate limiting configurations (Free & open-source in-memory shielding)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // max 30 auth requests per IP per 15 mins
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many authentication attempts, please try again after 15 minutes." }
+})
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200, // max 200 general requests per IP per 15 mins
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many requests, please try again after 15 minutes." }
+})
+
+app.use("/api/auth", authLimiter)
+app.use("/api", apiLimiter)
 
 const allowedOrigins = ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175"];
 if (process.env.FRONTEND_URL) {
