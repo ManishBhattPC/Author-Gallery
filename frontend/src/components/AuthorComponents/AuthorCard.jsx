@@ -10,7 +10,7 @@ const AuthorCard = ({ id, image, name, genre, works }) => {
         )}&background=8C4E35&color=FAF6F0&bold=true&size=256`;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition duration-300">
+    <div className="border border-slate-200/50 hover:border-amber-600/35 hover:-translate-y-1 bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300">
       <img
         src={avatarUrl}
         alt={name}
@@ -18,21 +18,21 @@ const AuthorCard = ({ id, image, name, genre, works }) => {
       />
 
       <div className="p-5">
-        <h3 className="text-xl font-semibold text-gray-900">{name}</h3>
+        <h3 className="text-xl font-serif font-bold text-slate-850 dark:text-slate-100">{name}</h3>
 
-        <p className="text-gray-500 mt-1">{genre}</p>
+        <p className="text-slate-500 dark:text-slate-400 mt-1.5 text-xs font-semibold uppercase tracking-wider">{genre}</p>
 
-        <p className="text-sm text-gray-600 mt-3">{works} Published Works</p>
+        <p className="text-sm text-slate-600 dark:text-slate-350 mt-3 font-medium">{works} Published Works</p>
 
         {id ? (
           <Link
             to={`/authors/${id}`}
-            className="mt-4 inline-block text-[#A05A3A] font-medium hover:text-amber-700"
+            className="mt-4 inline-block text-amber-700 dark:text-amber-500 font-bold hover:text-amber-900 dark:hover:text-amber-450 transition-colors text-sm"
           >
             View Profile →
           </Link>
         ) : (
-          <span className="mt-4 inline-block text-[#A05A3A] font-medium">
+          <span className="mt-4 inline-block text-amber-700 dark:text-amber-500 font-bold text-sm">
             View Profile →
           </span>
         )}

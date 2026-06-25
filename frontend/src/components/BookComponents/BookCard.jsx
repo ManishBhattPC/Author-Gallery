@@ -22,7 +22,7 @@ const BookCard = ({ book }) => {
     book?.genres?.[0] || "General";
 
   return (
-    <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden transition-all duration-300 flex flex-col">
+    <div className="group border border-slate-200/50 hover:border-amber-600/35 hover:-translate-y-1 bg-white rounded-2xl shadow-md hover:shadow-xl overflow-hidden transition-all duration-300 flex flex-col">
       
       {/* Cover */}
       <div className="relative aspect-[3/4] bg-slate-200 overflow-hidden">
@@ -55,7 +55,7 @@ const BookCard = ({ book }) => {
           {genre}
         </span>
 
-        <h2 className="font-bold text-lg line-clamp-2 mb-2">
+        <h2 className="font-serif font-bold text-base sm:text-lg text-slate-850 dark:text-slate-100 line-clamp-2 mb-2">
           {title}
         </h2>
 
@@ -70,14 +70,14 @@ const BookCard = ({ book }) => {
         </p>
 
         <div className="mb-4">
-          <span className="font-semibold text-green-700">
+          <span className="font-semibold text-green-700 dark:text-green-500">
             {price}
           </span>
         </div>
 
         <Link
           to={`/books/${book._id}`}
-          className="mt-auto block text-center bg-black text-white py-2 rounded-xl hover:bg-slate-800 transition"
+          className="mt-auto block text-center bg-amber-800 hover:bg-amber-900 text-white py-2 rounded-xl font-bold text-xs transition duration-200 shadow-sm"
         >
           View Details
         </Link>
