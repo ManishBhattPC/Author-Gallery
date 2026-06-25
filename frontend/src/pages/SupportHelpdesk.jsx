@@ -49,7 +49,7 @@ const SupportHelpdesk = () => {
   // If user is not logged in, show authentication prompt card
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#FAF6F0] px-4 py-16 sm:px-6 lg:px-8 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 px-4 py-16 sm:px-6 lg:px-8 flex items-center justify-center">
         <div className="mx-auto max-w-md w-full rounded-3xl bg-white border border-slate-200/60 p-8 shadow-xl text-center space-y-6">
           <div className="flex justify-center">
             <div className="p-4 bg-amber-50 rounded-3xl text-amber-800">
@@ -84,7 +84,7 @@ const SupportHelpdesk = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF6F0] px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-3xl rounded-3xl bg-white border border-slate-200/60 p-6 sm:p-10 shadow-xl text-left">
         
         {/* Header */}

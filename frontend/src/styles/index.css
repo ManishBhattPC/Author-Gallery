@@ -7,52 +7,140 @@
   --font-serif: "Playfair Display", serif;
   --font-sans: "Plus Jakarta Sans", sans-serif;
 
-  /* Theme Overrides for Warm Parchment Aesthetics */
-  --color-slate-50: #FAF6F0;
-  --color-slate-100: #F4EFEB;
-  --color-slate-200: #EFE9DF;
-  --color-slate-300: #E5DBCE;
-  --color-slate-400: #D0C2AE;
-  --color-slate-500: #8A7A65;
-  --color-slate-600: #6D5E4D;
-  --color-slate-700: #534537;
-  --color-slate-800: #3E3227;
-  --color-slate-900: #2B2118;
+  /* Theme Overrides mapped to dynamic CSS variables */
+  --color-slate-50: var(--slate-50);
+  --color-slate-100: var(--slate-100);
+  --color-slate-200: var(--slate-200);
+  --color-slate-300: var(--slate-300);
+  --color-slate-400: var(--slate-400);
+  --color-slate-500: var(--slate-500);
+  --color-slate-600: var(--slate-600);
+  --color-slate-700: var(--slate-700);
+  --color-slate-800: var(--slate-800);
+  --color-slate-900: var(--slate-900);
 
-  --color-gray-50: #FAF6F0;
-  --color-gray-100: #F4EFEB;
-  --color-gray-200: #EFE9DF;
-  --color-gray-300: #E5DBCE;
-  --color-gray-400: #D0C2AE;
-  --color-gray-500: #8A7A65;
-  --color-gray-600: #6D5E4D;
-  --color-gray-700: #534537;
-  --color-gray-800: #3E3227;
-  --color-gray-900: #2B2118;
+  --color-gray-50: var(--slate-50);
+  --color-gray-100: var(--slate-100);
+  --color-gray-200: var(--slate-200);
+  --color-gray-300: var(--slate-300);
+  --color-gray-400: var(--slate-400);
+  --color-gray-500: var(--slate-500);
+  --color-gray-600: var(--slate-600);
+  --color-gray-700: var(--slate-700);
+  --color-gray-800: var(--slate-800);
+  --color-gray-900: var(--slate-900);
 
-  --color-amber-50: #FDF8F3;
-  --color-amber-100: #FBF0E4;
-  --color-amber-200: #F7DFCA;
-  --color-amber-300: #F0C4A1;
-  --color-amber-400: #E5A170;
-  --color-amber-500: #D87F4A;
-  --color-amber-600: #C26335;
-  --color-amber-700: #A05A3A;
-  --color-amber-800: #8C4E35;
-  --color-amber-900: #5C3220;
-  --color-amber-950: #2C180E;
+  --color-amber-50: var(--amber-50);
+  --color-amber-100: var(--amber-100);
+  --color-amber-200: var(--amber-200);
+  --color-amber-300: var(--amber-300);
+  --color-amber-400: var(--amber-400);
+  --color-amber-500: var(--amber-500);
+  --color-amber-600: var(--amber-600);
+  --color-amber-700: var(--amber-700);
+  --color-amber-800: var(--amber-800);
+  --color-amber-900: var(--amber-900);
+  --color-amber-950: var(--amber-950);
 
-  --color-indigo-50: #F5EFEB;
-  --color-indigo-100: #EBE0D6;
-  --color-indigo-200: #D1BCAB;
-  --color-indigo-600: #A05A3A;
-  --color-indigo-700: #8C4E35;
-  --color-indigo-800: #5C3220;
+  --color-indigo-50: var(--indigo-50);
+  --color-indigo-100: var(--indigo-100);
+  --color-indigo-200: var(--indigo-200);
+  --color-indigo-600: var(--indigo-600);
+  --color-indigo-700: var(--indigo-700);
+  --color-indigo-800: var(--indigo-800);
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   font-family: var(--font-sans);
+
+  /* Light Theme Values (Warm Parchment Aesthetic) */
+  --slate-50: #FAF6F0;
+  --slate-100: #F4EFEB;
+  --slate-200: #EFE9DF;
+  --slate-300: #E5DBCE;
+  --slate-400: #D0C2AE;
+  --slate-500: #8A7A65;
+  --slate-600: #6D5E4D;
+  --slate-700: #534537;
+  --slate-800: #3E3227;
+  --slate-900: #2B2118;
+
+  --amber-50: #FDF8F3;
+  --amber-100: #FBF0E4;
+  --amber-200: #F7DFCA;
+  --amber-300: #F0C4A1;
+  --amber-400: #E5A170;
+  --amber-500: #D87F4A;
+  --amber-600: #C26335;
+  --amber-700: #A05A3A;
+  --amber-800: #8C4E35;
+  --amber-900: #5C3220;
+  --amber-950: #2C180E;
+
+  --indigo-50: #F5EFEB;
+  --indigo-100: #EBE0D6;
+  --indigo-200: #D1BCAB;
+  --indigo-600: #A05A3A;
+  --indigo-700: #8C4E35;
+  --indigo-800: #5C3220;
+
+  --card-bg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark Theme Slate colors (mainly page backgrounds and text) */
+    --slate-50: #0f0d0c;      /* Deep dark background */
+    --slate-100: #1a1614;     /* Slightly lighter dark background */
+    --slate-200: #25201d;     /* Borders / Dividers */
+    --slate-300: #322b27;
+    --slate-400: #4a403a;
+    --slate-500: #87776c;
+    --slate-600: #bcaea5;     /* Readable secondary text in dark mode */
+    --slate-700: #d6cbc2;
+    --slate-800: #ede6df;
+    --slate-900: #FAF6F0;     /* Cream white text for primary headings */
+
+    /* Amber (Accent copper/gold) colors adjusted for dark theme contrast */
+    --amber-50: #1c1511;
+    --amber-100: #2e2019;
+    --amber-200: #4d3326;
+    --amber-300: #734c38;
+    --amber-400: #9e674b;
+    --amber-500: #cc845e;
+    --amber-600: #e59c73;
+    --amber-700: #f0b592;     /* Bright copper for links / emphasis */
+    --amber-800: #f7ceb5;     /* Very bright copper */
+    --amber-900: #fde8db;
+    --amber-950: #ffffff;
+
+    /* Indigo overrides (used as accent color in some templates) */
+    --indigo-50: #1c1511;
+    --indigo-100: #2e2019;
+    --indigo-200: #4d3326;
+    --indigo-600: #f0b592;
+    --indigo-700: #f7ceb5;
+    --indigo-800: #fde8db;
+
+    /* Card background override for dark mode */
+    --card-bg: #171412;
+  }
+
+  /* Force background elements with bg-white to use the dark card background */
+  .bg-white {
+    background-color: var(--card-bg) !important;
+  }
+
+  /* Make focused elements that turn white on focus stay dark in dark mode */
+  .focus\:bg-white:focus {
+    background-color: var(--slate-100) !important;
+  }
+
+  /* SVG / Icon border adjustment for visibility */
+  .border-slate-200\/50, .border-slate-200\/60 {
+    border-color: rgba(229, 219, 206, 0.15) !important;
+  }
 }
 
 * {

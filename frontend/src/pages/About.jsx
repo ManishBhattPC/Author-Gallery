@@ -4,7 +4,7 @@ import { Sparkles, Users, BookOpen, Heart, GraduationCap, PenTool } from "lucide
 
 const About = () => {
   return (
-    <div className="bg-[#FAF6F0] min-h-screen text-slate-850">
+    <div className="bg-slate-50 min-h-screen text-slate-800">
 
       {/* Hero Section */}
       <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8 text-center bg-gradient-to-b from-amber-50/40 via-transparent to-transparent">

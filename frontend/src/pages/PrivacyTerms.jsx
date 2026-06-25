@@ -5,7 +5,7 @@ const PrivacyTerms = () => {
   const [activeTab, setActiveTab] = useState("privacy"); // privacy, terms
 
   return (
-    <div className="min-h-screen bg-[#FAF6F0] px-4 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl rounded-3xl bg-white border border-slate-200/60 p-6 sm:p-10 shadow-xl text-left">
         
         {/* Header */}

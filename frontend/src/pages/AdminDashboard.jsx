@@ -103,7 +103,7 @@ const AdminDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF6F0] flex flex-col items-center justify-center py-20">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center py-20">
         <Loader className="w-10 h-10 text-amber-800 animate-spin mb-3" />
         <h3 className="font-bold text-slate-800 text-lg">Loading Admin Panel</h3>
         <p className="text-sm text-slate-500 mt-1">Fetching records and reports...</p>
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF6F0] py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto w-full max-w-7xl space-y-8">
         
         {/* Header */}

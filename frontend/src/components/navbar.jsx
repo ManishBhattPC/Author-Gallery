@@ -72,7 +72,7 @@ const Navbar = () => {
   const userAvatar = user?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "User")}&background=8C4E35&color=FAF6F0&bold=true&size=128`;
 
   return (
-    <header className="sticky top-0 z-40 bg-[#FAF6F0] border-b border-slate-200/50 shadow-sm">
+    <header className="sticky top-0 z-40 bg-slate-50 border-b border-slate-200/50 shadow-sm">
       <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-8 md:px-12">
         
         {/* Brand Logo */}
