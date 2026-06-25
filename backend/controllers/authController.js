@@ -187,6 +187,7 @@ export const verifyOTP = async (req, res) => {
         email: user.email,
         role: user.role,
         profileImage: "",
+        token,
       },
     });
   } catch (error) {
@@ -279,6 +280,7 @@ export const loginUser = async (req, res) => {
         email: user.email,
         profileImage: profile?.profileImage || "",
         role: user.role,
+        token,
       },
     });
   } catch (error) {
@@ -368,6 +370,7 @@ export const googleLogin = async (req, res) => {
         email: user.email,
         profileImage: profile?.profileImage || "",
         role: user.role,
+        token,
       },
     });
   } catch (error) {
