@@ -98,10 +98,7 @@ export const getAuthorById = async (req, res) => {
     }
 
     // Fetch author details (exclude password)
-    const author = await User.findOne({
-      _id: authorId,
-      ...authorMatch, // Ensure user is an author
-    }).select("name email profileImage bio role followers following")
+    const author = await User.findById(authorId).select("name email profileImage bio role followers following")
 
     if (!author) {
       return res.status(404).json({ message: "Author not found" })

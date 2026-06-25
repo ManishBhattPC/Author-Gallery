@@ -1,5 +1,7 @@
 import mongoose from "mongoose"
 import User from "../models/User.js"
+import AuthorProfile from "../models/authorProfile.js"
+import Book from "../models/Book.js"
 import bcrypt from "bcryptjs"
 
 const seedAdmin = async () => {
@@ -21,12 +23,37 @@ const seedAdmin = async () => {
   }
 };
 
+const syncAuthorRoles = async () => {
+  try {
+    const profiles = await AuthorProfile.find().select("user");
+    const userIdsWithProfile = profiles.map(p => p.user).filter(Boolean);
+
+    const books = await Book.find().select("author");
+    const userIdsWithBooks = books.map(b => b.author).filter(Boolean);
+
+    const uniqueUserIds = Array.from(new Set([...userIdsWithProfile, ...userIdsWithBooks]));
+
+    if (uniqueUserIds.length > 0) {
+      const res = await User.updateMany(
+        { _id: { $in: uniqueUserIds }, role: "user" },
+        { role: "author" }
+      );
+      if (res.modifiedCount > 0) {
+        console.log(`[Startup Migration] Synced roles: promoted ${res.modifiedCount} user(s) to "author" role.`);
+      }
+    }
+  } catch (err) {
+    console.error("Error syncing author roles on startup:", err);
+  }
+};
+
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
     await mongoose.connect(mongoURI);
     console.log("MongoDB Connected")
     await seedAdmin();
+    await syncAuthorRoles();
   } catch (error) {
     console.log(error)
   }
