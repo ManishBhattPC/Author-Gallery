@@ -1,4 +1,10 @@
 import nodemailer from "nodemailer";
+import dns from "dns";
+
+// Force Node.js to prefer IPv4 DNS resolution globally to prevent ENETUNREACH IPv6 routing errors
+if (typeof dns.setDefaultResultOrder === "function") {
+  dns.setDefaultResultOrder("ipv4first");
+}
 
 const getTransporter = () => {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
