@@ -130,41 +130,10 @@ const Navbar = () => {
       <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-8 md:px-12">
         
         {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-2 text-xl font-serif font-bold text-slate-900 group">
-          <svg viewBox="0 0 100 100" className="w-10 h-10 select-none shadow-md rounded-xl transition-transform duration-300 group-hover:scale-105">
-            <defs>
-              <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#78350f" />
-                <stop offset="100%" stopColor="#451a03" />
-              </linearGradient>
-              <radialGradient id="peacockEye" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#38bdf8" />
-                <stop offset="30%" stopColor="#0284c7" />
-                <stop offset="60%" stopColor="#047857" />
-                <stop offset="100%" stopColor="#d97706" />
-              </radialGradient>
-              <linearGradient id="quillShaft" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#d97706" />
-                <stop offset="100%" stopColor="#047857" />
-              </linearGradient>
-            </defs>
-            <rect x="0" y="0" width="100" height="100" rx="26" fill="url(#shieldGrad)" />
-            <ellipse cx="50" cy="38" rx="20" ry="16" fill="url(#peacockEye)" />
-            <path d="M 50,48 C 38,41 38,31 50,33 C 62,31 62,41 50,48 Z" fill="#0c4a6e" opacity="0.85" />
-            <circle cx="50" cy="38" r="5" fill="#e0f2fe" />
-            <path d="M 50,38 Q 48,65 50,85" stroke="url(#quillShaft)" strokeWidth="3.5" strokeLinecap="round" fill="none" />
-            <path d="M 47,80 L 50,88 L 53,80 Z" fill="#d97706" />
-            <path d="M 50,42 Q 28,45 24,32" stroke="#047857" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
-            <path d="M 50,48 Q 26,52 20,40" stroke="#047857" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
-            <path d="M 50,54 Q 28,60 22,50" stroke="#047857" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
-            <path d="M 50,60 Q 32,68 26,58" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
-            <path d="M 50,42 Q 72,45 76,32" stroke="#047857" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
-            <path d="M 50,48 Q 74,52 80,40" stroke="#047857" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
-            <path d="M 50,54 Q 72,60 78,50" stroke="#047857" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
-            <path d="M 50,60 Q 68,68 74,58" stroke="#d97706" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
-            <text x="18" y="76" fontFamily="serif" fontSize="21" fontWeight="900" fill="#FAF6F0" opacity="0.95" letterSpacing="-1">A</text>
-            <text x="64" y="76" fontFamily="serif" fontSize="21" fontWeight="900" fill="#FAF6F0" opacity="0.95" letterSpacing="-1">G</text>
-          </svg>
+        <Link to="/" className="flex items-center gap-2.5 text-xl font-serif font-bold text-slate-900 group">
+          <span className="flex items-center justify-center bg-gradient-to-tr from-amber-800 to-amber-900 text-slate-50 w-9 h-9 rounded-xl font-serif font-bold text-sm shadow-md transition-transform group-hover:scale-105 select-none">
+            AG
+          </span>
           <span className="tracking-tight hover:text-amber-700 transition duration-300">Author Gallery</span>
         </Link>
 
