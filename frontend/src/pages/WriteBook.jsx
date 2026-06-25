@@ -24,6 +24,37 @@ const TEMPLATES = [
   { id: "vintage_parchment", name: "Vintage Parchment", desc: "Classic warm beige with bold charcoal margins" }
 ];
 
+const TEMPLATE_STYLES = {
+  royal_indigo: {
+    container: "bg-[#0F172A] border-2 border-amber-500/35 text-amber-100 shadow-xl",
+    title: "text-[#E6C687] border-amber-550/45 placeholder-amber-200/40 focus:border-amber-400 font-serif",
+    textarea: "bg-[#1E293B] border border-amber-500/20 text-[#FAF6F0] focus:ring-amber-500/20 focus:border-amber-400 placeholder-[#FAF6F0]/40 font-serif",
+    footer: "text-amber-300/70",
+    footerCount: "text-[#E6C687]"
+  },
+  crimson_velvet: {
+    container: "bg-[#3B0712] border-2 border-red-500/30 text-[#FAF6F0] shadow-xl",
+    title: "text-[#FAF6F0] border-red-500/30 placeholder-red-200/45 focus:border-[#FAF6F0] font-serif",
+    textarea: "bg-[#450A0A] border border-red-500/20 text-[#FAF6F0] focus:ring-red-500/20 focus:border-[#FAF6F0] placeholder-[#FAF6F0]/40 font-serif",
+    footer: "text-red-300/70",
+    footerCount: "text-[#FAF6F0]"
+  },
+  forest_sage: {
+    container: "bg-[#022C22] border-2 border-emerald-500/35 text-[#FAF6F0] shadow-xl",
+    title: "text-[#C5A880] border-emerald-500/35 placeholder-emerald-200/40 focus:border-[#C5A880] font-serif",
+    textarea: "bg-[#064E3B] border border-emerald-500/20 text-[#FAF6F0] focus:ring-emerald-500/20 focus:border-[#C5A880] placeholder-[#FAF6F0]/40 font-serif",
+    footer: "text-emerald-300/70",
+    footerCount: "text-[#C5A880]"
+  },
+  vintage_parchment: {
+    container: "bg-[#FAF6F0] border-2 border-[#3A3026]/75 text-[#3A3026] shadow-xl",
+    title: "text-[#3A3026] border-[#3A3026]/30 placeholder-[#3A3026]/40 focus:border-[#3A3026] font-serif",
+    textarea: "bg-[#FAF6F0] border border-[#3A3026]/20 text-[#3A3026] focus:ring-[#3A3026]/25 focus:border-[#3A3026] placeholder-[#3A3026]/40 font-serif",
+    footer: "text-[#3A3026]/75",
+    footerCount: "text-[#3A3026]"
+  }
+};
+
 const WriteBook = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -246,33 +277,27 @@ const WriteBook = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [mobileTab]);
 
-  // Debounced auto-save active draft properties
+  // Sync lastSaved time indicator when switching active draft
   useEffect(() => {
-    if (!activeDraft) return;
-
-    // Check if the current draft has content to save
-    const hasData = activeDraft.title || activeDraft.content || activeDraft.description;
-    if (hasData) {
-      setSaving(true);
+    if (activeDraft?.lastSaved) {
+      setLastSaved(new Date(activeDraft.lastSaved));
+    } else {
+      setLastSaved(null);
     }
+  }, [currentDraftId, activeDraft?.id, activeDraft?.lastSaved]);
+
+  // Debounced auto-save status indicator (sets saving to false after pause)
+  useEffect(() => {
+    if (!saving) return;
 
     const saveTimer = setTimeout(() => {
-      if (hasData) {
-        const updatedDrafts = drafts.map(d => {
-          if (d.id === activeDraft.id) {
-            return { ...d, lastSaved: new Date().toISOString() };
-          }
-          return d;
-        });
-        setDrafts(updatedDrafts);
-        localStorage.setItem("author_gallery_drafts", JSON.stringify(updatedDrafts));
-        setSaving(false);
-        setLastSaved(new Date());
-      }
+      setSaving(false);
+      setLastSaved(new Date());
     }, 1500);
 
     return () => clearTimeout(saveTimer);
   }, [
+    saving,
     activeDraft?.title,
     activeDraft?.content,
     activeDraft?.description,
@@ -282,16 +307,19 @@ const WriteBook = () => {
     activeDraft?.templateId
   ]);
 
-  // Update properties on active draft
+  // Update properties on active draft immediately and save to localStorage
   const handleUpdateActiveDraft = (field, val) => {
-    const updated = drafts.map(d => {
-      if (d.id === currentDraftId) {
-        return { ...d, [field]: val };
-      }
-      return d;
+    setSaving(true);
+    setDrafts(prevDrafts => {
+      const updated = prevDrafts.map(d => {
+        if (d.id === currentDraftId) {
+          return { ...d, [field]: val, lastSaved: new Date().toISOString() };
+        }
+        return d;
+      });
+      localStorage.setItem("author_gallery_drafts", JSON.stringify(updated));
+      return updated;
     });
-    setDrafts(updated);
-    localStorage.setItem("author_gallery_drafts", JSON.stringify(updated));
   };
 
   // Add new draft
@@ -421,6 +449,7 @@ const WriteBook = () => {
 
   const wordCount = activeDraft?.content ? activeDraft.content.trim().split(/\s+/).filter(Boolean).length : 0;
   const lastSavedTime = lastSaved ? lastSaved.toLocaleTimeString() : "";
+  const editorStyle = TEMPLATE_STYLES[activeDraft?.templateId || "royal_indigo"] || TEMPLATE_STYLES.royal_indigo;
 
   return (
     <div className="min-h-screen bg-slate-300 pb-12 transition-all">
@@ -498,11 +527,10 @@ const WriteBook = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 mt-6">
         {activeDraft ? (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-            
-            {/* Left Column (col-span-4 on tablet, col-span-3 on desktop): Drafts List */}
-            <div className={`md:col-span-4 lg:col-span-3 space-y-6 ${mobileTab === "drafts" ? "block" : "hidden md:block"}`}>
+            {/* Left Column (col-span-4 on tablet, col-span-3 on desktop): Drafts & Cover Customization */}
+            <div className={`md:col-span-4 lg:col-span-3 space-y-6 ${mobileTab === "drafts" || mobileTab === "templates" ? "block" : "hidden md:block"}`}>
               {/* Drafts List Card */}
-              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left">
+              <div className={`bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left ${mobileTab === "drafts" ? "block" : "hidden md:block"}`}>
                 <div className="flex justify-between items-center border-b border-slate-300 pb-2 mb-3">
                   <h3 className="font-bold font-serif text-slate-900 text-sm flex items-center gap-1.5">
                     <FileText size={16} className="text-amber-800" />
@@ -550,49 +578,9 @@ const WriteBook = () => {
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Middle Column (col-span-8 on tablet, col-span-6 on desktop): Notepad Editor */}
-            <div className={`md:col-span-8 lg:col-span-6 space-y-4 flex flex-col ${mobileTab === "editor" ? "block" : "hidden md:block"}`}>
-              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-5 sm:p-6 shadow-sm text-left flex flex-col space-y-4">
-                
-                {/* Title */}
-                <input
-                  type="text"
-                  value={activeDraft.title}
-                  onChange={(e) => handleUpdateActiveDraft("title", e.target.value)}
-                  placeholder="Draft Book Title..."
-                  className="w-full text-lg sm:text-2xl font-bold font-serif text-slate-900 bg-transparent border-b border-slate-300 focus:border-amber-700 pb-2.5 outline-none placeholder-slate-400 transition-colors"
-                  required
-                />
-
-                {/* Content Editor */}
-                <textarea
-                  value={activeDraft.content}
-                  onChange={(e) => handleUpdateActiveDraft("content", e.target.value)}
-                  placeholder="Begin drafting your work directly here. All changes auto-save in your browser..."
-                  className="w-full min-h-[380px] p-4 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-200/30 focus:border-amber-700 rounded-xl text-slate-900 placeholder-slate-400 outline-none text-sm sm:text-base leading-relaxed transition-all resize-none font-serif"
-                  required
-                />
-
-                {/* Counts and stats footer */}
-                <div className="flex justify-between items-center text-xs font-bold text-slate-700 pt-2">
-                  <span className="flex items-center gap-1">
-                    <FileText size={15} />
-                    Words: <span className="text-slate-900">{wordCount}</span>
-                  </span>
-                  <span>
-                    Characters: <span className="text-slate-900">{activeDraft.content ? activeDraft.content.length : 0}</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column (col-span-12 on tablet, col-span-3 on desktop): Cover Design & Publishing Details */}
-            <div className={`md:col-span-12 lg:col-span-3 space-y-6 ${mobileTab === "templates" ? "block" : "hidden md:block"}`}>
-              
               {/* Cover Selection Canvas */}
-              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left flex flex-col items-center">
+              <div className={`bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left flex flex-col items-center ${mobileTab === "templates" ? "block" : "hidden md:block"}`}>
                 <h3 className="font-bold font-serif text-slate-900 text-sm border-b border-slate-300 pb-2 mb-4 w-full flex items-center gap-1.5">
                   <Layout size={16} className="text-amber-800" />
                   Live Cover Preview
@@ -613,7 +601,7 @@ const WriteBook = () => {
               </div>
 
               {/* Cover Templates Selector */}
-              <div className="bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left">
+              <div className={`bg-slate-50 border border-slate-300 rounded-2xl p-4 shadow-sm text-left ${mobileTab === "templates" ? "block" : "hidden md:block"}`}>
                 <h3 className="font-bold font-serif text-slate-900 text-sm border-b border-slate-300 pb-2 mb-3">
                   Cover Templates
                 </h3>
@@ -637,7 +625,46 @@ const WriteBook = () => {
                   ))}
                 </div>
               </div>
+            </div>
 
+            {/* Middle Column (col-span-8 on tablet, col-span-6 on desktop): Notepad Editor */}
+            <div className={`md:col-span-8 lg:col-span-6 space-y-4 flex flex-col ${mobileTab === "editor" ? "block" : "hidden md:block"}`}>
+              <div className={`rounded-2xl p-5 sm:p-6 text-left flex flex-col space-y-4 transition-all ${editorStyle.container}`}>
+                
+                {/* Title */}
+                <input
+                  type="text"
+                  value={activeDraft.title}
+                  onChange={(e) => handleUpdateActiveDraft("title", e.target.value)}
+                  placeholder="Draft Book Title..."
+                  className={`w-full text-lg sm:text-2xl font-bold bg-transparent border-b pb-2.5 outline-none transition-colors ${editorStyle.title}`}
+                  required
+                />
+
+                {/* Content Editor */}
+                <textarea
+                  value={activeDraft.content}
+                  onChange={(e) => handleUpdateActiveDraft("content", e.target.value)}
+                  placeholder="Begin drafting your work directly here. All changes auto-save in your browser..."
+                  className={`w-full min-h-[460px] p-4 rounded-xl outline-none text-sm sm:text-base leading-relaxed transition-all resize-none ${editorStyle.textarea}`}
+                  required
+                />
+
+                {/* Counts and stats footer */}
+                <div className={`flex justify-between items-center text-xs font-bold pt-2 ${editorStyle.footer}`}>
+                  <span className="flex items-center gap-1">
+                    <FileText size={15} />
+                    Words: <span className={editorStyle.footerCount}>{wordCount}</span>
+                  </span>
+                  <span>
+                    Characters: <span className={editorStyle.footerCount}>{activeDraft.content ? activeDraft.content.length : 0}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column (col-span-12 on tablet, col-span-3 on desktop): Publishing Details */}
+            <div className={`md:col-span-12 lg:col-span-3 space-y-6 ${mobileTab === "templates" ? "block" : "hidden md:block"}`}>
               {/* Publishing Panel */}
               <div className="bg-slate-50 border border-slate-300 rounded-2xl p-5 shadow-sm text-left space-y-4">
                 <h3 className="font-bold font-serif text-slate-900 text-sm border-b border-slate-300 pb-2 flex items-center gap-1">
@@ -751,7 +778,6 @@ const WriteBook = () => {
                 </form>
               </div>
             </div>
-
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center p-12 bg-slate-50 border border-slate-300 rounded-2xl shadow-sm text-center max-w-lg mx-auto">
