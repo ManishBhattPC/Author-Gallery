@@ -28,7 +28,7 @@ const FeaturedAuthors = () => {
   }, []);
 
   return (
-    <section className="bg-slate-50 py-20">
+    <section className="bg-transparent py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <p className="text-amber-700 font-semibold uppercase tracking-[0.3em] text-sm">
