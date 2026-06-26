@@ -171,6 +171,10 @@ export const createBook = async (req, res) => {
         const range = doc.bufferedPageRange();
         for (let i = range.start + 1; i < range.start + range.count; i++) {
           doc.switchToPage(i);
+
+          // Temporarily set bottom margin to 0 for this page to prevent auto page breaks from footer text
+          const oldBottom = doc.page.margins.bottom;
+          doc.page.margins.bottom = 0;
           
           // Header title
           doc.fontSize(8).fillColor("#A09485")
@@ -184,6 +188,9 @@ export const createBook = async (req, res) => {
           
           // Page Number
           doc.text(`Page ${i}`, doc.page.width - 80, doc.page.height - 35, { align: "right" });
+
+          // Restore bottom margin
+          doc.page.margins.bottom = oldBottom;
         }
 
         doc.end();
