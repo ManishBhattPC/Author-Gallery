@@ -12,7 +12,8 @@ import {
   BookOpen, 
   Layout, 
   ChevronRight,
-  Info
+  Info,
+  AlertTriangle
 } from "lucide-react";
 import { useAuth } from "../AuthContext.jsx";
 import apiClient from "../services/apiClient.js";
@@ -79,6 +80,13 @@ const WriteBook = () => {
   const [lastSaved, setLastSaved] = useState(null);
   const [publishing, setPublishing] = useState(false);
   const [message, setMessage] = useState(null);
+  const [confirmModal, setConfirmModal] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (msg, type = "success") => {
+    setToast({ message: msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Initialize or set current draft
   useEffect(() => {
@@ -361,19 +369,22 @@ const WriteBook = () => {
   const handleDeleteDraft = (id, e) => {
     e.stopPropagation();
     if (drafts.length <= 1) {
-      alert("You must keep at least one draft.");
+      showToast("You must keep at least one draft.", "error");
       return;
     }
-    if (window.confirm("Delete this draft permanently?")) {
-      const remaining = drafts.filter(d => d.id !== id);
-      setDrafts(remaining);
-      localStorage.setItem("author_gallery_drafts", JSON.stringify(remaining));
-      if (currentDraftId === id) {
-        setCurrentDraftId(remaining[0].id);
+    setConfirmModal({
+      title: "Delete Draft permanently?",
+      message: "Are you sure you want to delete this draft? This will permanently erase your local copy.",
+      onConfirm: () => {
+        const remaining = drafts.filter(d => d.id !== id);
+        setDrafts(remaining);
+        localStorage.setItem("author_gallery_drafts", JSON.stringify(remaining));
+        if (currentDraftId === id) {
+          setCurrentDraftId(remaining[0].id);
+        }
+        showToast("Draft deleted.", "success");
       }
-      setMessage({ type: "success", text: "Draft deleted." });
-      setTimeout(() => setMessage(null), 3000);
-    }
+    });
   };
 
   // Publish active draft
@@ -812,6 +823,56 @@ const WriteBook = () => {
           </div>
         )}
       </div>
+
+      {/* Toast notifications */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[200000] max-w-sm animate-fade-in">
+          <div className={`p-4 rounded-2xl shadow-xl flex items-start gap-3 border ${
+            toast.type === "success" 
+              ? "bg-emerald-50 text-emerald-900 border-emerald-200" 
+              : "bg-red-50 text-red-950 border-red-200"
+          }`}>
+            <Info size={18} className={`shrink-0 mt-0.5 ${toast.type === "success" ? "text-emerald-700" : "text-red-750"}`} />
+            <div>
+              <p className="text-xs font-bold leading-normal">{toast.message}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-[200000] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white border border-slate-200/50 rounded-3xl w-full max-w-sm p-6 relative shadow-2xl text-left">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                <AlertTriangle size={18} className="text-red-650" />
+                <h4 className="font-bold text-sm text-slate-900">{confirmModal.title}</h4>
+              </div>
+              <p className="text-xs text-slate-750 leading-relaxed font-sans font-medium">
+                {confirmModal.message}
+              </p>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  onClick={() => setConfirmModal(null)}
+                  className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    confirmModal.onConfirm();
+                    setConfirmModal(null);
+                  }}
+                  className="px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

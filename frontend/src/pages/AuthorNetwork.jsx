@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchMyFollowers, fetchMyFollowing, followAuthor, unfollowAuthor } from "../services/authorService.js";
-import { Search, UserMinus, UserPlus, Users, ArrowLeft, Star } from "lucide-react";
+import { Search, UserMinus, UserPlus, Users, ArrowLeft, Star, Info } from "lucide-react";
 
 const AuthorNetwork = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -13,6 +13,12 @@ const AuthorNetwork = () => {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const loadNetwork = async () => {
     try {
@@ -58,7 +64,7 @@ const AuthorNetwork = () => {
       }
     } catch (err) {
       console.error("Error updating follow state:", err);
-      alert(err.message || "Action failed.");
+      showToast(err.message || "Action failed.", "error");
     } finally {
       setActionLoadingId(null);
     }
@@ -305,6 +311,21 @@ const AuthorNetwork = () => {
           </div>
         )}
 
+      {/* Toast notifications */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[200000] max-w-sm animate-fade-in text-left">
+          <div className={`p-4 rounded-2xl shadow-xl flex items-start gap-3 border ${
+            toast.type === "success" 
+              ? "bg-[#FAF6F0] text-[#722F37] border-[#722F37]/20" 
+              : "bg-red-50 text-red-950 border-red-200"
+          }`}>
+            <Info size={18} className={`shrink-0 mt-0.5 ${toast.type === "success" ? "text-amber-800" : "text-red-700"}`} />
+            <div>
+              <p className="text-xs font-bold leading-normal">{toast.message}</p>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );

@@ -64,6 +64,7 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [previewItem, setPreviewItem] = useState(null);
+  const [confirmModal, setConfirmModal] = useState(null);
   
   // Table Pagination & Filters
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,26 +114,40 @@ const AdminDashboard = () => {
   };
 
   // Moderator CRUD Functions
-  const handleDeleteBook = async (bookId) => {
-    if (!window.confirm("Are you sure you want to delete this book? This will permanently delete its Cloudinary assets (Cover & PDF), along with associated reviews and reports.")) return;
-    try {
-      await deleteBookByAdmin(bookId);
-      triggerToast("Book and Cloudinary assets successfully purged", "success");
-      loadDashboardData();
-    } catch (err) {
-      triggerToast("Failed to delete book", "error");
-    }
+  const handleDeleteBook = (bookId) => {
+    setConfirmModal({
+      title: "Purge eBook Listing",
+      message: "Are you sure you want to delete this book? This will permanently delete its Cloudinary assets (Cover & PDF), along with associated reviews and reports.",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteBookByAdmin(bookId);
+          triggerToast("Book and Cloudinary assets successfully purged", "success");
+          loadDashboardData();
+        } catch (err) {
+          triggerToast("Failed to delete book", "error");
+        }
+        setConfirmModal(null);
+      }
+    });
   };
 
-  const handleDeleteAuthor = async (authorId) => {
-    if (!window.confirm("Are you sure you want to block/delete this user? All books, reviews, and profile documents will be purged.")) return;
-    try {
-      await deleteAuthorByAdmin(authorId);
-      triggerToast("Author account blocked and data deleted successfully", "success");
-      loadDashboardData();
-    } catch (err) {
-      triggerToast("Failed to delete author", "error");
-    }
+  const handleDeleteAuthor = (authorId) => {
+    setConfirmModal({
+      title: "Block User Account",
+      message: "Are you sure you want to block/delete this user? All books, reviews, and profile documents will be purged.",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteAuthorByAdmin(authorId);
+          triggerToast("Author account blocked and data deleted successfully", "success");
+          loadDashboardData();
+        } catch (err) {
+          triggerToast("Failed to delete author", "error");
+        }
+        setConfirmModal(null);
+      }
+    });
   };
 
   const handleDismissReport = async (reportId) => {
@@ -145,25 +160,39 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm("Are you sure you want to delete this review comment?")) return;
-    try {
-      await deleteReviewByAdmin(reviewId);
-      triggerToast("Review comment successfully deleted", "success");
-      loadDashboardData();
-    } catch (err) {
-      triggerToast("Failed to delete review", "error");
-    }
+  const handleDeleteReview = (reviewId) => {
+    setConfirmModal({
+      title: "Delete Review Comment",
+      message: "Are you sure you want to delete this review comment?",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteReviewByAdmin(reviewId);
+          triggerToast("Review comment successfully deleted", "success");
+          loadDashboardData();
+        } catch (err) {
+          triggerToast("Failed to delete review", "error");
+        }
+        setConfirmModal(null);
+      }
+    });
   };
 
-  const handleLogout = async () => {
-    if (!window.confirm("Log out from admin moderation center?")) return;
-    try {
-      await logout();
-      navigate("/login");
-    } catch (err) {
-      triggerToast("Logout failed", "error");
-    }
+  const handleLogout = () => {
+    setConfirmModal({
+      title: "Confirm Admin Logout",
+      message: "Log out from the admin moderation center?",
+      type: "warning",
+      onConfirm: async () => {
+        try {
+          await logout();
+          navigate("/login");
+        } catch (err) {
+          triggerToast("Logout failed", "error");
+        }
+        setConfirmModal(null);
+      }
+    });
   };
 
   // Mock quick action toggles
@@ -1736,6 +1765,43 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 5. DYNAMIC CONFIRMATION MODAL */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-[100000] flex items-center justify-center p-4 admin-modal-overlay">
+          <div className="bg-[#121214] border border-zinc-800 rounded-3xl w-full max-w-md p-6 relative shadow-2xl text-left">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 border-b border-zinc-800 pb-3">
+                <AlertTriangle size={18} className={confirmModal.type === "danger" ? "text-rose-500" : "text-amber-500"} />
+                <h4 className="font-serif font-bold text-base text-white">{confirmModal.title}</h4>
+              </div>
+
+              <p className="text-xs text-zinc-400 leading-relaxed font-sans">
+                {confirmModal.message}
+              </p>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  onClick={() => setConfirmModal(null)}
+                  className="px-4 py-2 border border-zinc-800 hover:bg-zinc-850 text-zinc-350 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmModal.onConfirm}
+                  className={`px-4 py-2 text-white rounded-xl text-xs font-bold transition cursor-pointer ${
+                    confirmModal.type === "danger"
+                      ? "bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-950/20"
+                      : "bg-[#d87f4a] hover:bg-[#c26e3d]"
+                  }`}
+                >
+                  Confirm Action
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

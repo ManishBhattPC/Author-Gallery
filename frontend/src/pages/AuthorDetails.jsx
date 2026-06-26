@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { fetchAuthorById, followAuthor, unfollowAuthor, checkFollowStatus } from "../services/authorService.js";
 import BookCard from "../components/BookComponents/BookCard.jsx";
 import { useAuth } from "../AuthContext.jsx";
-import { Flag } from "lucide-react";
+import { Flag, Info } from "lucide-react";
 import ReviewSection from "../components/ReviewSection.jsx";
 import ReportModal from "../components/ReportModal.jsx";
 
@@ -18,6 +18,12 @@ const AuthorDetails = () => {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   console.log("DEBUG AuthorDetails:", {
     user,
@@ -79,7 +85,7 @@ const AuthorDetails = () => {
       }
     } catch (err) {
       console.error("Error toggling follow:", err);
-      alert(err.message || "Failed to perform follow action.");
+      showToast(err.message || "Failed to perform follow action.", "error");
     } finally {
       setFollowLoading(false);
     }
@@ -230,6 +236,22 @@ const AuthorDetails = () => {
         onClose={() => setReportModalOpen(false)}
         authorId={id}
       />
+
+      {/* Toast notifications */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[200000] max-w-sm animate-fade-in text-left">
+          <div className={`p-4 rounded-2xl shadow-xl flex items-start gap-3 border ${
+            toast.type === "success" 
+              ? "bg-[#FAF6F0] text-[#722F37] border-[#722F37]/20" 
+              : "bg-red-50 text-red-950 border-red-200"
+          }`}>
+            <Info size={18} className={`shrink-0 mt-0.5 ${toast.type === "success" ? "text-amber-800" : "text-red-700"}`} />
+            <div>
+              <p className="text-xs font-bold leading-normal">{toast.message}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

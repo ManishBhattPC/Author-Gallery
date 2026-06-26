@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchBookById } from "../../services/bookService.js";
 import { useAuth } from "../../AuthContext.jsx";
 import { createPortal } from "react-dom";
-import { Flag } from "lucide-react";
+import { Flag, Info } from "lucide-react";
 import ReviewSection from "../ReviewSection.jsx";
 import ReportModal from "../ReportModal.jsx";
 import {
@@ -43,6 +43,12 @@ const BookDetails = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
   
   // Immersive E-Reader States
   const [readerOpen, setReaderOpen] = useState(false);
@@ -945,7 +951,7 @@ const BookDetails = () => {
                         <button
                           onClick={() => {
                             handleToggleBookmark(activeChapterIndex);
-                            alert("Bookmark Saved! 🔖 Progress saved to this chapter.");
+                            showToast("Bookmark Saved! 🔖 Progress saved to this chapter.");
                           }}
                           className="bg-[#722F37] hover:bg-[#5C242B] text-white px-5 py-3.5 rounded-xl font-bold cursor-pointer transition shadow-md flex items-center gap-2 select-none text-xs tracking-wide flex-1 justify-center sm:flex-initial"
                         >
@@ -1027,6 +1033,21 @@ const BookDetails = () => {
           </div>
         </div>,
         document.body
+      )}
+      {/* Toast notifications */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[200000] max-w-sm animate-fade-in text-left">
+          <div className={`p-4 rounded-2xl shadow-xl flex items-start gap-3 border ${
+            toast.type === "success" 
+              ? "bg-[#FAF6F0] text-[#722F37] border-[#722F37]/20" 
+              : "bg-red-50 text-red-950 border-red-200"
+          }`}>
+            <Info size={18} className={`shrink-0 mt-0.5 ${toast.type === "success" ? "text-amber-800" : "text-red-700"}`} />
+            <div>
+              <p className="text-xs font-bold leading-normal">{toast.message}</p>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
