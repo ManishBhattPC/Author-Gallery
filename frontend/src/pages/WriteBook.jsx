@@ -322,6 +322,19 @@ const WriteBook = () => {
     });
   };
 
+  // Append a new chapter header helper
+  const handleInsertChapterHeader = () => {
+    const content = activeDraft?.content || "";
+    const matches = content.match(/(?:^|\n)(?:#\s*Chapter|##\s*Chapter|Chapter|CHAPTER|Ch\.)/gi);
+    const nextChapterNum = matches ? matches.length + 1 : 1;
+    
+    const headerToAdd = content.trim().length > 0 
+      ? `\n\nChapter ${nextChapterNum}: Title of Chapter ${nextChapterNum}\nWrite your chapter content here...\n\n`
+      : `Chapter ${nextChapterNum}: Title of Chapter ${nextChapterNum}\nWrite your chapter content here...\n\n`;
+      
+    handleUpdateActiveDraft("content", content + headerToAdd);
+  };
+
   // Add new draft
   const handleCreateNewDraft = () => {
     const newDraft = {
@@ -641,11 +654,24 @@ const WriteBook = () => {
                   required
                 />
 
+                {/* Editor Utilities / Toolbar */}
+                <div className="flex items-center justify-between pb-1 border-b border-dashed border-slate-200/40">
+                  <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider opacity-60">Notepad Desk</span>
+                  <button
+                    type="button"
+                    onClick={handleInsertChapterHeader}
+                    className="px-3 py-1.5 rounded-lg bg-amber-800 hover:bg-amber-900 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm active:scale-[0.98]"
+                    title="Insert a new Chapter header at the end of the text"
+                  >
+                    <span>📖 Add Chapter Header</span>
+                  </button>
+                </div>
+
                 {/* Content Editor */}
                 <textarea
                   value={activeDraft.content}
                   onChange={(e) => handleUpdateActiveDraft("content", e.target.value)}
-                  placeholder="Begin drafting your work directly here. All changes auto-save in your browser..."
+                  placeholder="Begin drafting your work directly here. Use the 'Chapter X: Title' format to split your book into chapters for the reader..."
                   className={`w-full min-h-[460px] p-4 rounded-xl outline-none text-sm sm:text-base leading-relaxed transition-all resize-none ${editorStyle.textarea}`}
                   required
                 />

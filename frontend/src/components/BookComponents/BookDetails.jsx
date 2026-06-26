@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchBookById } from "../../services/bookService.js";
 import { useAuth } from "../../AuthContext.jsx";
+import { createPortal } from "react-dom";
 import { Flag } from "lucide-react";
 import ReviewSection from "../ReviewSection.jsx";
 import ReportModal from "../ReportModal.jsx";
@@ -458,8 +459,8 @@ const BookDetails = () => {
       </div>
 
       {/* Immersive Fullscreen E-Reader Overlay */}
-      {readerOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[#120F0D] text-slate-100 font-sans">
+      {readerOpen && createPortal(
+        <div className="fixed inset-0 z-[9999] flex flex-col bg-[#120F0D] text-slate-100 font-sans">
           
           {/* Header Bar */}
           <header className="bg-[#1C1613] border-b border-[#2C211D] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-md shrink-0 gap-4">
@@ -1003,7 +1004,8 @@ const BookDetails = () => {
               </>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
