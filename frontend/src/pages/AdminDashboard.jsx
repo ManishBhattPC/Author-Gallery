@@ -62,6 +62,8 @@ const AdminDashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showQuickActionModal, setShowQuickActionModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [previewItem, setPreviewItem] = useState(null);
   
   // Table Pagination & Filters
   const [currentPage, setCurrentPage] = useState(1);
@@ -355,20 +357,42 @@ const AdminDashboard = () => {
   return (
     <div className="admin-dashboard-container min-h-screen flex text-zinc-100 font-sans">
       
+      {/* Mobile Drawer Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[90] md:hidden"
+        />
+      )}
+
       {/* 1. COLLAPSIBLE LEFT SIDEBAR */}
-      <aside className={`admin-sidebar shrink-0 relative flex flex-col justify-between p-4 ${isSidebarCollapsed ? "w-20" : "w-64"} hidden md:flex`}>
+      <aside className={`admin-sidebar shrink-0 p-4 transition-all duration-300 flex flex-col justify-between
+        fixed md:relative inset-y-0 left-0 z-[100] bg-[#0B0B0D] md:bg-transparent
+        ${isMobileMenuOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0"}
+        ${isSidebarCollapsed ? "md:w-20" : "md:w-64"}
+      `}>
         <div className="space-y-8">
           {/* Logo Brand Header */}
-          <div className="flex items-center gap-3 px-2 py-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#d87f4a] to-[#a05a3a] flex items-center justify-center text-white font-serif font-black text-xl shadow-lg shrink-0">
-              AG
-            </div>
-            {!isSidebarCollapsed && (
-              <div className="text-left leading-none">
-                <h1 className="font-serif font-black text-base tracking-wide text-white">Author Gallery</h1>
-                <span className="text-[10px] uppercase tracking-widest text-[#d87f4a] font-bold">Admin Portal</span>
+          <div className="flex items-center justify-between px-2 py-3 overflow-hidden">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#d87f4a] to-[#a05a3a] flex items-center justify-center text-white font-serif font-black text-xl shadow-lg shrink-0">
+                AG
               </div>
-            )}
+              {!isSidebarCollapsed && (
+                <div className="text-left leading-none">
+                  <h1 className="font-serif font-black text-base tracking-wide text-white">Author Gallery</h1>
+                  <span className="text-[10px] uppercase tracking-widest text-[#d87f4a] font-bold">Admin Portal</span>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile close button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="p-1 border border-zinc-800 hover:bg-zinc-800 rounded-lg md:hidden text-zinc-400 hover:text-white cursor-pointer"
+            >
+              <X size={14} />
+            </button>
           </div>
 
           {/* Navigation Links list */}
@@ -389,6 +413,7 @@ const AdminDashboard = () => {
                   setActiveTab(item.id);
                   setSearchQuery("");
                   setCurrentPage(1);
+                  setIsMobileMenuOpen(false); // Close mobile drawer
                 }}
                 className={`admin-sidebar-item ${activeTab === item.id ? "active" : ""}`}
                 title={item.label}
@@ -433,7 +458,10 @@ const AdminDashboard = () => {
         <header className="sticky top-0 bg-[#0B0B0D]/85 backdrop-blur-md border-b border-zinc-800 px-6 py-4 flex items-center justify-between z-40 gap-4">
           <div className="flex items-center gap-3">
             {/* Mobile menu toggle */}
-            <button className="p-2 border border-zinc-800 hover:bg-zinc-900 rounded-xl md:hidden cursor-pointer">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 border border-zinc-800 hover:bg-zinc-900 rounded-xl md:hidden cursor-pointer text-zinc-400 hover:text-white"
+            >
               <Menu size={18} />
             </button>
             
@@ -488,7 +516,7 @@ const AdminDashboard = () => {
               </button>
               
               {showNotifications && (
-                <div className="absolute right-0 mt-3 w-80 bg-[#121214] border border-zinc-800 rounded-2xl shadow-2xl p-4 z-50 text-left">
+                <div className="absolute right-0 mt-3 w-[calc(100vw-32px)] sm:w-80 max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl shadow-2xl p-4 z-50 text-left">
                   <div className="flex justify-between items-center border-b border-zinc-800 pb-2.5 mb-2.5">
                     <span className="text-xs font-bold text-zinc-300">Live Activity Feed</span>
                     <button 
@@ -767,13 +795,13 @@ const AdminDashboard = () => {
                             </td>
                             <td>
                               <div className="flex items-center gap-2">
-                                <Link
-                                  to={`/authors/${author._id}`}
-                                  className="p-1.5 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition"
-                                  title="View Public Profile"
+                                <button
+                                  onClick={() => setPreviewItem({ type: "author", data: author })}
+                                  className="p-1.5 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition cursor-pointer"
+                                  title="Inspect Account Profile"
                                 >
                                   <ExternalLink size={13} />
-                                </Link>
+                                </button>
                                 <button
                                   onClick={() => handleDeleteAuthor(author._id)}
                                   className="p-1.5 border border-zinc-850 hover:bg-rose-950/40 text-zinc-500 hover:text-rose-500 rounded-lg transition cursor-pointer"
@@ -891,13 +919,13 @@ const AdminDashboard = () => {
                           <div className="flex items-center justify-between border-t border-zinc-800/80 pt-3 mt-2">
                             <span className="text-xs font-bold text-zinc-300">₹{book.price || 0}</span>
                             <div className="flex gap-1.5">
-                              <Link
-                                to={`/books/${book._id}`}
-                                className="p-2 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition"
-                                title="Open E-Reader Page"
-                              >
-                                <ExternalLink size={13} />
-                              </Link>
+                              <button
+                                  onClick={() => setPreviewItem({ type: "book", data: book })}
+                                  className="p-2 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition cursor-pointer"
+                                  title="Inspect Book Content"
+                                >
+                                  <ExternalLink size={13} />
+                                </button>
                               <button
                                 onClick={() => handleDeleteBook(book._id)}
                                 className="p-2 border border-zinc-800 hover:bg-rose-950/40 text-zinc-500 hover:text-rose-500 rounded-lg transition cursor-pointer"
@@ -962,19 +990,25 @@ const AdminDashboard = () => {
                             {report.book ? (
                               <span>
                                 Flagged Book:{" "}
-                                <Link to={`/books/${report.book._id}`} className="text-[#d87f4a] hover:underline inline-flex items-center gap-1">
+                                <button
+                                  onClick={() => setPreviewItem({ type: "book", data: report.book })}
+                                  className="text-[#d87f4a] hover:underline inline-flex items-center gap-1 cursor-pointer font-semibold bg-transparent border-0 p-0 text-sm align-baseline"
+                                >
                                   {report.book.title}
-                                  <ExternalLink size={12} />
-                                </Link>
+                                  <ExternalLink size={12} className="inline shrink-0" />
+                                </button>
                                 <span className="text-xs text-zinc-500 font-normal"> (by {report.book.author?.name || "Unknown Author"})</span>
                               </span>
                             ) : report.author ? (
                               <span>
                                 Flagged User Profile:{" "}
-                                <Link to={`/authors/${report.author._id}`} className="text-[#d87f4a] hover:underline inline-flex items-center gap-1">
+                                <button
+                                  onClick={() => setPreviewItem({ type: "author", data: report.author })}
+                                  className="text-[#d87f4a] hover:underline inline-flex items-center gap-1 cursor-pointer font-semibold bg-transparent border-0 p-0 text-sm align-baseline"
+                                >
                                   {report.author.name}
-                                  <ExternalLink size={12} />
-                                </Link>
+                                  <ExternalLink size={12} className="inline shrink-0" />
+                                </button>
                               </span>
                             ) : (
                               <span className="italic text-zinc-500">General complaint message</span>
@@ -1069,9 +1103,12 @@ const AdminDashboard = () => {
                             {rev.book ? (
                               <span className="text-xs text-zinc-500">
                                 Target Listing:{" "}
-                                <Link to={`/books/${rev.book._id}`} className="font-semibold text-[#d87f4a] hover:underline">
+                                <button
+                                  onClick={() => setPreviewItem({ type: "book", data: rev.book })}
+                                  className="font-semibold text-[#d87f4a] hover:underline cursor-pointer bg-transparent border-0 p-0 text-xs align-baseline"
+                                >
                                   {rev.book.title}
-                                </Link>
+                                </button>
                               </span>
                             ) : (
                               <span className="text-xs text-zinc-600 italic">Target book deleted</span>
@@ -1509,6 +1546,138 @@ const AdminDashboard = () => {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. PREVIEW MODAL WORKSPACE */}
+      {previewItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 admin-modal-overlay">
+          <div className="bg-[#121214] border border-zinc-800 rounded-3xl w-full max-w-2xl p-6 relative shadow-2xl text-left admin-scroll overflow-y-auto max-h-[90vh]">
+            <button
+              onClick={() => setPreviewItem(null)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-white p-1 hover:bg-zinc-850 rounded-lg cursor-pointer transition"
+            >
+              <X size={16} />
+            </button>
+            
+            {previewItem.type === "book" ? (
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
+                  <BookOpen size={18} className="text-[#d87f4a]" />
+                  <h4 className="font-serif font-bold text-base text-white">Book Inspection Workspace</h4>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-6">
+                  <div className="w-32 h-44 bg-zinc-900 rounded-xl overflow-hidden shrink-0 border border-zinc-800">
+                    <img
+                      src={previewItem.data.coverImage}
+                      alt={previewItem.data.title}
+                      onError={(e) => {
+                        e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500";
+                        e.currentTarget.onerror = null;
+                      }}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="space-y-3.5 text-left flex-1 min-w-0">
+                    <div>
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                        {previewItem.data.genres?.[0] || "eBook"}
+                      </span>
+                      <h3 className="text-xl font-serif font-bold text-white mt-2 leading-tight">
+                        {previewItem.data.title}
+                      </h3>
+                      <p className="text-xs text-zinc-400 mt-1">
+                        Published by <span className="font-semibold text-zinc-200">{previewItem.data.author?.name || "Unknown Author"}</span> ({previewItem.data.author?.email || "No email"})
+                      </p>
+                    </div>
+                    <div className="flex gap-4 text-xs">
+                      <div>
+                        <span className="text-zinc-500 font-semibold block">Listing Price</span>
+                        <span className="text-zinc-200 font-bold text-sm">₹{previewItem.data.price || 0}</span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-500 font-semibold block">Publish Date</span>
+                        <span className="text-zinc-200 font-mono">{new Date(previewItem.data.publishDate || previewItem.data.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2.5">
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Book Synopsis</span>
+                  <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/80 text-xs text-zinc-300 leading-relaxed max-h-40 overflow-y-auto admin-scroll">
+                    {previewItem.data.description || "No description provided."}
+                  </div>
+                </div>
+
+                {previewItem.data.pdfFile && (
+                  <div className="space-y-2.5 border-t border-zinc-800 pt-5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider font-sans">eBook PDF File (Cloudinary Secure IFrame)</span>
+                      <a
+                        href={previewItem.data.pdfFile}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs text-[#d87f4a] hover:underline font-bold"
+                      >
+                        Open in new tab
+                      </a>
+                    </div>
+                    <div className="w-full h-80 rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
+                      <iframe
+                        src={previewItem.data.pdfFile}
+                        title={previewItem.data.title}
+                        className="w-full h-full"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 border-b border-zinc-800 pb-3">
+                  <Users size={18} className="text-[#d87f4a]" />
+                  <h4 className="font-serif font-bold text-base text-white">Account Profile Inspection</h4>
+                </div>
+
+                <div className="flex items-center gap-4 border-b border-zinc-900 pb-4">
+                  <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-xl font-serif font-black text-white overflow-hidden border border-zinc-700">
+                    {previewItem.data.profileImage ? (
+                      <img src={previewItem.data.profileImage} alt={previewItem.data.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{previewItem.data.name?.substring(0, 2).toUpperCase() || "US"}</span>
+                    )}
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-lg font-serif font-bold text-white">{previewItem.data.name}</h3>
+                    <span className={`inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${previewItem.data.role === 'author' ? "bg-emerald-950/40 text-emerald-400 border-emerald-900/30" : "bg-zinc-800 text-zinc-400 border-zinc-700/60"}`}>
+                      {previewItem.data.role || 'user'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-xs text-left">
+                  <div>
+                    <span className="text-zinc-500 font-semibold block">Registered Email</span>
+                    <span className="text-zinc-200 font-mono">{previewItem.data.email}</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 font-semibold block">Platform Activity Status</span>
+                    <span className="text-zinc-200">Active Listing Moderator / Member</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 font-semibold block">Works Published</span>
+                    <span className="text-zinc-200 font-bold">{previewItem.data.works || 0} Books</span>
+                  </div>
+                  <div>
+                    <span className="text-zinc-500 font-semibold block">Profile Reference ID</span>
+                    <span className="text-zinc-400 font-mono text-[10px]">{previewItem.data._id}</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
