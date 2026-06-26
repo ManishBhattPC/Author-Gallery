@@ -1,30 +1,51 @@
 import apiClient from "./apiClient.js";
+import { apiCache } from "./cacheManager.js";
 
 export const getBooks = async (params = {}) => {
+  const cacheKey = `books:list:${JSON.stringify(params)}`;
+  const cachedData = apiCache.get(cacheKey);
+  if (cachedData) return cachedData;
+
   const response = await apiClient.get("/api/books", {
     params, // Search, genre, pagination filters
   });
 
+  apiCache.set(cacheKey, response.data, 30); // Cache for 30s
   return response.data;
 };
 
 export const getMyBooks = async () => {
+  const cacheKey = "books:my-books";
+  const cachedData = apiCache.get(cacheKey);
+  if (cachedData) return cachedData;
+
   const response = await apiClient.get("/api/books/my-books");
 
+  apiCache.set(cacheKey, response.data, 15); // Cache for 15s
   return response.data;
 };
 
 export const searchBooks = async (query) => {
+  const cacheKey = `books:search:${query}`;
+  const cachedData = apiCache.get(cacheKey);
+  if (cachedData) return cachedData;
+
   const response = await apiClient.get("/api/books", {
     params: { search: query }, // Search by title
   });
 
+  apiCache.set(cacheKey, response.data, 30);
   return response.data;
 };
 
 export const fetchBookById = async (id) => {
+  const cacheKey = `books:id:${id}`;
+  const cachedData = apiCache.get(cacheKey);
+  if (cachedData) return cachedData;
+
   const response = await apiClient.get(`/api/books/${id}`);
 
+  apiCache.set(cacheKey, response.data, 30);
   return response.data;
 };
 
@@ -39,6 +60,7 @@ export const createBook = async (formData) => {
     }
   );
 
+  apiCache.invalidate("books:"); // Invalidate cached books
   return response.data;
 };
 
@@ -48,12 +70,14 @@ export const updateBook = async (id, bookPayload) => {
     bookPayload
   );
 
+  apiCache.invalidate("books:"); // Invalidate cached books
   return response.data;
 };
 
 export const deleteBook = async (id) => {
   const response = await apiClient.delete(`/api/books/${id}`);
 
+  apiCache.invalidate("books:"); // Invalidate cached books
   return response.data;
 };
 

@@ -1,5 +1,17 @@
 import apiClient from "./apiClient.js";
 import { getMyBooks } from "./bookService.js";
+import { apiCache } from "./cacheManager.js";
+
+export const getPublicSummaryStats = async () => {
+  const cacheKey = "dashboard:public-summary";
+  const cachedData = apiCache.get(cacheKey);
+  if (cachedData) return cachedData;
+
+  const response = await apiClient.get("/api/dashboard/summary");
+  
+  apiCache.set(cacheKey, response.data, 30); // Cache for 30s
+  return response.data;
+};
 
 export const getAuthorDashboard = async () => {
   const response = await apiClient.get("/api/dashboard/stats");

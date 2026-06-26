@@ -44,3 +44,21 @@ export const getAuthorDashboardStats = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+
+export const getPublicSummaryStats = async (req, res) => {
+  try {
+    const [totalBooks, totalAuthors] = await Promise.all([
+      Book.countDocuments(),
+      User.countDocuments({
+        $or: [{ role: "author" }, { role: { $exists: false } }]
+      })
+    ]);
+
+    res.status(200).json({
+      totalBooks,
+      totalAuthors
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}

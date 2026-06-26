@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getBooks } from "../../services/bookService.js";
-import { fetchAuthors } from "../../services/authorService.js";
+import { getPublicSummaryStats } from "../../services/dashboardService.js";
 import { Sparkles } from "lucide-react";
 
 const HERO_IMAGES = [
@@ -49,25 +48,16 @@ const HeroSection = () => {
   const [dbBooksCount, setDbBooksCount] = useState(0);
   const [dbUsersCount, setDbUsersCount] = useState(0);
 
-  // Fetch actual counts from database on mount
+  // Fetch actual counts from database summary on mount
   useEffect(() => {
-    // 1. Get total books
-    getBooks({ limit: 1 })
+    getPublicSummaryStats()
       .then((data) => {
-        if (data && data.totalBooks !== undefined) {
-          setDbBooksCount(data.totalBooks);
+        if (data) {
+          setDbBooksCount(data.totalBooks || 0);
+          setDbUsersCount(data.totalAuthors || 0);
         }
       })
-      .catch((err) => console.error("Error loading total books count:", err));
-
-    // 2. Get total users (authors)
-    fetchAuthors()
-      .then((data) => {
-        if (data && Array.isArray(data.authors)) {
-          setDbUsersCount(data.authors.length);
-        }
-      })
-      .catch((err) => console.error("Error loading total users count:", err));
+      .catch((err) => console.error("Error loading summary stats:", err));
   }, []);
 
   // Set up dynamic animated targets
