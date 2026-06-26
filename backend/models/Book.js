@@ -93,7 +93,8 @@ const signCloudinaryPdfUrl = (url) => {
   }
 
   try {
-    const parts = url.split("/");
+    const cleanUrl = url.split("?")[0].split("#")[0];
+    const parts = cleanUrl.split("/");
     const uploadIndex = parts.findIndex((p) =>
       ["upload", "private", "authenticated"].includes(p)
     );
@@ -102,13 +103,22 @@ const signCloudinaryPdfUrl = (url) => {
     // Get the resource type (e.g., "image", "raw")
     const resourceType = parts[uploadIndex - 1] || "image";
 
-    // Extract public ID (everything after the version segment)
+    // Extract public ID (everything after the uploadIndex)
     let remainingParts = parts.slice(uploadIndex + 1);
-    if (remainingParts[0] && /^v\d+$/.test(remainingParts[0])) {
-      remainingParts = remainingParts.slice(1);
+
+    // Shift off signature segment(s) (s--...--) and version segment(s) (v...) from the front
+    while (remainingParts.length > 0) {
+      const first = remainingParts[0];
+      if (/^s--.*--$/.test(first) || /^v\d+$/.test(first)) {
+        remainingParts.shift();
+      } else {
+        break;
+      }
     }
 
     const publicIdWithExt = remainingParts.join("/");
+    const extMatch = publicIdWithExt.match(/\.[^/.]+$/);
+    const ext = extMatch ? extMatch[0] : "";
     const publicId = publicIdWithExt.replace(/\.[^/.]+$/, "");
 
     // Generate signed URL
@@ -118,6 +128,7 @@ const signCloudinaryPdfUrl = (url) => {
       sign_url: true,
       expires_at: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes (600 seconds)
       secure: true,
+      format: ext ? ext.substring(1) : undefined
     });
   } catch (error) {
     console.error("Error signing Cloudinary PDF URL:", error);
