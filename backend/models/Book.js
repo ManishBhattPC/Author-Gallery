@@ -60,6 +60,12 @@ const bookSchema = new mongoose.Schema(
       trim: true,
     },
 
+    content: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+
     price: {
       type: Number,
       required: true,

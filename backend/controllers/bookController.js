@@ -222,6 +222,7 @@ export const createBook = async (req, res) => {
       author: req.user._id,
       coverImage: coverUpload.secure_url,
       pdfFile: pdfUpload.secure_url,
+      content: content || "",
     });
 
     res.status(201).json(book);

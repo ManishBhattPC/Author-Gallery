@@ -16,6 +16,18 @@ import {
   FaExpand,
   FaQuestionCircle,
   FaTimes,
+  FaPlay,
+  FaPause,
+  FaBookmark,
+  FaStar,
+  FaRegStar,
+  FaVolumeUp,
+  FaVolumeMute,
+  FaCog,
+  FaSun,
+  FaMoon,
+  FaChevronDown,
+  FaChevronUp,
 } from "react-icons/fa";
 
 const BookDetails = () => {
@@ -30,8 +42,190 @@ const BookDetails = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  
+  // Immersive E-Reader States
   const [readerOpen, setReaderOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
+  const [activeChapterIndex, setActiveChapterIndex] = useState(0);
+  const [fontSize, setFontSize] = useState(18); // Default font size in px
+  const [fontFamily, setFontFamily] = useState("serif"); // serif, sans, open-dyslexic
+  const [readerTheme, setReaderTheme] = useState("cream"); // cream, dark, sepia
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [notes, setNotes] = useState("");
+  const [chapterRatings, setChapterRatings] = useState({});
+  const [controlsOpen, setControlsOpen] = useState(false);
+  
+  // Collapsible accordion states inside sidebar
+  const [chaptersExpanded, setChaptersExpanded] = useState(true);
+  const [bookmarksExpanded, setBookmarksExpanded] = useState(false);
+  const [notesExpanded, setNotesExpanded] = useState(false);
+
+  // Helper to parse chapters dynamically from editor content
+  const parseChapters = (text) => {
+    if (!text || !text.trim()) return [];
+    
+    // Split on markers like "Chapter X" or "# Chapter X" or "## Chapter X" or "Ch. X"
+    const parts = text.split(/(?:^|\r?\n)(?=(?:#\s*Chapter|##\s*Chapter|Chapter|CHAPTER|Ch\.)\s*(?:\d+|[IVXLCDM]+)?\b)/i);
+    
+    const chaptersList = [];
+    
+    parts.forEach((part, idx) => {
+      const trimmed = part.trim();
+      if (!trimmed) return;
+      
+      const lines = trimmed.split(/\r?\n/);
+      const firstLine = lines[0];
+      
+      // Match "Chapter [Number] [Optional Title]"
+      const isHeader = /^(?:#\s*Chapter|##\s*Chapter|Chapter|CHAPTER|Ch\.)/i.test(firstLine);
+      
+      if (isHeader) {
+        const title = firstLine.replace(/^(?:#\s*Chapter|##\s*Chapter|Chapter|CHAPTER|Ch\.)\s*(?:\d+|[IVXLCDM]+)?[:.-]?\s*/i, "").trim();
+        const headerPrefix = firstLine.match(/^(?:#\s*Chapter|##\s*Chapter|Chapter|CHAPTER|Ch\.)\s*(?:\d+|[IVXLCDM]+)?/i)[0].replace(/[#\s]/g, "");
+        const bodyText = lines.slice(1).join("\n").trim();
+        
+        chaptersList.push({
+          title: title ? `${headerPrefix}: ${title}` : headerPrefix,
+          content: bodyText,
+        });
+      } else {
+        // Text block before the first chapter (Introduction/Prologue)
+        chaptersList.push({
+          title: idx === 0 ? "Introduction" : `Section ${idx + 1}`,
+          content: trimmed,
+        });
+      }
+    });
+    
+    return chaptersList.length > 0 ? chaptersList : [{ title: "Full Text", content: text }];
+  };
+
+  const chapters = parseChapters(book?.content || "");
+  const activeChapter = chapters[activeChapterIndex] || null;
+
+  // Load/save reader preferences and bookmarks from localStorage
+  useEffect(() => {
+    if (readerOpen && id) {
+      // Load bookmark position
+      const savedBookmark = localStorage.getItem(`bookmark_${id}`);
+      if (savedBookmark !== null) {
+        setActiveChapterIndex(parseInt(savedBookmark, 10));
+      }
+      
+      // Load bookmarks list
+      const savedBookmarksList = localStorage.getItem(`bookmarks_${id}`);
+      if (savedBookmarksList) {
+        setBookmarks(JSON.parse(savedBookmarksList));
+      }
+      
+      // Load notes
+      const savedNotes = localStorage.getItem(`notes_${id}`);
+      if (savedNotes) {
+        setNotes(savedNotes);
+      }
+      
+      // Load ratings
+      const savedRatings = localStorage.getItem(`ratings_${id}`);
+      if (savedRatings) {
+        setChapterRatings(JSON.parse(savedRatings));
+      }
+    }
+  }, [readerOpen, id]);
+
+  const handleSaveNotes = (val) => {
+    setNotes(val);
+    localStorage.setItem(`notes_${id}`, val);
+  };
+
+  const handleToggleBookmark = (chapIdx) => {
+    let updated;
+    if (bookmarks.includes(chapIdx)) {
+      updated = bookmarks.filter((b) => b !== chapIdx);
+    } else {
+      updated = [...bookmarks, chapIdx].sort((a, b) => a - b);
+    }
+    setBookmarks(updated);
+    localStorage.setItem(`bookmarks_${id}`, JSON.stringify(updated));
+  };
+
+  const handleRateChapter = (rating) => {
+    const updated = { ...chapterRatings, [activeChapterIndex]: rating };
+    setChapterRatings(updated);
+    localStorage.setItem(`ratings_${id}`, JSON.stringify(updated));
+  };
+
+  // Text-To-Speech Playback
+  const speakText = (text) => {
+    if (!window.speechSynthesis) return;
+
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    
+    // Remove markup/formatting before speaking
+    const cleanText = text.replace(/<[^>]*>/g, "").trim();
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.onend = () => setIsPlaying(false);
+    utterance.onerror = () => setIsPlaying(false);
+
+    setIsPlaying(true);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => console.error(err));
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  // Track if fullscreen is closed manually via ESC key
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const THEME_STYLES = {
+    cream: {
+      bg: "bg-[#FDF8F3]",
+      text: "text-[#2C1F15]",
+      border: "border-[#E2D7C8]"
+    },
+    dark: {
+      bg: "bg-[#12100F]",
+      text: "text-[#E5DED4]",
+      border: "border-[#2C2522]"
+    },
+    sepia: {
+      bg: "bg-[#F4ECCF]",
+      text: "text-[#433422]",
+      border: "border-[#DED2B2]"
+    }
+  };
+
+  const hasTextContent = book?.content && book.content.trim().length > 0;
 
   useEffect(() => {
     const loadBook = async () => {
@@ -271,7 +465,11 @@ const BookDetails = () => {
           <header className="bg-[#1C1613] border-b border-[#2C211D] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-md shrink-0 gap-4">
             <div className="flex items-center gap-3 min-w-0 flex-1">
               <button
-                onClick={() => setReaderOpen(false)}
+                onClick={() => {
+                  setReaderOpen(false);
+                  if (window.speechSynthesis) window.speechSynthesis.cancel();
+                  setIsPlaying(false);
+                }}
                 className="p-2 rounded-lg hover:bg-slate-800 transition text-slate-400 hover:text-white cursor-pointer shrink-0"
                 title="Exit Reader"
               >
@@ -301,6 +499,22 @@ const BookDetails = () => {
                 <FaInfoCircle />
                 <span className="hidden sm:inline">Info Panel</span>
               </button>
+
+              {/* Settings Toggle Icon */}
+              {hasTextContent && (
+                <button
+                  onClick={() => setControlsOpen(!controlsOpen)}
+                  className={`p-2 sm:p-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 border text-xs sm:text-sm font-semibold ${
+                    controlsOpen 
+                      ? "bg-amber-800/10 border-amber-800/35 text-amber-500 hover:bg-amber-900/20" 
+                      : "border-slate-700 text-slate-300 hover:bg-slate-800"
+                  }`}
+                  title="Reader Preferences"
+                >
+                  <FaCog />
+                  <span className="hidden sm:inline">Settings</span>
+                </button>
+              )}
 
               <a
                 href={book?.pdfFile}
@@ -342,7 +556,7 @@ const BookDetails = () => {
                   </div>
 
                   {/* Book Cover mockup inside sidebar */}
-                  <div className="aspect-[3/4] w-40 sm:w-48 mx-auto bg-slate-200 border-4 border-[#38231B] rounded-xl shadow-lg overflow-hidden relative">
+                  <div className="aspect-[3/4] w-36 sm:w-40 mx-auto bg-slate-200 border-4 border-[#38231B] rounded-xl shadow-lg overflow-hidden relative">
                     <img src={cover} alt={book?.title} className="w-full h-full object-cover" />
                   </div>
 
@@ -350,7 +564,7 @@ const BookDetails = () => {
                     <span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
                       {book?.genres?.[0] || "Book"}
                     </span>
-                    <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#2C1F15] leading-tight">
+                    <h2 className="font-serif text-lg sm:text-xl font-bold text-[#2C1F15] leading-tight">
                       {book?.title}
                     </h2>
                     <p className="text-xs sm:text-sm font-medium text-amber-700 mt-1">
@@ -358,58 +572,436 @@ const BookDetails = () => {
                     </p>
                   </div>
 
-                  <div className="border-t border-[#DFD5C6] pt-4">
-                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                      Synopsis
-                    </h4>
-                    <p className="text-xs sm:text-sm leading-relaxed text-slate-700 line-clamp-6" title={book?.description}>
-                      {book?.description}
-                    </p>
-                  </div>
-
-                  <div className="border-t border-[#DFD5C6] pt-4 space-y-3 text-xs text-slate-500">
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Published Date</span>
-                      <span className="font-bold text-slate-700">{formattedDate}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-semibold">Price/Tier</span>
-                      <span className="font-bold text-slate-700">₹{book?.price}</span>
-                    </div>
-                  </div>
-
-                  {/* Quick Reader Help Guidelines */}
-                  <div className="border-t border-[#DFD5C6] pt-4">
-                    <div className="bg-amber-50 border border-amber-200/50 rounded-xl p-3.5 flex gap-2.5">
-                      <FaQuestionCircle className="text-amber-700 shrink-0 text-sm mt-0.5" />
-                      <div className="text-[11px] text-amber-800 leading-normal">
-                        <p className="font-bold mb-1">E-Reader Tips:</p>
-                        <ul className="list-disc pl-3.5 space-y-1">
-                          <li>Use your cursor to scroll page by page.</li>
-                          <li>Hover overlay bottom tools for zoom options.</li>
-                        </ul>
+                  {/* Sidebar Accordions */}
+                  <div className="border-t border-[#DFD5C6] pt-4 space-y-4">
+                    
+                    {/* Chapters Accordion */}
+                    {hasTextContent && (
+                      <div className="border-b border-[#DFD5C6]/60 pb-3">
+                        <button 
+                          onClick={() => setChaptersExpanded(!chaptersExpanded)}
+                          className="w-full flex items-center justify-between text-xs font-bold text-slate-700 uppercase tracking-wider py-1.5 text-left cursor-pointer"
+                        >
+                          <span>Chapters ({chapters.length})</span>
+                          {chaptersExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                        </button>
+                        
+                        {chaptersExpanded && (
+                          <div className="mt-2 max-h-52 overflow-y-auto space-y-1.5 pr-1">
+                            {chapters.map((chap, idx) => {
+                              const isActive = idx === activeChapterIndex;
+                              const isBookmarked = bookmarks.includes(idx);
+                              return (
+                                <button
+                                  key={idx}
+                                  onClick={() => {
+                                    setActiveChapterIndex(idx);
+                                    if (window.speechSynthesis) window.speechSynthesis.cancel();
+                                    setIsPlaying(false);
+                                    // auto-close sidebar on mobile
+                                    if (window.innerWidth < 768) setSidebarOpen(false);
+                                  }}
+                                  className={`w-full text-left px-3 py-2 rounded-lg text-xs transition cursor-pointer flex items-center justify-between ${
+                                    isActive 
+                                      ? "bg-amber-800/10 text-amber-900 border-l-4 border-amber-800 font-bold" 
+                                      : "text-slate-700 hover:bg-slate-200/60"
+                                  }`}
+                                >
+                                  <span className="truncate pr-2">{chap.title}</span>
+                                  {isBookmarked && <FaBookmark className="text-amber-700 shrink-0 text-[10px]" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
+                    )}
+
+                    {/* Bookmarks Accordion */}
+                    {hasTextContent && (
+                      <div className="border-b border-[#DFD5C6]/60 pb-3">
+                        <button 
+                          onClick={() => setBookmarksExpanded(!bookmarksExpanded)}
+                          className="w-full flex items-center justify-between text-xs font-bold text-slate-700 uppercase tracking-wider py-1.5 text-left cursor-pointer"
+                        >
+                          <span>Bookmarks ({bookmarks.length})</span>
+                          {bookmarksExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                        </button>
+                        
+                        {bookmarksExpanded && (
+                          <div className="mt-2 space-y-1.5">
+                            {bookmarks.length === 0 ? (
+                              <p className="text-[11px] text-slate-400 italic px-2">No bookmarks saved.</p>
+                            ) : (
+                              bookmarks.map((chapIdx) => (
+                                <button
+                                  key={chapIdx}
+                                  onClick={() => {
+                                    setActiveChapterIndex(chapIdx);
+                                    if (window.speechSynthesis) window.speechSynthesis.cancel();
+                                    setIsPlaying(false);
+                                    if (window.innerWidth < 768) setSidebarOpen(false);
+                                  }}
+                                  className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-slate-700 hover:bg-slate-200/60 transition cursor-pointer flex items-center gap-2"
+                                >
+                                  <FaBookmark className="text-amber-700 text-[10px]" />
+                                  <span className="truncate">{chapters[chapIdx]?.title || `Chapter ${chapIdx + 1}`}</span>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Reader Notes Accordion */}
+                    {hasTextContent && (
+                      <div className="border-b border-[#DFD5C6]/60 pb-3">
+                        <button 
+                          onClick={() => setNotesExpanded(!notesExpanded)}
+                          className="w-full flex items-center justify-between text-xs font-bold text-slate-700 uppercase tracking-wider py-1.5 text-left cursor-pointer"
+                        >
+                          <span>Reader Notes</span>
+                          {notesExpanded ? <FaChevronUp /> : <FaChevronDown />}
+                        </button>
+                        
+                        {notesExpanded && (
+                          <div className="mt-2">
+                            <textarea
+                              value={notes}
+                              onChange={(e) => handleSaveNotes(e.target.value)}
+                              placeholder="Write notes while reading..."
+                              rows={4}
+                              className="w-full text-xs p-2.5 rounded-lg border border-[#DFD5C6] bg-[#FAF5EE] text-[#2C1F15] focus:outline-none focus:border-amber-700/50 resize-none font-sans"
+                            />
+                            <p className="text-[9px] text-slate-400 mt-1 italic">Auto-saves to browser storage</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Synopsis (Fallback / Info) */}
+                    <div className="pt-2">
+                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                        Synopsis
+                      </h4>
+                      <p className="text-xs leading-relaxed text-slate-700 line-clamp-6" title={book?.description}>
+                        {book?.description}
+                      </p>
                     </div>
+
                   </div>
                 </div>
               </aside>
             )}
 
-            {/* Simulated Desktop Mahogany desk & Hardcover book binder container */}
-            <main className="flex-1 bg-gradient-to-br from-[#1C1512] via-[#120F0D] to-[#0A0706] p-2 sm:p-6 md:p-8 flex items-center justify-center overflow-hidden relative">
-              
-              {/* Outer Hardcover leather binder mockup - Responsive */}
-              <div className="w-full max-w-5xl h-full flex items-stretch bg-[#221713] border border-[#2C1F1B] md:border-4 md:border-[#2A1812] md:bg-[#38231B] md:shadow-[0_20px_50px_rgba(0,0,0,0.85)] rounded-xl md:rounded-[32px] p-1 sm:p-2 md:p-4 relative overflow-hidden">
+            {/* MAIN READER WORKSPACE PANEL */}
+            {hasTextContent ? (
+              // Immersive HTML Text E-Reader
+              <div className={`flex-1 flex flex-col overflow-y-auto relative ${THEME_STYLES[readerTheme].bg} transition-colors duration-300`}>
                 
-                {/* Styled e-Reader Iframe */}
-                <iframe
-                  src={`${book?.pdfFile}#toolbar=0`}
-                  title={book?.title}
-                  className="w-full h-full rounded-lg md:rounded-2xl bg-white border border-[#DFD5C6] shadow-[inset_0_2px_8px_rgba(0,0,0,0.12)] z-0"
-                />
-              </div>
+                {/* Desktop Floating Settings Panel / Mobile bottom sheet */}
+                {controlsOpen && (
+                  <>
+                    {/* Backdrop for closing overlay on click outside */}
+                    <div 
+                      onClick={() => setControlsOpen(false)}
+                      className="absolute inset-0 bg-transparent z-30"
+                    />
 
-            </main>
+                    {/* Floating Settings Card */}
+                    <div className="absolute md:right-6 md:top-6 fixed bottom-0 left-0 right-0 z-40 bg-[#1C1613] border-t border-[#2C211D] md:border md:rounded-2xl p-5 shadow-2xl md:w-72 text-slate-100 flex flex-col gap-4 rounded-t-3xl md:rounded-2xl">
+                      <div className="flex justify-between items-center border-b border-[#2C211D] pb-3">
+                        <span className="text-sm font-bold font-serif text-amber-500">Reader Options</span>
+                        <button 
+                          onClick={() => setControlsOpen(false)}
+                          className="text-slate-400 hover:text-white p-1 cursor-pointer"
+                        >
+                          <FaTimes size={14} />
+                        </button>
+                      </div>
+
+                      {/* Font size control */}
+                      <div className="flex flex-col gap-2">
+                        <span className="text-xs text-slate-400 font-semibold">Font Size</span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => setFontSize(Math.max(14, fontSize - 1))}
+                            disabled={fontSize <= 14}
+                            className="flex-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+                          >
+                            A-
+                          </button>
+                          <span className="text-xs font-bold text-center w-8">{fontSize}px</span>
+                          <button
+                            onClick={() => setFontSize(Math.min(28, fontSize + 1))}
+                            disabled={fontSize >= 28}
+                            className="flex-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+                          >
+                            A+
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Font Family control */}
+                      <div className="flex flex-col gap-2">
+                        <span className="text-xs text-slate-400 font-semibold">Typography style</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setFontFamily("serif")}
+                            className={`flex-1 px-3 py-2 rounded-xl text-xs font-serif font-bold transition cursor-pointer border ${
+                              fontFamily === "serif" 
+                                ? "bg-amber-800 border-amber-500 text-white" 
+                                : "bg-slate-800 border-transparent text-slate-300 hover:bg-slate-700"
+                            }`}
+                          >
+                            Classic Serif
+                          </button>
+                          <button
+                            onClick={() => setFontFamily("sans")}
+                            className={`flex-1 px-3 py-2 rounded-xl text-xs font-sans font-bold transition cursor-pointer border ${
+                              fontFamily === "sans" 
+                                ? "bg-amber-800 border-amber-500 text-white" 
+                                : "bg-slate-800 border-transparent text-slate-300 hover:bg-slate-700"
+                            }`}
+                          >
+                            Modern Sans
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Page Theme controls */}
+                      <div className="flex flex-col gap-2">
+                        <span className="text-xs text-slate-400 font-semibold">Reading Themes</span>
+                        <div className="grid grid-cols-3 gap-2">
+                          <button
+                            onClick={() => setReaderTheme("cream")}
+                            className={`px-2 py-2 rounded-xl text-[11px] font-semibold border transition cursor-pointer bg-[#FDF8F3] text-[#2C1F15] ${
+                              readerTheme === "cream" ? "border-amber-500 ring-2 ring-amber-500/30" : "border-slate-700"
+                            }`}
+                          >
+                            Parchment
+                          </button>
+                          <button
+                            onClick={() => setReaderTheme("sepia")}
+                            className={`px-2 py-2 rounded-xl text-[11px] font-semibold border transition cursor-pointer bg-[#F4ECCF] text-[#433422] ${
+                              readerTheme === "sepia" ? "border-amber-500 ring-2 ring-amber-500/30" : "border-slate-700"
+                            }`}
+                          >
+                            Sepia
+                          </button>
+                          <button
+                            onClick={() => setReaderTheme("dark")}
+                            className={`px-2 py-2 rounded-xl text-[11px] font-semibold border transition cursor-pointer bg-[#12100F] text-[#E5DED4] ${
+                              readerTheme === "dark" ? "border-amber-500 ring-2 ring-amber-500/30" : "border-slate-700"
+                            }`}
+                          >
+                            Dark Mode
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Text to Speech controls */}
+                      <div className="flex flex-col gap-2 border-t border-[#2C211D] pt-3">
+                        <span className="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
+                          <FaVolumeUp />
+                          Voice Read Aloud
+                        </span>
+                        <button
+                          onClick={() => speakText(activeChapter?.content || "")}
+                          className={`w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
+                            isPlaying 
+                              ? "bg-rose-950/60 border border-rose-800 text-rose-300 hover:bg-rose-900/60" 
+                              : "bg-amber-800 hover:bg-amber-900 text-white"
+                          }`}
+                        >
+                          {isPlaying ? (
+                            <>
+                              <FaPause /> Stop Voice
+                            </>
+                          ) : (
+                            <>
+                              <FaPlay /> Speak Chapter
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Fullscreen control */}
+                      <button
+                        onClick={toggleFullscreen}
+                        className="w-full border border-slate-700 hover:bg-slate-800 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer mt-1"
+                      >
+                        <FaExpand size={11} />
+                        {isFullscreen ? "Exit Fullscreen" : "Fullscreen Mode"}
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {/* Centered Book Pages Canvas */}
+                <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 sm:py-12 flex justify-center">
+                  <div className={`w-full max-w-3xl min-h-full rounded-2xl shadow-lg border p-6 sm:p-12 transition-all duration-300 ${THEME_STYLES[readerTheme].bg} ${THEME_STYLES[readerTheme].text} ${THEME_STYLES[readerTheme].border} flex flex-col justify-between`}>
+                    
+                    {/* Chapter Header Typography */}
+                    <div className="border-b border-amber-900/10 dark:border-slate-700/20 pb-4 mb-6 sm:mb-8 text-center">
+                      <span className="font-serif font-bold uppercase tracking-wider text-xs text-amber-700 dark:text-amber-500/80">
+                        {activeChapter?.title?.split(":")[0] || `Chapter ${activeChapterIndex + 1}`}
+                      </span>
+                      <h1 className="font-serif font-bold text-2xl sm:text-3xl mt-1 leading-tight text-[#2C1F15] dark:text-slate-100">
+                        {activeChapter?.title?.split(":")[1]?.trim() || activeChapter?.title || "Story Section"}
+                      </h1>
+                    </div>
+
+                    {/* Styled Reading Text Area */}
+                    <div className="flex-1 select-text">
+                      {activeChapter?.content ? (
+                        (() => {
+                          const paragraphs = activeChapter.content
+                            .split(/\n+/)
+                            .map(p => p.trim())
+                            .filter(p => p.length > 0);
+                            
+                          if (paragraphs.length === 0) return null;
+                          
+                          const firstPara = paragraphs[0];
+                          const firstLetter = firstPara.charAt(0);
+                          const restOfFirstPara = firstPara.slice(1);
+                          
+                          return (
+                            <div 
+                              style={{ fontSize: `${fontSize}px` }} 
+                              className={`leading-relaxed text-justify select-text space-y-5 ${
+                                fontFamily === "serif" ? "font-serif" : "font-sans"
+                              }`}
+                            >
+                              <p>
+                                <span className="float-left text-5xl sm:text-6xl font-serif font-bold text-[#8C4E35] mr-3 mt-1.5 leading-none">
+                                  {firstLetter}
+                                </span>
+                                {restOfFirstPara}
+                              </p>
+                              {paragraphs.slice(1).map((para, idx) => (
+                                <p key={idx} className="indent-6 sm:indent-8">
+                                  {para}
+                                </p>
+                              ))}
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        <p className="text-slate-400 italic text-center py-10">This chapter contains no text content.</p>
+                      )}
+                    </div>
+
+                    {/* Book page Footer Navigation Flow */}
+                    <div className="border-t border-amber-900/10 dark:border-slate-700/20 pt-8 mt-12 space-y-6">
+                      
+                      {/* Navigation Chapter Buttons */}
+                      <div className="flex flex-wrap items-center justify-between gap-4">
+                        
+                        {/* Prev button */}
+                        <button
+                          onClick={() => {
+                            if (activeChapterIndex > 0) {
+                              setActiveChapterIndex(activeChapterIndex - 1);
+                              localStorage.setItem(`bookmark_${id}`, activeChapterIndex - 1);
+                              if (window.speechSynthesis) window.speechSynthesis.cancel();
+                              setIsPlaying(false);
+                            }
+                          }}
+                          disabled={activeChapterIndex === 0}
+                          className="bg-[#722F37] hover:bg-[#5C242B] disabled:opacity-30 disabled:hover:bg-[#722F37] text-white border border-[#5C242B] px-4 py-2.5 rounded-xl flex flex-col items-start cursor-pointer transition select-none min-w-[120px] max-w-[160px] flex-1 disabled:cursor-not-allowed"
+                        >
+                          <span className="text-[10px] text-amber-300 font-bold uppercase">Previous</span>
+                          <span className="text-xs truncate w-full font-serif font-semibold text-slate-100">
+                            {activeChapterIndex > 0 ? chapters[activeChapterIndex - 1]?.title?.split(":")[0] || `Ch. ${activeChapterIndex}` : "At Start"}
+                          </span>
+                        </button>
+
+                        {/* Continue reading Bookmark btn */}
+                        <button
+                          onClick={() => {
+                            handleToggleBookmark(activeChapterIndex);
+                            alert("Bookmark Saved! 🔖 Progress saved to this chapter.");
+                          }}
+                          className="bg-[#722F37] hover:bg-[#5C242B] text-white px-5 py-3.5 rounded-xl font-bold cursor-pointer transition shadow-md flex items-center gap-2 select-none text-xs tracking-wide flex-1 justify-center sm:flex-initial"
+                        >
+                          <FaBookmark className="text-amber-300 text-xs" />
+                          <span>Bookmark Progress</span>
+                        </button>
+
+                        {/* Next button */}
+                        <button
+                          onClick={() => {
+                            if (activeChapterIndex < chapters.length - 1) {
+                              setActiveChapterIndex(activeChapterIndex + 1);
+                              localStorage.setItem(`bookmark_${id}`, activeChapterIndex + 1);
+                              if (window.speechSynthesis) window.speechSynthesis.cancel();
+                              setIsPlaying(false);
+                            }
+                          }}
+                          disabled={activeChapterIndex === chapters.length - 1}
+                          className="bg-[#722F37] hover:bg-[#5C242B] disabled:opacity-30 disabled:hover:bg-[#722F37] text-white border border-[#5C242B] px-4 py-2.5 rounded-xl flex flex-col items-end cursor-pointer transition select-none min-w-[120px] max-w-[160px] flex-1 disabled:cursor-not-allowed"
+                        >
+                          <span className="text-[10px] text-amber-300 font-bold uppercase">Next Chapter</span>
+                          <span className="text-xs truncate w-full font-serif font-semibold text-slate-100 text-right">
+                            {activeChapterIndex < chapters.length - 1 ? chapters[activeChapterIndex + 1]?.title?.split(":")[0] || `Ch. ${activeChapterIndex + 2}` : "End of Book"}
+                          </span>
+                        </button>
+
+                      </div>
+
+                      {/* Chapter rating widget */}
+                      <div className="flex flex-col sm:flex-row items-center justify-between border-t border-amber-900/5 pt-6 gap-2">
+                        <span className="text-xs text-slate-500 font-medium font-serif italic">Rate this chapter:</span>
+                        <div className="flex items-center gap-1.5">
+                          {[1, 2, 3, 4, 5].map((star) => {
+                            const activeRating = chapterRatings[activeChapterIndex] || 0;
+                            const isSelected = star <= activeRating;
+                            return (
+                              <button
+                                key={star}
+                                onClick={() => handleRateChapter(star)}
+                                className="text-lg cursor-pointer transition transform hover:scale-110"
+                              >
+                                {isSelected ? (
+                                  <FaStar className="text-amber-500" />
+                                ) : (
+                                  <FaRegStar className="text-slate-400 hover:text-amber-500" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              // PDF Iframe Reader Fallback (For uploaded PDF books that lack raw content text)
+              <>
+                {/* Simulated Desktop Mahogany desk & Hardcover book binder container */}
+                <main className="flex-1 bg-gradient-to-br from-[#1C1512] via-[#120F0D] to-[#0A0706] p-2 sm:p-6 md:p-8 flex items-center justify-center overflow-hidden relative">
+                  
+                  {/* Outer Hardcover leather binder mockup - Responsive */}
+                  <div className="w-full max-w-5xl h-full flex items-stretch bg-[#221713] border border-[#2C1F1B] md:border-4 md:border-[#2A1812] md:bg-[#38231B] md:shadow-[0_20px_50px_rgba(0,0,0,0.85)] rounded-xl md:rounded-[32px] p-1 sm:p-2 md:p-4 relative overflow-hidden">
+                    
+                    {/* Styled e-Reader Iframe */}
+                    <iframe
+                      src={`${book?.pdfFile}#toolbar=0`}
+                      title={book?.title}
+                      className="w-full h-full rounded-lg md:rounded-2xl bg-white border border-[#DFD5C6] shadow-[inset_0_2px_8px_rgba(0,0,0,0.12)] z-0"
+                    />
+                  </div>
+
+                </main>
+              </>
+            )}
           </div>
         </div>
       )}
