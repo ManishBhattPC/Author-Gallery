@@ -489,7 +489,8 @@ const AdminDashboard = () => {
                   placeholder={`Search ${activeTab === "users" ? "members" : activeTab.replace("-", " ")}...`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="admin-input pl-10 text-xs focus:ring-1 focus:ring-[#d87f4a]/50"
+                  className="admin-input text-xs focus:ring-1 focus:ring-[#d87f4a]/50"
+                  style={{ paddingLeft: "38px" }}
                 />
               </div>
             ) : (
