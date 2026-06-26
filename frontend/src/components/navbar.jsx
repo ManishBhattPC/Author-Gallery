@@ -342,6 +342,54 @@ const Navbar = () => {
                     <span>{item.label}</span>
                   </NavLink>
                 ))}
+
+                {user && (
+                  <>
+                    <div className="h-px bg-slate-200/50 my-2" />
+                    <NavLink
+                      to={user.role === "admin" ? "/admin-dashboard" : "/author-dashboard"}
+                      onClick={() => setMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                          isActive 
+                            ? "bg-amber-800 text-white shadow-sm" 
+                            : "text-slate-700 hover:bg-slate-100"
+                        }`
+                      }
+                    >
+                      <LayoutDashboard size={18} />
+                      <span>{user.role === "admin" ? "Admin Panel" : "Author Dashboard"}</span>
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/write"
+                      onClick={() => setMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                          isActive 
+                            ? "bg-amber-800 text-white shadow-sm" 
+                            : "text-slate-700 hover:bg-slate-100"
+                        }`
+                      }
+                    >
+                      <PenTool size={18} />
+                      <span>Write a Book</span>
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/author-profile"
+                      onClick={() => setMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                          isActive 
+                            ? "bg-amber-800 text-white shadow-sm" 
+                            : "text-slate-700 hover:bg-slate-100"
+                        }`
+                      }
+                    >
+                      <Settings size={18} />
+                      <span>Profile Settings</span>
+                    </NavLink>
+                  </>
+                )}
               </div>
             </div>
 
@@ -366,48 +414,13 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  {user.role === "admin" ? (
-                    <Link
-                      to="/admin-dashboard"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition text-amber-800 font-bold"
-                    >
-                      <LayoutDashboard size={18} className="text-amber-800" />
-                      <span>Admin Panel</span>
-                    </Link>
-                  ) : (
-                    <Link
-                      to="/author-dashboard"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition"
-                    >
-                      <LayoutDashboard size={18} className="text-slate-400" />
-                      <span>Author Dashboard</span>
-                    </Link>
-                  )}
-                  <Link
-                    to="/dashboard/write"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition"
-                  >
-                    <PenTool size={18} className="text-slate-400" />
-                    <span>Write a Book</span>
-                  </Link>
-                  <Link
-                    to="/dashboard/author-profile"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition"
-                  >
-                    <Settings size={18} className="text-slate-400" />
-                    <span>Profile Settings</span>
-                  </Link>
                   <button
                     type="button"
                     onClick={() => {
                       toggleTheme();
                       setMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer text-left"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer text-left"
                   >
                     {theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches) ? (
                       <>
@@ -424,7 +437,7 @@ const Navbar = () => {
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-rose-600 rounded-xl hover:bg-rose-50 transition mt-2 cursor-pointer"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-rose-600 rounded-xl hover:bg-rose-50 transition mt-2 cursor-pointer"
                   >
                     <LogOut size={18} />
                     <span>Sign Out</span>
