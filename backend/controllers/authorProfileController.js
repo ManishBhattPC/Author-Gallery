@@ -1,6 +1,7 @@
 import AuthorProfile from "../models/authorProfile.js";
 import User from "../models/User.js";
 import uploadToCloudinary from "../utils/uploadToCloudinary.js"; // Cloudinary upload
+import deleteFromCloudinary from "../utils/deleteFromCloudinary.js";
 
 // Create Author Profile
 export const createAuthorProfile = async (req, res) => {
@@ -109,6 +110,9 @@ export const updateAuthorProfile = async (req, res) => {
 
     // Upload profile image to Cloudinary if provided
     if (req.file) {
+      if (profile.profileImage) {
+        await deleteFromCloudinary(profile.profileImage);
+      }
       const upload = await uploadToCloudinary(req.file.buffer, "author-profiles");
       profile.profileImage = upload.secure_url; // Store Cloudinary URL
     }

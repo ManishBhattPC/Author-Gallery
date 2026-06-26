@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import cloudinary from "../config/cloudinary.js";
+import deleteFromCloudinary from "../utils/deleteFromCloudinary.js";
 
 const bookSchema = new mongoose.Schema(
   {
@@ -158,6 +159,22 @@ bookSchema.set("toObject", {
     }
     return ret;
   },
+});
+
+// Pre-deleteOne hook to delete assets from Cloudinary when a book document is deleted
+bookSchema.pre("deleteOne", { document: true, query: false }, async function (next) {
+  try {
+    if (this.coverImage) {
+      await deleteFromCloudinary(this.coverImage);
+    }
+    if (this.pdfFile) {
+      await deleteFromCloudinary(this.pdfFile);
+    }
+    next();
+  } catch (error) {
+    console.error("Error in Book pre-deleteOne middleware:", error);
+    next(error);
+  }
 });
 
 const Book = mongoose.model("Book", bookSchema);

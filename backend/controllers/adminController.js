@@ -96,7 +96,10 @@ export const deleteAuthor = async (req, res) => {
     }
 
     // Delete author profile
-    await AuthorProfile.deleteOne({ user: authorId });
+    const profile = await AuthorProfile.findOne({ user: authorId });
+    if (profile) {
+      await profile.deleteOne();
+    }
 
     // Delete all books by this author
     const authorBooks = await Book.find({ author: authorId });
@@ -105,7 +108,11 @@ export const deleteAuthor = async (req, res) => {
     // Delete reports/reviews on those books
     await Report.deleteMany({ book: { $in: bookIds } });
     await Review.deleteMany({ book: { $in: bookIds } });
-    await Book.deleteMany({ author: authorId });
+    
+    // Delete each book document individually to trigger Cloudinary deletion middleware
+    for (const book of authorBooks) {
+      await book.deleteOne();
+    }
 
     // Delete reports/reviews directly against the author profile
     await Report.deleteMany({ author: authorId });

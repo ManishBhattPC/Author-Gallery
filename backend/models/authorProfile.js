@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import deleteFromCloudinary from "../utils/deleteFromCloudinary.js";
 
 const authorProfileSchema = new mongoose.Schema(
   {
@@ -70,6 +71,19 @@ const authorProfileSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Pre-deleteOne hook to delete profile image from Cloudinary when profile is deleted
+authorProfileSchema.pre("deleteOne", { document: true, query: false }, async function (next) {
+  try {
+    if (this.profileImage) {
+      await deleteFromCloudinary(this.profileImage);
+    }
+    next();
+  } catch (error) {
+    console.error("Error in AuthorProfile pre-deleteOne middleware:", error);
+    next(error);
+  }
+});
 
 const AuthorProfile = mongoose.model(
   "AuthorProfile",
