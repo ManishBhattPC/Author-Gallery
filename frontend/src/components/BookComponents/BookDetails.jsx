@@ -15,6 +15,7 @@ import {
   FaInfoCircle,
   FaExpand,
   FaQuestionCircle,
+  FaTimes,
 } from "react-icons/fa";
 
 const BookDetails = () => {
@@ -267,30 +268,30 @@ const BookDetails = () => {
         <div className="fixed inset-0 z-50 flex flex-col bg-[#120F0D] text-slate-100 font-sans">
           
           {/* Header Bar */}
-          <header className="bg-[#1C1613] border-b border-[#2C211D] px-6 py-4 flex items-center justify-between shadow-md shrink-0">
-            <div className="flex items-center gap-4">
+          <header className="bg-[#1C1613] border-b border-[#2C211D] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-md shrink-0 gap-4">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
               <button
                 onClick={() => setReaderOpen(false)}
-                className="p-2 rounded-lg hover:bg-slate-800 transition text-slate-400 hover:text-white cursor-pointer"
+                className="p-2 rounded-lg hover:bg-slate-800 transition text-slate-400 hover:text-white cursor-pointer shrink-0"
                 title="Exit Reader"
               >
                 <FaArrowLeft className="text-lg" />
               </button>
-              <div className="border-l border-slate-700 h-6 hidden sm:block" />
-              <div>
-                <h3 className="font-serif font-bold text-base sm:text-lg text-slate-100 truncate max-w-xs sm:max-w-md">
+              <div className="border-l border-slate-700 h-6 hidden sm:block shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h3 className="font-serif font-bold text-sm sm:text-lg text-slate-100 truncate">
                   {book?.title}
                 </h3>
-                <p className="text-xs text-amber-500/80 font-medium">
+                <p className="text-[10px] sm:text-xs text-amber-500/80 font-medium truncate">
                   by {authorName}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className={`p-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 border text-sm font-semibold ${
+                className={`p-2 sm:p-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 border text-xs sm:text-sm font-semibold ${
                   sidebarOpen 
                     ? "bg-amber-800/10 border-amber-800/35 text-amber-500 hover:bg-amber-900/20" 
                     : "border-slate-700 text-slate-300 hover:bg-slate-800"
@@ -305,7 +306,7 @@ const BookDetails = () => {
                 href={book?.pdfFile}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-amber-700 hover:bg-amber-800 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2"
+                className="bg-amber-700 hover:bg-amber-800 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2"
                 title="Open PDF directly"
               >
                 <FaExpand className="text-xs" />
@@ -317,12 +318,31 @@ const BookDetails = () => {
           {/* Main workspace */}
           <div className="flex-1 flex overflow-hidden relative">
             
+            {/* Mobile Backdrop scrim for collapsible sidebar */}
+            {sidebarOpen && (
+              <div 
+                onClick={() => setSidebarOpen(false)}
+                className="absolute inset-0 bg-black/60 z-10 md:hidden transition-opacity duration-300"
+              />
+            )}
+
             {/* Vintage Parchment Collapsible Sidebar */}
             {sidebarOpen && (
-              <aside className="w-80 bg-[#FDF8F3] text-[#3E3024] flex flex-col shrink-0 shadow-2xl z-20 transition-all duration-300 overflow-y-auto fixed md:relative top-[73px] md:top-0 bottom-0 left-0 md:h-full border-r border-[#DFD5C6]">
-                <div className="p-6 space-y-6">
+              <aside className="w-72 sm:w-80 bg-[#FDF8F3] text-[#3E3024] flex flex-col shrink-0 shadow-2xl z-20 transition-all duration-300 overflow-y-auto absolute md:relative top-0 bottom-0 left-0 h-full border-r border-[#DFD5C6]">
+                <div className="p-5 sm:p-6 space-y-5 sm:space-y-6">
+                  {/* Mobile Close Button inside sidebar header */}
+                  <div className="flex justify-between items-center md:hidden">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Book Details</span>
+                    <button
+                      onClick={() => setSidebarOpen(false)}
+                      className="p-1.5 rounded-lg hover:bg-slate-200 text-[#6D5E4D] hover:text-[#2C1F15] cursor-pointer transition"
+                    >
+                      <FaTimes className="text-sm" />
+                    </button>
+                  </div>
+
                   {/* Book Cover mockup inside sidebar */}
-                  <div className="aspect-[3/4] w-48 mx-auto bg-slate-200 border-4 border-[#38231B] rounded-xl shadow-lg overflow-hidden relative">
+                  <div className="aspect-[3/4] w-40 sm:w-48 mx-auto bg-slate-200 border-4 border-[#38231B] rounded-xl shadow-lg overflow-hidden relative">
                     <img src={cover} alt={book?.title} className="w-full h-full object-cover" />
                   </div>
 
@@ -330,10 +350,10 @@ const BookDetails = () => {
                     <span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
                       {book?.genres?.[0] || "Book"}
                     </span>
-                    <h2 className="font-serif text-2xl font-bold text-[#2C1F15] leading-tight">
+                    <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#2C1F15] leading-tight">
                       {book?.title}
                     </h2>
-                    <p className="text-sm font-medium text-amber-700 mt-1">
+                    <p className="text-xs sm:text-sm font-medium text-amber-700 mt-1">
                       by {authorName}
                     </p>
                   </div>
@@ -342,7 +362,7 @@ const BookDetails = () => {
                     <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
                       Synopsis
                     </h4>
-                    <p className="text-sm leading-relaxed text-slate-700 line-clamp-6" title={book?.description}>
+                    <p className="text-xs sm:text-sm leading-relaxed text-slate-700 line-clamp-6" title={book?.description}>
                       {book?.description}
                     </p>
                   </div>
@@ -376,16 +396,16 @@ const BookDetails = () => {
             )}
 
             {/* Simulated Desktop Mahogany desk & Hardcover book binder container */}
-            <main className="flex-1 bg-gradient-to-br from-[#1C1512] via-[#120F0D] to-[#0A0706] p-4 sm:p-8 flex items-center justify-center overflow-hidden relative">
+            <main className="flex-1 bg-gradient-to-br from-[#1C1512] via-[#120F0D] to-[#0A0706] p-2 sm:p-6 md:p-8 flex items-center justify-center overflow-hidden relative">
               
               {/* Outer Hardcover leather binder mockup - Responsive */}
-              <div className="w-full max-w-5xl h-full flex items-stretch md:bg-[#38231B] md:border-4 md:border-[#2A1812] md:shadow-[0_20px_50px_rgba(0,0,0,0.85)] md:rounded-[32px] md:p-4 relative overflow-hidden bg-white dark:bg-slate-900">
+              <div className="w-full max-w-5xl h-full flex items-stretch bg-[#221713] border border-[#2C1F1B] md:border-4 md:border-[#2A1812] md:bg-[#38231B] md:shadow-[0_20px_50px_rgba(0,0,0,0.85)] rounded-xl md:rounded-[32px] p-1 sm:p-2 md:p-4 relative overflow-hidden">
                 
                 {/* Styled e-Reader Iframe */}
                 <iframe
                   src={`${book?.pdfFile}#toolbar=0`}
                   title={book?.title}
-                  className="w-full h-full rounded-2xl bg-white border border-[#DFD5C6] shadow-[inset_0_2px_8px_rgba(0,0,0,0.12)] z-0"
+                  className="w-full h-full rounded-lg md:rounded-2xl bg-white border border-[#DFD5C6] shadow-[inset_0_2px_8px_rgba(0,0,0,0.12)] z-0"
                 />
               </div>
 
