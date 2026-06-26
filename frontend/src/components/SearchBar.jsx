@@ -130,7 +130,7 @@ const SearchBar = ({ search = "", setSearch, onSearch, placeholder = "Search boo
           }}
           onFocus={() => setShowDropdown(true)}
           placeholder={placeholder}
-          className="w-full rounded-full border border-slate-200 bg-slate-50 px-4 pl-12 py-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:focus:border-amber-400 dark:focus:ring-amber-950/30"
+          className="w-full rounded-full border border-slate-300 bg-white px-4 pl-12 py-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:border-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:focus:border-amber-400 dark:focus:ring-amber-950/30"
         />
         
         {loading && (
@@ -142,7 +142,7 @@ const SearchBar = ({ search = "", setSearch, onSearch, placeholder = "Search boo
 
       {/* Autocomplete Suggestions Overlay */}
       {showDropdown && hasSuggestions && (
-        <div className="absolute left-0 right-0 mt-2 bg-slate-50 border border-slate-200 rounded-3xl shadow-xl z-50 max-h-96 overflow-y-auto p-4 space-y-4 text-left">
+        <div className="absolute left-0 right-0 mt-2 bg-white border border-slate-200/80 rounded-3xl shadow-xl z-50 max-h-96 overflow-y-auto p-4 space-y-4 text-left dark:bg-slate-100 dark:border-slate-800">
           
           {/* Categories / Genres */}
           {suggestions.categories.length > 0 && (

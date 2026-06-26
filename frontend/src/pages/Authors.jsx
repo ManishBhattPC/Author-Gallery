@@ -20,7 +20,7 @@ const Authors = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen">
-      <section className="border-b border-slate-200 bg-white py-16 px-4 sm:px-6 lg:px-8 dark:bg-slate-100 dark:border-slate-200">
+      <section className="border-b border-slate-200 bg-slate-100 py-16 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl text-center">
           <h1 className="font-serif text-4xl font-semibold tracking-tight text-slate-900 sm:text-5xl">
             Discover Remarkable Authors
