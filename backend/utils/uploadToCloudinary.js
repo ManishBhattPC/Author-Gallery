@@ -9,10 +9,12 @@ Used for both:
 const uploadToCloudinary = async (fileBuffer, folder) => {
   try {
     return new Promise((resolve, reject) => {
+      const isPdf = folder === "book-pdfs";
       const stream = cloudinary.uploader.upload_stream(
         {
           folder: folder, // e.g. "book-covers" or "book-pdfs"
           resource_type: "auto", // detects image or pdf automatically
+          type: isPdf ? "authenticated" : "upload",
         },
         (error, result) => {
           if (error) return reject(error);

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import cloudinary from "../config/cloudinary.js";
 
 const bookSchema = new mongoose.Schema(
   {
@@ -82,6 +83,65 @@ const bookSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+const signCloudinaryPdfUrl = (url) => {
+  if (!url) return url;
+
+  // If the URL is not from Cloudinary, or is not authenticated/private, return it as-is
+  if (!url.includes("res.cloudinary.com") || (!url.includes("/authenticated/") && !url.includes("/private/"))) {
+    return url;
+  }
+
+  try {
+    const parts = url.split("/");
+    const uploadIndex = parts.findIndex((p) =>
+      ["upload", "private", "authenticated"].includes(p)
+    );
+    if (uploadIndex === -1) return url;
+
+    // Get the resource type (e.g., "image", "raw")
+    const resourceType = parts[uploadIndex - 1] || "image";
+
+    // Extract public ID (everything after the version segment)
+    let remainingParts = parts.slice(uploadIndex + 1);
+    if (remainingParts[0] && /^v\d+$/.test(remainingParts[0])) {
+      remainingParts = remainingParts.slice(1);
+    }
+
+    const publicIdWithExt = remainingParts.join("/");
+    const publicId = publicIdWithExt.replace(/\.[^/.]+$/, "");
+
+    // Generate signed URL
+    return cloudinary.url(publicId, {
+      resource_type: resourceType,
+      type: "authenticated",
+      sign_url: true,
+      expires_at: Math.floor(Date.now() / 1000) + 600, // Valid for 10 minutes (600 seconds)
+      secure: true,
+    });
+  } catch (error) {
+    console.error("Error signing Cloudinary PDF URL:", error);
+    return url;
+  }
+};
+
+bookSchema.set("toJSON", {
+  transform: (doc, ret) => {
+    if (ret.pdfFile) {
+      ret.pdfFile = signCloudinaryPdfUrl(ret.pdfFile);
+    }
+    return ret;
+  },
+});
+
+bookSchema.set("toObject", {
+  transform: (doc, ret) => {
+    if (ret.pdfFile) {
+      ret.pdfFile = signCloudinaryPdfUrl(ret.pdfFile);
+    }
+    return ret;
+  },
+});
 
 const Book = mongoose.model("Book", bookSchema);
 
