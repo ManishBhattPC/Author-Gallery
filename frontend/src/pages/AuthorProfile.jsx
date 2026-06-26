@@ -21,8 +21,13 @@ const AuthorProfile = () => {
     setLoading(true);
     try {
       const data = await getMyAuthorProfile();
-      setProfile(data);
-      setProfileExists(true);
+      if (data && data._id) {
+        setProfile(data);
+        setProfileExists(true);
+      } else {
+        setProfile({});
+        setProfileExists(false);
+      }
     } catch (error) {
       setProfile({});
       setProfileExists(false);
