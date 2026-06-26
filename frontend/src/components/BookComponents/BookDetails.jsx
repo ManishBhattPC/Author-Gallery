@@ -30,7 +30,7 @@ const BookDetails = () => {
   const [imageError, setImageError] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [readerOpen, setReaderOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
 
   useEffect(() => {
     const loadBook = async () => {
@@ -292,7 +292,7 @@ const BookDetails = () => {
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className={`p-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 border text-sm font-semibold ${
                   sidebarOpen 
-                    ? "bg-amber-800/10 border-amber-800/35 text-amber-505 hover:bg-amber-850/20" 
+                    ? "bg-amber-800/10 border-amber-800/35 text-amber-500 hover:bg-amber-900/20" 
                     : "border-slate-700 text-slate-300 hover:bg-slate-800"
                 }`}
                 title="Toggle Book Details Panel"
@@ -305,7 +305,7 @@ const BookDetails = () => {
                 href={book?.pdfFile}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-amber-750 hover:bg-amber-850 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2"
+                className="bg-amber-700 hover:bg-amber-800 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition flex items-center gap-2"
                 title="Open PDF directly"
               >
                 <FaExpand className="text-xs" />
@@ -319,7 +319,7 @@ const BookDetails = () => {
             
             {/* Vintage Parchment Collapsible Sidebar */}
             {sidebarOpen && (
-              <aside className="w-80 bg-[#FDF8F3] border-r border-[#DFD5C6] text-[#3E3024] flex flex-col h-full shrink-0 shadow-2xl z-10 transition-all duration-300 overflow-y-auto">
+              <aside className="w-80 bg-[#FDF8F3] text-[#3E3024] flex flex-col shrink-0 shadow-2xl z-20 transition-all duration-300 overflow-y-auto fixed md:relative top-[73px] md:top-0 bottom-0 left-0 md:h-full border-r border-[#DFD5C6]">
                 <div className="p-6 space-y-6">
                   {/* Book Cover mockup inside sidebar */}
                   <div className="aspect-[3/4] w-48 mx-auto bg-slate-200 border-4 border-[#38231B] rounded-xl shadow-lg overflow-hidden relative">
@@ -333,7 +333,7 @@ const BookDetails = () => {
                     <h2 className="font-serif text-2xl font-bold text-[#2C1F15] leading-tight">
                       {book?.title}
                     </h2>
-                    <p className="text-sm font-medium text-amber-750 mt-1">
+                    <p className="text-sm font-medium text-amber-700 mt-1">
                       by {authorName}
                     </p>
                   </div>
@@ -378,17 +378,9 @@ const BookDetails = () => {
             {/* Simulated Desktop Mahogany desk & Hardcover book binder container */}
             <main className="flex-1 bg-gradient-to-br from-[#1C1512] via-[#120F0D] to-[#0A0706] p-4 sm:p-8 flex items-center justify-center overflow-hidden relative">
               
-              {/* Outer Hardcover leather binder mockup */}
-              <div className="bg-[#38231B] border-4 border-[#2A1812] shadow-[0_20px_50px_rgba(0,0,0,0.85)] rounded-[32px] p-2 sm:p-4 flex items-stretch w-full max-w-5xl h-full relative overflow-hidden">
+              {/* Outer Hardcover leather binder mockup - Responsive */}
+              <div className="w-full max-w-5xl h-full flex items-stretch md:bg-[#38231B] md:border-4 md:border-[#2A1812] md:shadow-[0_20px_50px_rgba(0,0,0,0.85)] md:rounded-[32px] md:p-4 relative overflow-hidden bg-white dark:bg-slate-900">
                 
-                {/* Book spine crease effect down the center */}
-                <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-8 bg-gradient-to-r from-black/35 via-black/10 to-black/35 pointer-events-none z-10" />
-
-                {/* Left shadow border frame */}
-                <div className="absolute top-0 bottom-0 left-0 w-2.5 bg-gradient-to-r from-black/40 to-transparent pointer-events-none z-10" />
-                {/* Right shadow border frame */}
-                <div className="absolute top-0 bottom-0 right-0 w-2.5 bg-gradient-to-l from-black/40 to-transparent pointer-events-none z-10" />
-
                 {/* Styled e-Reader Iframe */}
                 <iframe
                   src={`${book?.pdfFile}#toolbar=0`}
