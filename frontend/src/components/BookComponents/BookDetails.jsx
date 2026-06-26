@@ -208,6 +208,18 @@ const BookDetails = () => {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
   }, []);
 
+  // Prevent background scroll when E-Reader is open
+  useEffect(() => {
+    if (readerOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [readerOpen]);
+
   const THEME_STYLES = {
     cream: {
       bg: "bg-[#FDF8F3]",
