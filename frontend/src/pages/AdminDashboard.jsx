@@ -380,6 +380,7 @@ const AdminDashboard = () => {
               { id: "reports", label: "Content Reports", icon: <AlertTriangle size={18} />, badge: data.reports?.filter(r => r.status === "pending").length },
               { id: "reviews", label: "User Reviews", icon: <MessageSquare size={18} /> },
               { id: "payments", label: "Payments / Orders", icon: <CreditCard size={18} /> },
+              { id: "super-admin", label: "Super Admin", icon: <Shield size={18} /> },
               { id: "settings", label: "Portal Settings", icon: <Settings size={18} /> }
             ].map((item) => (
               <button
@@ -535,8 +536,11 @@ const AdminDashboard = () => {
                     <span className="text-[10px] text-zinc-500">admin@authorgallery.com</span>
                   </div>
                   <div className="p-1.5 space-y-1">
+                    <button onClick={() => { setActiveTab("super-admin"); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg cursor-pointer transition flex items-center gap-2">
+                      <Shield size={13} /> Super Admin Page
+                    </button>
                     <button onClick={() => { setActiveTab("settings"); setShowProfileMenu(false); }} className="w-full text-left px-3 py-2 text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 rounded-lg cursor-pointer transition flex items-center gap-2">
-                      <Settings size={13} /> Settings
+                      <Settings size={13} /> Portal Settings
                     </button>
                     <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-xs text-red-400 hover:bg-red-950/20 rounded-lg cursor-pointer transition flex items-center gap-2">
                       <LogOut size={13} /> Log Out
@@ -1243,6 +1247,206 @@ const AdminDashboard = () => {
                     >
                       Save Banner
                     </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          )}
+
+          {/* H. SUPER ADMIN VIEW */}
+          {activeTab === "super-admin" && (
+            <div className="space-y-8 animate-fade-in text-left">
+              <div className="flex flex-col md:flex-row gap-6">
+                
+                {/* 1. Account Profile Card */}
+                <div className="admin-glass-card p-6 flex-1 flex flex-col justify-between">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-4 border-b border-zinc-800 pb-4">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-rose-700 flex items-center justify-center text-xl font-serif font-black text-white shadow-lg shadow-amber-900/10">
+                        SA
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-serif font-bold text-white">Super Admin</h3>
+                        <span className="text-xs text-[#d87f4a] font-semibold flex items-center gap-1">
+                          <Shield size={12} className="shrink-0" /> Root Administrator (Tier 3)
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-zinc-500 font-semibold">Registered Email</span>
+                        <span className="text-zinc-200 font-mono">admin@authorgallery.com</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-zinc-500 font-semibold">Account Authority</span>
+                        <span className="text-emerald-400 font-bold bg-emerald-950/20 px-2 py-0.5 border border-emerald-900/40 rounded-lg text-[10px]">
+                          All Permissions Granted
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-zinc-500 font-semibold">Active Session IP</span>
+                        <span className="text-zinc-200 font-mono">127.0.0.1 (Local Host)</span>
+                      </div>
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="text-zinc-500 font-semibold">Session Token Type</span>
+                        <span className="text-zinc-200 font-mono">JWT Bearer (Secure HTTP Only)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-zinc-800 pt-6 mt-6 flex gap-3">
+                    <button
+                      onClick={() => triggerToast("Admin API key generated successfully", "success")}
+                      className="flex-1 py-2.5 bg-zinc-800 hover:bg-zinc-750 text-zinc-200 text-xs font-bold rounded-xl border border-zinc-700 transition cursor-pointer text-center"
+                    >
+                      Generate API Key
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="py-2.5 px-4 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 text-xs font-bold rounded-xl transition cursor-pointer text-center"
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                </div>
+
+                {/* 2. Platform Status Card */}
+                <div className="admin-glass-card p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="font-serif font-bold text-base text-zinc-100 border-b border-zinc-800 pb-3 mb-5">
+                      Platform Node Metrics
+                    </h4>
+
+                    <div className="space-y-5">
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-zinc-400">Cloudinary Media Storage</span>
+                          <span className="text-zinc-200 font-bold">11.25 GB / 25 GB (45%)</span>
+                        </div>
+                        {/* Custom SVG Storage progress bar */}
+                        <svg className="w-full h-2 rounded-full overflow-hidden bg-zinc-800" viewBox="0 0 100 2">
+                          <rect x="0" y="0" width="45" height="2" fill="#d87f4a" />
+                        </svg>
+                      </div>
+
+                      <div className="flex justify-between items-center bg-zinc-900/40 p-3 rounded-xl border border-zinc-800 text-xs">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500" />
+                          <span className="text-zinc-300 font-semibold">MongoDB Atlas Cluster</span>
+                        </div>
+                        <span className="text-zinc-400 font-mono text-[10px]">Connected (3 Nodes)</span>
+                      </div>
+
+                      <div className="flex justify-between items-center bg-zinc-900/40 p-3 rounded-xl border border-zinc-800 text-xs">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500" />
+                          <span className="text-zinc-300 font-semibold">Server Response Time</span>
+                        </div>
+                        <span className="text-zinc-400 font-mono text-[10px]">42 ms (Stable)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-zinc-800 pt-5 mt-6 flex justify-between items-center text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
+                    <span>System Status: healthy</span>
+                    <span className="text-emerald-400 font-semibold">Node Online</span>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* 3. Credentials & Audit Logs Grid */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Security Password Form */}
+                <div className="admin-glass-card p-6 lg:col-span-1 space-y-4">
+                  <h4 className="font-serif font-bold text-base text-zinc-100 border-b border-zinc-800 pb-3 mb-2">
+                    Security Credentials
+                  </h4>
+                  
+                  <div className="space-y-4 text-left">
+                    <div>
+                      <label className="block text-xs font-semibold text-zinc-400 mb-2">Current Admin Password</label>
+                      <input
+                        type="password"
+                        placeholder="••••••••"
+                        className="admin-input text-xs"
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-zinc-400 mb-2">New Password</label>
+                      <input
+                        type="password"
+                        placeholder="Enter new credentials..."
+                        className="admin-input text-xs"
+                      />
+                    </div>
+                    <button
+                      onClick={() => triggerToast("Password updated successfully (simulation)", "success")}
+                      className="w-full py-2.5 bg-[#d87f4a] hover:bg-[#c26e3d] text-white text-xs font-bold rounded-xl transition cursor-pointer"
+                    >
+                      Update Credentials
+                    </button>
+                  </div>
+                </div>
+
+                {/* Secure Audit Logs */}
+                <div className="admin-glass-card p-6 lg:col-span-2 space-y-4">
+                  <div className="flex justify-between items-center border-b border-zinc-800 pb-3 mb-2">
+                    <h4 className="font-serif font-bold text-base text-zinc-100">
+                      Access Logs & Operations
+                    </h4>
+                    <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider font-mono">
+                      Last 5 activities
+                    </span>
+                  </div>
+
+                  <div className="overflow-x-auto admin-scroll">
+                    <table className="admin-table text-left">
+                      <thead>
+                        <tr>
+                          <th className="text-[10px] pb-3 text-zinc-500">Timestamp</th>
+                          <th className="text-[10px] pb-3 text-zinc-500">Operation / Activity</th>
+                          <th className="text-[10px] pb-3 text-zinc-500">IP Location</th>
+                          <th className="text-[10px] pb-3 text-zinc-500">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-800/10">
+                        <tr>
+                          <td className="text-xs text-zinc-400 font-mono py-3">Today, 18:01</td>
+                          <td className="text-xs text-zinc-200 font-semibold py-3">Viewed Super Admin Console</td>
+                          <td className="text-xs text-zinc-400 font-mono py-3">127.0.0.1</td>
+                          <td className="py-3"><span className="bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 px-2 py-0.5 rounded-lg text-[9px] font-bold">SUCCESS</span></td>
+                        </tr>
+                        <tr>
+                          <td className="text-xs text-zinc-400 font-mono py-3">Today, 17:55</td>
+                          <td className="text-xs text-zinc-200 font-semibold py-3">Admin Login Successful</td>
+                          <td className="text-xs text-zinc-400 font-mono py-3">127.0.0.1</td>
+                          <td className="py-3"><span className="bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 px-2 py-0.5 rounded-lg text-[9px] font-bold">SUCCESS</span></td>
+                        </tr>
+                        <tr>
+                          <td className="text-xs text-zinc-400 font-mono py-3">Yesterday, 14:20</td>
+                          <td className="text-xs text-zinc-200 font-semibold py-3">Purged Book ID 6a3e48324...</td>
+                          <td className="text-xs text-zinc-400 font-mono py-3">192.168.1.42</td>
+                          <td className="py-3"><span className="bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 px-2 py-0.5 rounded-lg text-[9px] font-bold">SUCCESS</span></td>
+                        </tr>
+                        <tr>
+                          <td className="text-xs text-zinc-400 font-mono py-3">Yesterday, 14:15</td>
+                          <td className="text-xs text-zinc-200 font-semibold py-3">Dismissed Report #104</td>
+                          <td className="text-xs text-zinc-400 font-mono py-3">192.168.1.42</td>
+                          <td className="py-3"><span className="bg-emerald-950/20 border border-emerald-900/40 text-emerald-400 px-2 py-0.5 rounded-lg text-[9px] font-bold">SUCCESS</span></td>
+                        </tr>
+                        <tr>
+                          <td className="text-xs text-zinc-400 font-mono py-3">June 25, 11:32</td>
+                          <td className="text-xs text-zinc-300 py-3">Database System Backup</td>
+                          <td className="text-xs text-zinc-400 font-mono py-3">Backup Node A</td>
+                          <td className="py-3"><span className="bg-blue-950/20 border border-blue-900/40 text-blue-400 px-2 py-0.5 rounded-lg text-[9px] font-bold">SYSTEM</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
                 </div>
 
