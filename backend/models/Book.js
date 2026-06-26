@@ -162,7 +162,7 @@ bookSchema.set("toObject", {
 });
 
 // Pre-deleteOne hook to delete assets from Cloudinary when a book document is deleted
-bookSchema.pre("deleteOne", { document: true, query: false }, async function (next) {
+bookSchema.pre("deleteOne", { document: true, query: false }, async function () {
   try {
     if (this.coverImage) {
       await deleteFromCloudinary(this.coverImage);
@@ -170,10 +170,9 @@ bookSchema.pre("deleteOne", { document: true, query: false }, async function (ne
     if (this.pdfFile) {
       await deleteFromCloudinary(this.pdfFile);
     }
-    next();
   } catch (error) {
     console.error("Error in Book pre-deleteOne middleware:", error);
-    next(error);
+    throw error;
   }
 });
 

@@ -73,15 +73,14 @@ const authorProfileSchema = new mongoose.Schema(
 );
 
 // Pre-deleteOne hook to delete profile image from Cloudinary when profile is deleted
-authorProfileSchema.pre("deleteOne", { document: true, query: false }, async function (next) {
+authorProfileSchema.pre("deleteOne", { document: true, query: false }, async function () {
   try {
     if (this.profileImage) {
       await deleteFromCloudinary(this.profileImage);
     }
-    next();
   } catch (error) {
     console.error("Error in AuthorProfile pre-deleteOne middleware:", error);
-    next(error);
+    throw error;
   }
 });
 
