@@ -11,6 +11,36 @@ import { promises as dnsPromises } from "dns";
 // Strict email regex for validation
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+const DISPOSABLE_DOMAINS = new Set([
+  "divahd.com",
+  "mailinator.com",
+  "yopmail.com",
+  "tempmail.com",
+  "10minutemail.com",
+  "dispostable.com",
+  "guerrillamail.com",
+  "sharklasers.com",
+  "getairmail.com",
+  "trashmail.com",
+  "maildrop.cc",
+  "tempmailaddress.com",
+  "disposablemail.com",
+  "generator.email",
+  "spambog.com",
+  "spambog.de",
+  "spambog.ru",
+  "temp-mail.org",
+  "fakeinbox.com",
+  "throwawaymail.com",
+  "mintemail.com",
+  "disposable.com",
+]);
+
+const isDisposableEmail = (email) => {
+  const domain = email.split("@")[1]?.toLowerCase().trim();
+  return DISPOSABLE_DOMAINS.has(domain);
+};
+
 const verifyEmailDomain = async (email) => {
   const domain = email.split("@")[1];
   if (!domain) return false;
@@ -75,6 +105,13 @@ export const registerUser = async (req, res) => {
     if (/^\d+$/.test(localPart)) {
       return res.status(400).json({
         message: "Email username (before @) cannot consist entirely of numbers",
+      });
+    }
+
+    // Validate if the email domain is disposable/temporary
+    if (isDisposableEmail(trimmedEmail)) {
+      return res.status(400).json({
+        message: "Registration using temporary or disposable email addresses is not allowed.",
       });
     }
 
@@ -301,7 +338,7 @@ export const googleLogin = async (req, res) => {
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
 
     // Developer simulation mode if no credentials exist or token starts with mock_
-    if (!googleClientId || googleClientId === "your-google-client-id" || idToken.startsWith("mock_")) {
+    if (!isProduction && (!googleClientId || googleClientId === "your-google-client-id" || idToken.startsWith("mock_"))) {
       console.log("Using Google OAuth simulation mode.");
       if (idToken.startsWith("mock_")) {
         const parts = idToken.split("_");
