@@ -10,7 +10,7 @@ const AuthorCard = ({ id, image, name, genre, works }) => {
         )}&background=8C4E35&color=FAF6F0&bold=true&size=256`;
 
   return (
-    <div className="border border-slate-200/50 hover:border-amber-600/35 hover:-translate-y-1 bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300">
+    <div className="border border-slate-200/50 dark:border-slate-300 hover:border-amber-600/35 hover:-translate-y-1 bg-white dark:bg-slate-100 rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300">
       <img
         src={avatarUrl}
         alt={name}

@@ -43,7 +43,7 @@ const FeaturedAuthors = () => {
         </div>
 
         {loading ? (
-          <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 shadow-sm">
+          <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 shadow-sm dark:bg-slate-100 dark:border-slate-200 dark:text-slate-400">
             Loading featured authors…
           </div>
         ) : error ? (
@@ -51,7 +51,7 @@ const FeaturedAuthors = () => {
             {error}
           </div>
         ) : authors.length === 0 ? (
-          <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 shadow-sm">
+          <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 shadow-sm dark:bg-slate-100 dark:border-slate-200 dark:text-slate-400">
             No featured authors found.
           </div>
         ) : (

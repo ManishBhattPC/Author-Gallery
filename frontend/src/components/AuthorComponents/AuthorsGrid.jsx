@@ -28,10 +28,10 @@ const AuthorsGrid = ({ search = "" }) => {
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-14">
-      <h2 className="text-3xl font-bold mb-8">All Authors</h2>
+      <h2 className="text-3xl font-bold text-slate-900 mb-8">All Authors</h2>
 
       {loading ? (
-        <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 shadow-sm dark:bg-slate-100 dark:border-slate-200 dark:text-slate-400">
           Loading authors…
         </div>
       ) : error ? (
@@ -39,7 +39,7 @@ const AuthorsGrid = ({ search = "" }) => {
           {error}
         </div>
       ) : authors.length === 0 ? (
-        <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 shadow-sm">
+        <div className="rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center text-slate-500 shadow-sm dark:bg-slate-100 dark:border-slate-200 dark:text-slate-400">
           No authors found for "{search}".
         </div>
       ) : (
