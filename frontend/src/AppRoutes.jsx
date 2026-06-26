@@ -26,6 +26,14 @@ import AdminDashboard from "./pages/AdminDashboard.jsx"
 const AppRoutes = () => {
   return (
     <Routes>
+      <Route
+        path="/admin-dashboard"
+        element={
+          <ProtectedRoute role="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
       <Route path="/" element={<Layout />}>
         <Route index element={<Home />} />
         <Route path="explore" element={<Explore />} />
@@ -73,15 +81,6 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <WriteBook />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="admin-dashboard"
-          element={
-            <ProtectedRoute role="admin">
-              <AdminDashboard />
             </ProtectedRoute>
           }
         />

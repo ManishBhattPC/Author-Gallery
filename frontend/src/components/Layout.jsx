@@ -1,10 +1,16 @@
 import React from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, Navigate } from "react-router-dom";
 import Navbar from "./navbar.jsx";
 import Footer from "./Footer.jsx";
+import { useAuth } from "../AuthContext.jsx";
 
 const Layout = () => {
   const location = useLocation();
+  const { user } = useAuth();
+
+  if (user?.role === "admin") {
+    return <Navigate to="/admin-dashboard" replace />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
