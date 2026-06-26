@@ -212,17 +212,26 @@ const BookDetails = () => {
     cream: {
       bg: "bg-[#FDF8F3]",
       text: "text-[#2C1F15]",
-      border: "border-[#E2D7C8]"
+      border: "border-[#E2D7C8]",
+      title: "text-[#2C1F15]",
+      tag: "text-[#8C4E35]",
+      divider: "border-[#E2D7C8]"
     },
     dark: {
       bg: "bg-[#12100F]",
       text: "text-[#E5DED4]",
-      border: "border-[#2C2522]"
+      border: "border-[#2C2522]",
+      title: "text-[#E5DED4]",
+      tag: "text-[#D87F4A]",
+      divider: "border-[#2C2522]"
     },
     sepia: {
       bg: "bg-[#F4ECCF]",
       text: "text-[#433422]",
-      border: "border-[#DED2B2]"
+      border: "border-[#DED2B2]",
+      title: "text-[#433422]",
+      tag: "text-[#A05A3A]",
+      divider: "border-[#DED2B2]"
     }
   };
 
@@ -460,7 +469,7 @@ const BookDetails = () => {
 
       {/* Immersive Fullscreen E-Reader Overlay */}
       {readerOpen && createPortal(
-        <div className="fixed inset-0 z-[9999] flex flex-col bg-[#120F0D] text-slate-100 font-sans">
+        <div className="fixed inset-0 z-[9999] flex flex-col bg-[#120F0D] text-zinc-100 font-sans">
           
           {/* Header Bar */}
           <header className="bg-[#1C1613] border-b border-[#2C211D] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-md shrink-0 gap-4">
@@ -471,17 +480,17 @@ const BookDetails = () => {
                   if (window.speechSynthesis) window.speechSynthesis.cancel();
                   setIsPlaying(false);
                 }}
-                className="p-2 rounded-lg hover:bg-slate-800 transition text-slate-400 hover:text-white cursor-pointer shrink-0"
+                className="p-2 rounded-lg hover:bg-zinc-800 transition text-zinc-400 hover:text-white cursor-pointer shrink-0"
                 title="Exit Reader"
               >
                 <FaArrowLeft className="text-lg" />
               </button>
-              <div className="border-l border-slate-700 h-6 hidden sm:block shrink-0" />
+              <div className="border-l border-zinc-700 h-6 hidden sm:block shrink-0" />
               <div className="min-w-0 flex-1">
-                <h3 className="font-serif font-bold text-sm sm:text-lg text-slate-100 truncate">
+                <h3 className="font-serif font-bold text-sm sm:text-lg text-zinc-100 truncate">
                   {book?.title}
                 </h3>
-                <p className="text-[10px] sm:text-xs text-amber-500/80 font-medium truncate">
+                <p className="text-[10px] sm:text-xs text-[#D87F4A] font-medium truncate">
                   by {authorName}
                 </p>
               </div>
@@ -492,8 +501,8 @@ const BookDetails = () => {
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className={`p-2 sm:p-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 border text-xs sm:text-sm font-semibold ${
                   sidebarOpen 
-                    ? "bg-amber-800/10 border-amber-800/35 text-amber-500 hover:bg-amber-900/20" 
-                    : "border-slate-700 text-slate-300 hover:bg-slate-800"
+                    ? "bg-[#D87F4A]/10 border-[#D87F4A]/30 text-[#D87F4A] hover:bg-[#D87F4A]/20" 
+                    : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                 }`}
                 title="Toggle Book Details Panel"
               >
@@ -507,8 +516,8 @@ const BookDetails = () => {
                   onClick={() => setControlsOpen(!controlsOpen)}
                   className={`p-2 sm:p-2.5 rounded-xl transition cursor-pointer flex items-center gap-2 border text-xs sm:text-sm font-semibold ${
                     controlsOpen 
-                      ? "bg-amber-800/10 border-amber-800/35 text-amber-500 hover:bg-amber-900/20" 
-                      : "border-slate-700 text-slate-300 hover:bg-slate-800"
+                      ? "bg-[#D87F4A]/10 border-[#D87F4A]/30 text-[#D87F4A] hover:bg-[#D87F4A]/20" 
+                      : "border-zinc-700 text-zinc-300 hover:bg-zinc-800"
                   }`}
                   title="Reader Preferences"
                 >
@@ -521,7 +530,7 @@ const BookDetails = () => {
                 href={book?.pdfFile}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-amber-700 hover:bg-amber-800 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2"
+                className="bg-[#A05A3A] hover:bg-[#8C4E35] text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2"
                 title="Open PDF directly"
               >
                 <FaExpand className="text-xs" />
@@ -547,10 +556,10 @@ const BookDetails = () => {
                 <div className="p-5 sm:p-6 space-y-5 sm:space-y-6">
                   {/* Mobile Close Button inside sidebar header */}
                   <div className="flex justify-between items-center md:hidden">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Book Details</span>
+                    <span className="text-xs font-bold text-[#8C7B67] uppercase tracking-wider">Book Details</span>
                     <button
                       onClick={() => setSidebarOpen(false)}
-                      className="p-1.5 rounded-lg hover:bg-slate-200 text-[#6D5E4D] hover:text-[#2C1F15] cursor-pointer transition"
+                      className="p-1.5 rounded-lg hover:bg-[#DFD5C6]/60 text-[#6D5E4D] hover:text-[#2C1F15] cursor-pointer transition"
                     >
                       <FaTimes className="text-sm" />
                     </button>
@@ -562,13 +571,13 @@ const BookDetails = () => {
                   </div>
 
                   <div>
-                    <span className="inline-block bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+                    <span className="inline-block bg-[#FBF0E4] text-[#8C4E35] px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
                       {book?.genres?.[0] || "Book"}
                     </span>
                     <h2 className="font-serif text-lg sm:text-xl font-bold text-[#2C1F15] leading-tight">
                       {book?.title}
                     </h2>
-                    <p className="text-xs sm:text-sm font-medium text-amber-700 mt-1">
+                    <p className="text-xs sm:text-sm font-medium text-[#A05A3A] mt-1">
                       by {authorName}
                     </p>
                   </div>
@@ -581,7 +590,7 @@ const BookDetails = () => {
                       <div className="border-b border-[#DFD5C6]/60 pb-3">
                         <button 
                           onClick={() => setChaptersExpanded(!chaptersExpanded)}
-                          className="w-full flex items-center justify-between text-xs font-bold text-slate-700 uppercase tracking-wider py-1.5 text-left cursor-pointer"
+                          className="w-full flex items-center justify-between text-xs font-bold text-[#544436] uppercase tracking-wider py-1.5 text-left cursor-pointer"
                         >
                           <span>Chapters ({chapters.length})</span>
                           {chaptersExpanded ? <FaChevronUp /> : <FaChevronDown />}
@@ -604,8 +613,8 @@ const BookDetails = () => {
                                   }}
                                   className={`w-full text-left px-3 py-2 rounded-lg text-xs transition cursor-pointer flex items-center justify-between ${
                                     isActive 
-                                      ? "bg-amber-800/10 text-amber-900 border-l-4 border-amber-800 font-bold" 
-                                      : "text-slate-700 hover:bg-slate-200/60"
+                                      ? "bg-[#8C4E35]/10 text-[#5C3220] border-l-4 border-[#8C4E35] font-bold" 
+                                      : "text-[#544436] hover:bg-[#DFD5C6]/60"
                                   }`}
                                 >
                                   <span className="truncate pr-2">{chap.title}</span>
@@ -623,7 +632,7 @@ const BookDetails = () => {
                       <div className="border-b border-[#DFD5C6]/60 pb-3">
                         <button 
                           onClick={() => setBookmarksExpanded(!bookmarksExpanded)}
-                          className="w-full flex items-center justify-between text-xs font-bold text-slate-700 uppercase tracking-wider py-1.5 text-left cursor-pointer"
+                          className="w-full flex items-center justify-between text-xs font-bold text-[#544436] uppercase tracking-wider py-1.5 text-left cursor-pointer"
                         >
                           <span>Bookmarks ({bookmarks.length})</span>
                           {bookmarksExpanded ? <FaChevronUp /> : <FaChevronDown />}
@@ -632,7 +641,7 @@ const BookDetails = () => {
                         {bookmarksExpanded && (
                           <div className="mt-2 space-y-1.5">
                             {bookmarks.length === 0 ? (
-                              <p className="text-[11px] text-slate-400 italic px-2">No bookmarks saved.</p>
+                              <p className="text-[11px] text-[#8C7B67] italic px-2">No bookmarks saved.</p>
                             ) : (
                               bookmarks.map((chapIdx) => (
                                 <button
@@ -643,7 +652,7 @@ const BookDetails = () => {
                                     setIsPlaying(false);
                                     if (window.innerWidth < 768) setSidebarOpen(false);
                                   }}
-                                  className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-slate-700 hover:bg-slate-200/60 transition cursor-pointer flex items-center gap-2"
+                                  className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-[#544436] hover:bg-[#DFD5C6]/60 transition cursor-pointer flex items-center gap-2"
                                 >
                                   <FaBookmark className="text-amber-700 text-[10px]" />
                                   <span className="truncate">{chapters[chapIdx]?.title || `Chapter ${chapIdx + 1}`}</span>
@@ -660,7 +669,7 @@ const BookDetails = () => {
                       <div className="border-b border-[#DFD5C6]/60 pb-3">
                         <button 
                           onClick={() => setNotesExpanded(!notesExpanded)}
-                          className="w-full flex items-center justify-between text-xs font-bold text-slate-700 uppercase tracking-wider py-1.5 text-left cursor-pointer"
+                          className="w-full flex items-center justify-between text-xs font-bold text-[#544436] uppercase tracking-wider py-1.5 text-left cursor-pointer"
                         >
                           <span>Reader Notes</span>
                           {notesExpanded ? <FaChevronUp /> : <FaChevronDown />}
@@ -673,9 +682,9 @@ const BookDetails = () => {
                               onChange={(e) => handleSaveNotes(e.target.value)}
                               placeholder="Write notes while reading..."
                               rows={4}
-                              className="w-full text-xs p-2.5 rounded-lg border border-[#DFD5C6] bg-[#FAF5EE] text-[#2C1F15] focus:outline-none focus:border-amber-700/50 resize-none font-sans"
+                              className="w-full text-xs p-2.5 rounded-lg border border-[#DFD5C6] bg-[#FAF5EE] text-[#2C1F15] focus:outline-none focus:border-[#A05A3A]/50 resize-none font-sans"
                             />
-                            <p className="text-[9px] text-slate-400 mt-1 italic">Auto-saves to browser storage</p>
+                            <p className="text-[9px] text-[#8C7B67] mt-1 italic">Auto-saves to browser storage</p>
                           </div>
                         )}
                       </div>
@@ -683,10 +692,10 @@ const BookDetails = () => {
 
                     {/* Synopsis (Fallback / Info) */}
                     <div className="pt-2">
-                      <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                      <h4 className="text-xs font-bold text-[#8C7B67] uppercase tracking-wider mb-2">
                         Synopsis
                       </h4>
-                      <p className="text-xs leading-relaxed text-slate-700 line-clamp-6" title={book?.description}>
+                      <p className="text-xs leading-relaxed text-[#544436] line-clamp-6" title={book?.description}>
                         {book?.description}
                       </p>
                     </div>
@@ -711,12 +720,12 @@ const BookDetails = () => {
                     />
 
                     {/* Floating Settings Card */}
-                    <div className="absolute md:right-6 md:top-6 fixed bottom-0 left-0 right-0 z-40 bg-[#1C1613] border-t border-[#2C211D] md:border md:rounded-2xl p-5 shadow-2xl md:w-72 text-slate-100 flex flex-col gap-4 rounded-t-3xl md:rounded-2xl">
+                    <div className="absolute md:right-6 md:top-6 fixed bottom-0 left-0 right-0 z-40 bg-[#1C1613] border-t border-[#2C211D] md:border md:rounded-2xl p-5 shadow-2xl md:w-72 text-zinc-100 flex flex-col gap-4 rounded-t-3xl md:rounded-2xl">
                       <div className="flex justify-between items-center border-b border-[#2C211D] pb-3">
-                        <span className="text-sm font-bold font-serif text-amber-500">Reader Options</span>
+                        <span className="text-sm font-bold font-serif text-[#D87F4A]">Reader Options</span>
                         <button 
                           onClick={() => setControlsOpen(false)}
-                          className="text-slate-400 hover:text-white p-1 cursor-pointer"
+                          className="text-zinc-400 hover:text-white p-1 cursor-pointer"
                         >
                           <FaTimes size={14} />
                         </button>
@@ -724,12 +733,12 @@ const BookDetails = () => {
 
                       {/* Font size control */}
                       <div className="flex flex-col gap-2">
-                        <span className="text-xs text-slate-400 font-semibold">Font Size</span>
+                        <span className="text-xs text-zinc-400 font-semibold">Font Size</span>
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => setFontSize(Math.max(14, fontSize - 1))}
                             disabled={fontSize <= 14}
-                            className="flex-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+                            className="flex-1 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
                           >
                             A-
                           </button>
@@ -737,7 +746,7 @@ const BookDetails = () => {
                           <button
                             onClick={() => setFontSize(Math.min(28, fontSize + 1))}
                             disabled={fontSize >= 28}
-                            className="flex-1 bg-slate-800 hover:bg-slate-700 disabled:opacity-30 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
+                            className="flex-1 bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer"
                           >
                             A+
                           </button>
@@ -746,14 +755,14 @@ const BookDetails = () => {
 
                       {/* Font Family control */}
                       <div className="flex flex-col gap-2">
-                        <span className="text-xs text-slate-400 font-semibold">Typography style</span>
+                        <span className="text-xs text-zinc-400 font-semibold">Typography style</span>
                         <div className="flex gap-2">
                           <button
                             onClick={() => setFontFamily("serif")}
                             className={`flex-1 px-3 py-2 rounded-xl text-xs font-serif font-bold transition cursor-pointer border ${
                               fontFamily === "serif" 
-                                ? "bg-amber-800 border-amber-500 text-white" 
-                                : "bg-slate-800 border-transparent text-slate-300 hover:bg-slate-700"
+                                ? "bg-[#8C4E35] border-[#D87F4A] text-white" 
+                                : "bg-zinc-800 border-transparent text-zinc-300 hover:bg-zinc-700"
                             }`}
                           >
                             Classic Serif
@@ -762,8 +771,8 @@ const BookDetails = () => {
                             onClick={() => setFontFamily("sans")}
                             className={`flex-1 px-3 py-2 rounded-xl text-xs font-sans font-bold transition cursor-pointer border ${
                               fontFamily === "sans" 
-                                ? "bg-amber-800 border-amber-500 text-white" 
-                                : "bg-slate-800 border-transparent text-slate-300 hover:bg-slate-700"
+                                ? "bg-[#8C4E35] border-[#D87F4A] text-white" 
+                                : "bg-zinc-800 border-transparent text-zinc-300 hover:bg-zinc-700"
                             }`}
                           >
                             Modern Sans
@@ -773,12 +782,12 @@ const BookDetails = () => {
 
                       {/* Page Theme controls */}
                       <div className="flex flex-col gap-2">
-                        <span className="text-xs text-slate-400 font-semibold">Reading Themes</span>
+                        <span className="text-xs text-zinc-400 font-semibold">Reading Themes</span>
                         <div className="grid grid-cols-3 gap-2">
                           <button
                             onClick={() => setReaderTheme("cream")}
                             className={`px-2 py-2 rounded-xl text-[11px] font-semibold border transition cursor-pointer bg-[#FDF8F3] text-[#2C1F15] ${
-                              readerTheme === "cream" ? "border-amber-500 ring-2 ring-amber-500/30" : "border-slate-700"
+                              readerTheme === "cream" ? "border-[#D87F4A] ring-2 ring-[#D87F4A]/30" : "border-zinc-700"
                             }`}
                           >
                             Parchment
@@ -786,7 +795,7 @@ const BookDetails = () => {
                           <button
                             onClick={() => setReaderTheme("sepia")}
                             className={`px-2 py-2 rounded-xl text-[11px] font-semibold border transition cursor-pointer bg-[#F4ECCF] text-[#433422] ${
-                              readerTheme === "sepia" ? "border-amber-500 ring-2 ring-amber-500/30" : "border-slate-700"
+                              readerTheme === "sepia" ? "border-[#D87F4A] ring-2 ring-[#D87F4A]/30" : "border-zinc-700"
                             }`}
                           >
                             Sepia
@@ -794,7 +803,7 @@ const BookDetails = () => {
                           <button
                             onClick={() => setReaderTheme("dark")}
                             className={`px-2 py-2 rounded-xl text-[11px] font-semibold border transition cursor-pointer bg-[#12100F] text-[#E5DED4] ${
-                              readerTheme === "dark" ? "border-amber-500 ring-2 ring-amber-500/30" : "border-slate-700"
+                              readerTheme === "dark" ? "border-[#D87F4A] ring-2 ring-[#D87F4A]/30" : "border-zinc-700"
                             }`}
                           >
                             Dark Mode
@@ -804,7 +813,7 @@ const BookDetails = () => {
 
                       {/* Text to Speech controls */}
                       <div className="flex flex-col gap-2 border-t border-[#2C211D] pt-3">
-                        <span className="text-xs text-slate-400 font-semibold flex items-center gap-1.5">
+                        <span className="text-xs text-zinc-400 font-semibold flex items-center gap-1.5">
                           <FaVolumeUp />
                           Voice Read Aloud
                         </span>
@@ -813,7 +822,7 @@ const BookDetails = () => {
                           className={`w-full py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer ${
                             isPlaying 
                               ? "bg-rose-950/60 border border-rose-800 text-rose-300 hover:bg-rose-900/60" 
-                              : "bg-amber-800 hover:bg-amber-900 text-white"
+                              : "bg-[#8C4E35] hover:bg-[#5C3220] text-white"
                           }`}
                         >
                           {isPlaying ? (
@@ -831,7 +840,7 @@ const BookDetails = () => {
                       {/* Fullscreen control */}
                       <button
                         onClick={toggleFullscreen}
-                        className="w-full border border-slate-700 hover:bg-slate-800 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer mt-1"
+                        className="w-full border border-zinc-700 hover:bg-zinc-800 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer mt-1"
                       >
                         <FaExpand size={11} />
                         {isFullscreen ? "Exit Fullscreen" : "Fullscreen Mode"}
@@ -845,11 +854,11 @@ const BookDetails = () => {
                   <div className={`w-full max-w-3xl min-h-full rounded-2xl shadow-lg border p-6 sm:p-12 transition-all duration-300 ${THEME_STYLES[readerTheme].bg} ${THEME_STYLES[readerTheme].text} ${THEME_STYLES[readerTheme].border} flex flex-col justify-between`}>
                     
                     {/* Chapter Header Typography */}
-                    <div className="border-b border-amber-900/10 dark:border-slate-700/20 pb-4 mb-6 sm:mb-8 text-center">
-                      <span className="font-serif font-bold uppercase tracking-wider text-xs text-amber-700 dark:text-amber-500/80">
+                    <div className={`border-b ${THEME_STYLES[readerTheme].divider} pb-4 mb-6 sm:mb-8 text-center`}>
+                      <span className={`font-serif font-bold uppercase tracking-wider text-xs ${THEME_STYLES[readerTheme].tag}`}>
                         {activeChapter?.title?.split(":")[0] || `Chapter ${activeChapterIndex + 1}`}
                       </span>
-                      <h1 className="font-serif font-bold text-2xl sm:text-3xl mt-1 leading-tight text-[#2C1F15] dark:text-slate-100">
+                      <h1 className={`font-serif font-bold text-2xl sm:text-3xl mt-1 leading-tight ${THEME_STYLES[readerTheme].title}`}>
                         {activeChapter?.title?.split(":")[1]?.trim() || activeChapter?.title || "Story Section"}
                       </h1>
                     </div>
@@ -896,7 +905,7 @@ const BookDetails = () => {
                     </div>
 
                     {/* Book page Footer Navigation Flow */}
-                    <div className="border-t border-amber-900/10 dark:border-slate-700/20 pt-8 mt-12 space-y-6">
+                    <div className={`border-t ${THEME_STYLES[readerTheme].divider} pt-8 mt-12 space-y-6`}>
                       
                       {/* Navigation Chapter Buttons */}
                       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -915,7 +924,7 @@ const BookDetails = () => {
                           className="bg-[#722F37] hover:bg-[#5C242B] disabled:opacity-30 disabled:hover:bg-[#722F37] text-white border border-[#5C242B] px-4 py-2.5 rounded-xl flex flex-col items-start cursor-pointer transition select-none min-w-[120px] max-w-[160px] flex-1 disabled:cursor-not-allowed"
                         >
                           <span className="text-[10px] text-amber-300 font-bold uppercase">Previous</span>
-                          <span className="text-xs truncate w-full font-serif font-semibold text-slate-100">
+                          <span className="text-xs truncate w-full font-serif font-semibold text-zinc-100">
                             {activeChapterIndex > 0 ? chapters[activeChapterIndex - 1]?.title?.split(":")[0] || `Ch. ${activeChapterIndex}` : "At Start"}
                           </span>
                         </button>
@@ -946,7 +955,7 @@ const BookDetails = () => {
                           className="bg-[#722F37] hover:bg-[#5C242B] disabled:opacity-30 disabled:hover:bg-[#722F37] text-white border border-[#5C242B] px-4 py-2.5 rounded-xl flex flex-col items-end cursor-pointer transition select-none min-w-[120px] max-w-[160px] flex-1 disabled:cursor-not-allowed"
                         >
                           <span className="text-[10px] text-amber-300 font-bold uppercase">Next Chapter</span>
-                          <span className="text-xs truncate w-full font-serif font-semibold text-slate-100 text-right">
+                          <span className="text-xs truncate w-full font-serif font-semibold text-zinc-100 text-right">
                             {activeChapterIndex < chapters.length - 1 ? chapters[activeChapterIndex + 1]?.title?.split(":")[0] || `Ch. ${activeChapterIndex + 2}` : "End of Book"}
                           </span>
                         </button>
@@ -954,8 +963,8 @@ const BookDetails = () => {
                       </div>
 
                       {/* Chapter rating widget */}
-                      <div className="flex flex-col sm:flex-row items-center justify-between border-t border-amber-900/5 pt-6 gap-2">
-                        <span className="text-xs text-slate-500 font-medium font-serif italic">Rate this chapter:</span>
+                      <div className={`flex flex-col sm:flex-row items-center justify-between border-t ${THEME_STYLES[readerTheme].divider} pt-6 gap-2`}>
+                        <span className={`text-xs ${THEME_STYLES[readerTheme].text} opacity-70 font-medium font-serif italic`}>Rate this chapter:</span>
                         <div className="flex items-center gap-1.5">
                           {[1, 2, 3, 4, 5].map((star) => {
                             const activeRating = chapterRatings[activeChapterIndex] || 0;
@@ -969,7 +978,7 @@ const BookDetails = () => {
                                 {isSelected ? (
                                   <FaStar className="text-amber-500" />
                                 ) : (
-                                  <FaRegStar className="text-slate-400 hover:text-amber-500" />
+                                  <FaRegStar className={`${THEME_STYLES[readerTheme].text} opacity-40 hover:opacity-100 hover:text-[#D87F4A]`} />
                                 )}
                               </button>
                             );
