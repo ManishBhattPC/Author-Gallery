@@ -480,17 +480,24 @@ const AdminDashboard = () => {
           {/* Search and Action items */}
           <div className="flex items-center gap-4">
             
-            {/* Global Search Bar */}
-            <div className="relative max-w-xs w-48 sm:w-64">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-              <input
-                type="text"
-                placeholder={`Search ${activeTab}...`}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="admin-input pl-10"
-              />
-            </div>
+            {/* Global Search Bar (Only render on searchable tabs) */}
+            {["users", "books", "reports", "reviews", "payments"].includes(activeTab) ? (
+              <div className="relative max-w-xs w-48 sm:w-64">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 animate-pulse" />
+                <input
+                  type="text"
+                  placeholder={`Search ${activeTab === "users" ? "members" : activeTab.replace("-", " ")}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="admin-input pl-10 text-xs focus:ring-1 focus:ring-[#d87f4a]/50"
+                />
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2 bg-zinc-900/35 border border-zinc-800/80 px-3.5 py-1.5 rounded-xl">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Workspace Synced</span>
+              </div>
+            )}
 
             {/* Quick action button */}
             <button
@@ -945,116 +952,166 @@ const AdminDashboard = () => {
 
           {/* D. CONTENT REPORTS PANEL */}
           {activeTab === "reports" && (
-            <div className="admin-glass-card p-6 text-left animate-fade-in space-y-6">
-              <div className="flex justify-between items-center border-b border-zinc-800 pb-4">
+            <div className="space-y-6 animate-fade-in text-left">
+              
+              <div className="admin-glass-card p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                  <h3 className="text-lg font-bold text-zinc-200">Moderator Review Center</h3>
-                  <p className="text-xs text-zinc-500">Handle content complaints and policy violations</p>
+                  <h3 className="text-lg font-bold text-zinc-200 font-serif">Moderation & Helpdesk Center</h3>
+                  <p className="text-xs text-zinc-500">Track general support requests, complaints, and listing violations</p>
+                </div>
+                <div className="flex items-center gap-2 bg-zinc-900/35 border border-zinc-800/85 px-3 py-1 rounded-xl">
+                  <span className="text-xs text-zinc-400 font-semibold">Active Complaints:</span>
+                  <span className="bg-rose-500/20 text-rose-400 px-2 py-0.5 rounded-full text-[10px] font-bold border border-rose-500/20">
+                    {data.reports?.filter(r => r.status === "pending").length || 0} Pending
+                  </span>
                 </div>
               </div>
 
               {data.reports?.length === 0 ? (
-                <div className="py-12 text-center text-zinc-500 space-y-2">
-                  <CheckCircle className="w-10 h-10 mx-auto text-emerald-500" />
-                  <h5 className="font-bold text-sm text-zinc-300">Clear Workspace</h5>
-                  <p className="text-xs max-w-sm mx-auto leading-relaxed">No content complaints have been filed. Platform complies with standards.</p>
+                <div className="admin-glass-card p-16 text-center text-zinc-500 space-y-3">
+                  <CheckCircle className="w-12 h-12 mx-auto text-emerald-500" />
+                  <h5 className="font-serif font-bold text-base text-zinc-300">Clean Workspace Log</h5>
+                  <p className="text-xs max-w-sm mx-auto leading-relaxed text-zinc-500">
+                    No active support requests or copyright infringement complaints found in the database.
+                  </p>
                 </div>
               ) : (
-                <div className="space-y-4 divide-y divide-zinc-850">
+                <div className="grid grid-cols-1 gap-6">
                   {data.reports
                     ?.filter(r => {
                       if (searchQuery.trim()) {
                         const q = searchQuery.toLowerCase();
                         return (
                           r.reason.toLowerCase().includes(q) ||
-                          r.book?.title.toLowerCase().includes(q) ||
-                          r.author?.name.toLowerCase().includes(q)
+                          r.description.toLowerCase().includes(q) ||
+                          (r.reporter?.name || r.guestName || "").toLowerCase().includes(q) ||
+                          (r.book?.title || "").toLowerCase().includes(q)
                         );
                       }
                       return true;
                     })
-                    .map((report, idx) => (
-                      <div key={report._id} className={`pt-4 flex flex-col lg:flex-row lg:items-start justify-between gap-6 ${idx === 0 ? "pt-0" : ""}`}>
-                        <div className="space-y-3 flex-1 min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="inline-flex items-center gap-1.5 bg-rose-950/40 text-rose-400 px-3 py-1 rounded-full text-xs font-bold border border-rose-900/30">
-                              <AlertTriangle size={12} />
-                              {report.reason}
-                            </span>
-                            <span className="text-xs text-zinc-500">
-                              Filed by: <span className="font-semibold text-zinc-300">{report.reporter?.name || "User"}</span> ({report.reporter?.email})
-                            </span>
+                    .map((report) => {
+                      const isContentFlag = report.book || report.author;
+                      const dateStr = new Date(report.createdAt).toLocaleString("en-IN", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      });
+                      
+                      return (
+                        <div key={report._id} className="admin-glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-zinc-800/70 hover:border-zinc-750">
+                          <div className="space-y-4 flex-1 min-w-0">
+                            
+                            {/* Card Header badges */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              {isContentFlag ? (
+                                <span className="inline-flex items-center gap-1 bg-rose-500/10 text-rose-400 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-rose-500/20 uppercase tracking-wider">
+                                  <AlertTriangle size={11} className="shrink-0" />
+                                  Violation Report
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider">
+                                  <HelpCircle size={11} className="shrink-0" />
+                                  Support Desk Ticket
+                                </span>
+                              )}
+                              
+                              <span className="text-[10px] text-zinc-500 font-bold font-mono">
+                                Ticket ID: {report._id.substring(12).toUpperCase()}
+                              </span>
+                              <span className="text-[10px] text-zinc-650">•</span>
+                              <span className="text-[10px] text-zinc-500 font-medium">
+                                Submitted {dateStr}
+                              </span>
+                            </div>
+
+                            {/* Details Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 border-t border-b border-zinc-900/60 py-3.5">
+                              <div>
+                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Subject Reason</span>
+                                <span className="text-xs text-zinc-200 font-semibold block">{report.reason}</span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Submitted By</span>
+                                <span className="text-xs text-zinc-200 font-semibold block">
+                                  {report.reporter?.name || report.guestName || "Guest User"}
+                                </span>
+                                <span className="text-[10px] text-zinc-500 font-mono block">
+                                  {report.reporter?.email || report.guestEmail}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Target Scope</span>
+                                {report.book ? (
+                                  <button
+                                    onClick={() => setPreviewItem({ type: "book", data: report.book })}
+                                    className="text-[#d87f4a] hover:underline text-xs font-bold bg-transparent border-0 p-0 text-left cursor-pointer flex items-center gap-1"
+                                  >
+                                    Book: {report.book.title}
+                                    <ExternalLink size={11} className="shrink-0" />
+                                  </button>
+                                ) : report.author ? (
+                                  <button
+                                    onClick={() => setPreviewItem({ type: "author", data: report.author })}
+                                    className="text-[#d87f4a] hover:underline text-xs font-bold bg-transparent border-0 p-0 text-left cursor-pointer flex items-center gap-1"
+                                  >
+                                    Profile: {report.author.name}
+                                    <ExternalLink size={11} className="shrink-0" />
+                                  </button>
+                                ) : (
+                                  <span className="text-xs text-zinc-500 font-medium">General Application Support</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Ticket Description */}
+                            {report.description && (
+                              <div className="space-y-1.5">
+                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">Issue Description</span>
+                                <p className="text-xs text-zinc-400 bg-zinc-950/40 p-3.5 rounded-xl border border-zinc-900/50 leading-relaxed font-sans max-w-3xl">
+                                  {report.description}
+                                </p>
+                              </div>
+                            )}
+
                           </div>
 
-                          <div className="text-sm font-semibold text-zinc-200">
-                            {report.book ? (
-                              <span>
-                                Flagged Book:{" "}
-                                <button
-                                  onClick={() => setPreviewItem({ type: "book", data: report.book })}
-                                  className="text-[#d87f4a] hover:underline inline-flex items-center gap-1 cursor-pointer font-semibold bg-transparent border-0 p-0 text-sm align-baseline"
-                                >
-                                  {report.book.title}
-                                  <ExternalLink size={12} className="inline shrink-0" />
-                                </button>
-                                <span className="text-xs text-zinc-500 font-normal"> (by {report.book.author?.name || "Unknown Author"})</span>
-                              </span>
-                            ) : report.author ? (
-                              <span>
-                                Flagged User Profile:{" "}
-                                <button
-                                  onClick={() => setPreviewItem({ type: "author", data: report.author })}
-                                  className="text-[#d87f4a] hover:underline inline-flex items-center gap-1 cursor-pointer font-semibold bg-transparent border-0 p-0 text-sm align-baseline"
-                                >
-                                  {report.author.name}
-                                  <ExternalLink size={12} className="inline shrink-0" />
-                                </button>
-                              </span>
-                            ) : (
-                              <span className="italic text-zinc-500">General complaint message</span>
+                          {/* Action panel */}
+                          <div className="flex md:flex-col gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-zinc-900 pt-4 md:pt-0">
+                            <button
+                              onClick={() => handleDismissReport(report._id)}
+                              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 border border-zinc-800 hover:bg-zinc-850 text-zinc-300 rounded-xl text-xs font-bold transition cursor-pointer"
+                            >
+                              <CheckCircle size={13} className="text-emerald-500 shrink-0" />
+                              Dismiss / Resolve
+                            </button>
+
+                            {report.book && (
+                              <button
+                                onClick={() => handleDeleteBook(report.book._id)}
+                                className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 rounded-xl text-xs font-bold transition cursor-pointer"
+                              >
+                                <Trash2 size={13} className="shrink-0" />
+                                Purge eBook
+                              </button>
+                            )}
+
+                            {report.author && (
+                              <button
+                                onClick={() => handleDeleteAuthor(report.author._id)}
+                                className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 rounded-xl text-xs font-bold transition cursor-pointer"
+                              >
+                                <Trash2 size={13} className="shrink-0" />
+                                Block Account
+                              </button>
                             )}
                           </div>
 
-                          {report.description && (
-                            <p className="text-xs text-zinc-400 bg-zinc-900/60 p-3.5 rounded-xl border border-zinc-800/80 max-w-2xl leading-relaxed">
-                              {report.description}
-                            </p>
-                          )}
                         </div>
-
-                        <div className="flex gap-2 shrink-0 lg:self-center">
-                          <button
-                            onClick={() => handleDismissReport(report._id)}
-                            className="flex items-center justify-center gap-1.5 px-4 py-2 border border-zinc-800 hover:bg-zinc-850 text-zinc-300 rounded-xl text-xs font-semibold transition cursor-pointer"
-                          >
-                            <CheckCircle size={14} className="text-emerald-500" />
-                            Dismiss Case
-                          </button>
-
-                          {report.book && (
-                            <button
-                              onClick={() => handleDeleteBook(report.book._id)}
-                              className="flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
-                            >
-                              <Trash2 size={14} />
-                              Purge Book
-                            </button>
-                          )}
-
-                          {report.author && (
-                            <button
-                              onClick={() => handleDeleteAuthor(report.author._id)}
-                              className="flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
-                            >
-                              <Trash2 size={14} />
-                              Block Author
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               )}
+
             </div>
           )}
 

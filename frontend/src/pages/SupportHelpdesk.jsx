@@ -6,7 +6,7 @@ import { HelpCircle, Send, ShieldAlert, LogIn, UserPlus, CheckCircle2 } from "lu
 
 const SupportHelpdesk = () => {
   const { user } = useAuth();
-  const [form, setForm] = useState({ reason: "Account Issue", description: "" });
+  const [form, setForm] = useState({ reason: "Account Issue", description: "", name: "", email: "" });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(null);
@@ -27,61 +27,38 @@ const SupportHelpdesk = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) return;
-
     setLoading(true);
     setError(null);
 
     try {
-      await submitReport({
+      const payload = {
         reason: form.reason,
         description: form.description,
-      });
+      };
+
+      if (user) {
+        payload.name = user.name;
+        payload.email = user.email;
+      } else {
+        if (!form.name.trim()) {
+          throw new Error("Name is required.");
+        }
+        if (!form.email.trim()) {
+          throw new Error("Email address is required.");
+        }
+        payload.name = form.name.trim();
+        payload.email = form.email.trim();
+      }
+
+      await submitReport(payload);
       setSubmitted(true);
-      setForm({ reason: "Account Issue", description: "" });
+      setForm({ reason: "Account Issue", description: "", name: "", email: "" });
     } catch (err) {
       setError(err.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-
-  // If user is not logged in, show authentication prompt card
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-slate-50 px-4 py-16 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="mx-auto max-w-md w-full rounded-3xl bg-white border border-slate-200/60 p-8 shadow-xl text-center space-y-6">
-          <div className="flex justify-center">
-            <div className="p-4 bg-amber-50 rounded-3xl text-amber-800">
-              <ShieldAlert className="w-12 h-12" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-slate-800">Sign Up Required</h1>
-            <p className="text-sm text-slate-500 leading-relaxed">
-              To submit a support ticket at our Helpdesk, you must have an account. This helps us track your issue and respond to you directly.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Link
-              to="/login"
-              className="flex-1 flex items-center justify-center gap-2 rounded-full border border-slate-350 bg-white py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:shadow-sm active:scale-95 transition-all duration-200"
-            >
-              <LogIn className="w-4.5 h-4.5 text-slate-500" />
-              Log In
-            </Link>
-            <Link
-              to="/signup"
-              className="flex-1 flex items-center justify-center gap-2 rounded-full bg-amber-800 py-3 text-sm font-semibold text-white hover:bg-amber-900 hover:shadow-md active:scale-95 transition-all duration-200 shadow-sm"
-            >
-              <UserPlus className="w-4.5 h-4.5" />
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-12 sm:px-6 lg:px-8">
@@ -123,21 +100,37 @@ const SupportHelpdesk = () => {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid gap-6 sm:grid-cols-2">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Your Name</label>
+                <label className="block text-xs font-semibold text-slate-655 mb-1">Your Name *</label>
                 <input
                   type="text"
-                  value={user.name}
-                  disabled
-                  className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 outline-none cursor-not-allowed text-xs font-medium"
+                  name="name"
+                  value={user ? user.name : form.name}
+                  onChange={handleChange}
+                  disabled={Boolean(user)}
+                  required
+                  placeholder="Enter your name..."
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none border transition-all ${
+                    user 
+                      ? "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed" 
+                      : "bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 text-slate-800"
+                  }`}
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Your Email</label>
+                <label className="block text-xs font-semibold text-slate-655 mb-1">Your Email *</label>
                 <input
                   type="email"
-                  value={user.email}
-                  disabled
-                  className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 outline-none cursor-not-allowed text-xs font-medium"
+                  name="email"
+                  value={user ? user.email : form.email}
+                  onChange={handleChange}
+                  disabled={Boolean(user)}
+                  required
+                  placeholder="Enter your email address..."
+                  className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none border transition-all ${
+                    user 
+                      ? "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed" 
+                      : "bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 text-slate-800"
+                  }`}
                 />
               </div>
             </div>
