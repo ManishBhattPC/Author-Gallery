@@ -44,6 +44,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
 import "./AdminDashboard.css";
+import gsap from "gsap";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -810,10 +811,63 @@ const AdminDashboard = () => {
               {/* 8 KPI CARDS CONTAINER */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {kpiData.map((kpi) => (
-                  <div key={kpi.id} className="admin-glass-card p-5 flex flex-col justify-between text-left space-y-4">
+                  <div 
+                    key={kpi.id} 
+                    onMouseEnter={(e) => {
+                      const card = e.currentTarget;
+                      const icon = card.querySelector(".kpi-icon-container");
+                      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                      if (prefersReducedMotion) return;
+
+                      gsap.to(card, {
+                        y: -5,
+                        transformPerspective: 800,
+                        rotateX: 3,
+                        scale: 1.015,
+                        borderColor: "rgba(216, 127, 74, 0.25)",
+                        boxShadow: "0 15px 25px -5px rgba(0, 0, 0, 0.4), 0 5px 10px -5px rgba(216, 127, 74, 0.15)",
+                        duration: 0.35,
+                        ease: "power2.out"
+                      });
+                      if (icon) {
+                        gsap.to(icon, {
+                          z: 15,
+                          scale: 1.05,
+                          borderColor: "rgba(216, 127, 74, 0.2)",
+                          duration: 0.35
+                        });
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      const card = e.currentTarget;
+                      const icon = card.querySelector(".kpi-icon-container");
+                      const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+                      if (prefersReducedMotion) return;
+
+                      gsap.to(card, {
+                        y: 0,
+                        rotateX: 0,
+                        scale: 1,
+                        borderColor: "rgba(63, 63, 70, 0.4)", // matches default border
+                        boxShadow: "none",
+                        duration: 0.5,
+                        ease: "power3.out"
+                      });
+                      if (icon) {
+                        gsap.to(icon, {
+                          z: 0,
+                          scale: 1,
+                          borderColor: "rgba(39, 39, 42, 1)",
+                          duration: 0.5
+                        });
+                      }
+                    }}
+                    style={{ transformStyle: "preserve-3d" }}
+                    className="admin-glass-card p-5 flex flex-col justify-between text-left space-y-4"
+                  >
                     <div className="flex justify-between items-center">
                       <span className="text-xs text-zinc-400 font-bold uppercase tracking-wider">{kpi.label}</span>
-                      <div className="p-2 bg-zinc-900 rounded-xl border border-zinc-800">
+                      <div className="p-2 bg-zinc-900 rounded-xl border border-zinc-800 kpi-icon-container">
                         {kpi.icon}
                       </div>
                     </div>

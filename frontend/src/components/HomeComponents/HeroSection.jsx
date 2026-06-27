@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getPublicSummaryStats } from "../../services/dashboardService.js";
 import { Sparkles } from "lucide-react";
+import gsap from "gsap";
 
 const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=1200&auto=format&fit=crop&q=80",
@@ -46,6 +47,30 @@ const useCountUp = (target, duration = 1500) => {
 const HeroSection = () => {
   const [currentImageIdx, setCurrentImageIdx] = useState(0);
   const [dbBooksCount, setDbBooksCount] = useState(0);
+  const heroContainerRef = useRef(null);
+
+  useEffect(() => {
+    const el = heroContainerRef.current;
+    if (!el) return;
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    // Ambient floating 3D animation
+    const tl = gsap.timeline({ repeat: -1, yoyo: true });
+    tl.to(el, {
+      y: -12,
+      rotationX: 1.5,
+      rotationY: -1.5,
+      transformPerspective: 1000,
+      duration: 3.5,
+      ease: "sine.inOut"
+    });
+
+    return () => {
+      tl.kill();
+    };
+  }, []);
   const [dbUsersCount, setDbUsersCount] = useState(0);
 
   // Fetch actual counts from database summary on mount
@@ -143,7 +168,11 @@ const HeroSection = () => {
           </div>
 
           {/* Right Side Image (Dynamic Cross-fade Slideshow) */}
-          <div className="relative h-[320px] sm:h-[420px] md:h-[500px] rounded-3xl overflow-hidden shadow-lg group">
+          <div 
+            ref={heroContainerRef}
+            style={{ transformStyle: "preserve-3d" }}
+            className="relative h-[320px] sm:h-[420px] md:h-[500px] rounded-3xl overflow-hidden shadow-lg group"
+          >
             {HERO_IMAGES.map((img, idx) => (
               <img
                 key={img}
