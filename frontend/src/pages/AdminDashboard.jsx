@@ -556,23 +556,51 @@ const AdminDashboard = () => {
                 <div className="absolute right-0 mt-3 w-[calc(100vw-32px)] sm:w-80 max-w-sm bg-[#121214] border border-zinc-800 rounded-2xl shadow-2xl p-4 z-50 text-left">
                   <div className="flex justify-between items-center border-b border-zinc-800 pb-2.5 mb-2.5">
                     <span className="text-xs font-bold text-zinc-300">Live Activity Feed</span>
-                    <button 
-                      onClick={() => {
-                        setNotificationLogs(prev => prev.map(n => ({ ...n, read: true })));
-                        triggerToast("All notifications marked as read", "success");
-                      }} 
-                      className="text-[10px] text-[#d87f4a] font-bold hover:underline"
-                    >
-                      Clear All
-                    </button>
+                    {notificationLogs.length > 0 && (
+                      <button 
+                        onClick={() => {
+                          setNotificationLogs([]);
+                          triggerToast("All notifications cleared", "success");
+                        }} 
+                        className="text-[10px] text-[#d87f4a] font-bold hover:underline cursor-pointer"
+                      >
+                        Clear All
+                      </button>
+                    )}
                   </div>
                   <div className="space-y-2 max-h-60 overflow-y-auto admin-scroll">
-                    {notificationLogs.map(log => (
-                      <div key={log.id} className={`p-2 rounded-xl text-[11px] leading-relaxed transition ${log.read ? "text-zinc-400 hover:bg-zinc-900/20" : "bg-[#d87f4a]/5 border border-[#d87f4a]/10 text-zinc-200"}`}>
-                        <p>{log.text}</p>
-                        <span className="text-[9px] text-zinc-500 mt-1 block">{log.time}</span>
+                    {notificationLogs.length === 0 ? (
+                      <div className="text-center py-8 text-zinc-500 text-xs font-sans font-medium">
+                        No new notifications
                       </div>
-                    ))}
+                    ) : (
+                      notificationLogs.map(log => (
+                        <div 
+                          key={log.id} 
+                          className={`p-2.5 rounded-xl text-[11px] leading-relaxed transition relative group flex justify-between gap-2 items-start ${
+                            log.read 
+                              ? "text-zinc-400 hover:bg-zinc-900/20" 
+                              : "bg-[#d87f4a]/5 border border-[#d87f4a]/10 text-zinc-200"
+                          }`}
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="break-words pr-4 text-xs font-medium">{log.text}</p>
+                            <span className="text-[9px] text-zinc-500 mt-1 block">{log.time}</span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNotificationLogs(prev => prev.filter(n => n.id !== log.id));
+                              triggerToast("Notification cleared", "success");
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-200 rounded-lg cursor-pointer transition-all duration-155 absolute top-2 right-2"
+                            title="Dismiss notification"
+                          >
+                            <X size={10} />
+                          </button>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}
