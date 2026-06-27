@@ -89,6 +89,7 @@ const CustomCursor = () => {
         x: currentX,
         y: currentY,
         rotation: rotation,
+        transformOrigin: "0px 0px"
       });
 
       // Spawn ink particle trail if pen is moving
@@ -141,15 +142,20 @@ const CustomCursor = () => {
         pointerEvents: "none",
         zIndex: 999999,
         transformStyle: "preserve-3d",
-        willChange: "transform",
-        transform: "translate(0px, -40px)" // aligns bottom-left (nib tip) with mouse coords
+        willChange: "transform"
       }}
       className="select-none pointer-events-none"
     >
       {/* 3D Glowing Hover Circle behind the Nib */}
       <div
         ref={glowRef}
-        className={`absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-4 h-4 rounded-full bg-amber-500/20 filter blur-sm border border-amber-600/30 transition-all duration-300 scale-0 ${
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          transform: "translate(-50%, -50%)"
+        }}
+        className={`w-4 h-4 rounded-full bg-amber-500/20 filter blur-sm border border-amber-600/30 transition-all duration-300 scale-0 ${
           isHoveringClickable ? "scale-[1.8] opacity-100 bg-[#d87f4a]/25 border-[#d87f4a]/45" : "opacity-0"
         }`}
       />
@@ -162,6 +168,9 @@ const CustomCursor = () => {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         style={{
+          position: "absolute",
+          top: "-40px", // aligns bottom-left (nib tip) with container top-left (mouse)
+          left: 0,
           transform: isHoveringClickable ? "scale(1.1) rotate(-8deg)" : "scale(1)",
           transformOrigin: "bottom left",
           transition: "transform 0.25s ease-out"
