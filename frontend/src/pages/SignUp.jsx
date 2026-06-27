@@ -17,6 +17,7 @@ const Signup = () => {
   const [googleConfirmPassword, setGoogleConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [resendStatus, setResendStatus] = useState(null);
+  const isRegistrationClosed = localStorage.getItem("admin_setting_allowRegistration") === "false";
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -25,6 +26,11 @@ const Signup = () => {
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+
+    if (isRegistrationClosed) {
+      setError("Registration is temporarily closed by the administrator.");
+      return;
+    }
 
     // 1. Client-side name validation
     if (!form.name.trim()) {
@@ -245,82 +251,103 @@ const Signup = () => {
         </p>
 
         {step === "details" && (
-          <form className="mt-8 space-y-5" onSubmit={handleRegisterSubmit}>
-            <div>
-              <label className="block text-sm font-medium text-slate-700">Full name</label>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                required
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-              />
+          isRegistrationClosed ? (
+            <div className="mt-8 p-6 bg-amber-50/50 border border-amber-200/60 rounded-3xl text-center space-y-4 animate-fade-in">
+              <div className="w-12 h-12 bg-amber-700/10 rounded-full flex items-center justify-center text-amber-850 mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                </svg>
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-bold text-slate-800 text-sm">Registrations Closed</h4>
+                <p className="text-xs text-slate-550 max-w-xs mx-auto leading-relaxed font-medium">
+                  New account registrations are temporarily closed by the platform administration. Please sign in with an existing account or try again later.
+                </p>
+              </div>
+              <div className="pt-2">
+                <Link to="/login" className="inline-block text-xs bg-amber-700 hover:bg-amber-800 text-white font-bold px-5 py-2.5 rounded-full shadow transition cursor-pointer">
+                  Sign In to existing account
+                </Link>
+              </div>
             </div>
+          ) : (
+            <form className="mt-8 space-y-5" onSubmit={handleRegisterSubmit}>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Full name</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
+                  className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={form.email}
-                onChange={handleChange}
-                required
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700">Password</label>
-              <input
-                type="password"
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                required
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
-              />
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Password</label>
+                <input
+                  type="password"
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                />
+              </div>
 
-            {error && <p className="text-sm text-rose-655 font-semibold">{error}</p>}
+              {error && <p className="text-sm text-rose-655 font-semibold">{error}</p>}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-full bg-amber-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-amber-800 hover:shadow-md active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
-            >
-              {loading ? "Creating Account..." : "Sign Up"}
-            </button>
-
-            {/* Divider */}
-            <div className="relative flex py-2 items-center">
-              <div className="flex-grow border-t border-slate-200"></div>
-              <span className="flex-shrink mx-4 text-slate-400 text-xs font-semibold uppercase">Or</span>
-              <div className="flex-grow border-t border-slate-200"></div>
-            </div>
-
-            {/* Real Google Button Container */}
-            <div id="google-signup-btn" className="w-full flex justify-center"></div>
-
-            {/* Dev Mode Simulated Google Sign-in */}
-            {(!import.meta.env.VITE_GOOGLE_CLIENT_ID || import.meta.env.VITE_GOOGLE_CLIENT_ID === "your-google-client-id") && (
               <button
-                type="button"
-                onClick={handleSimulatedGoogleLogin}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 hover:shadow-sm active:scale-[0.98] transition-all duration-200 font-semibold text-slate-700 text-xs cursor-pointer bg-white"
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-full bg-amber-700 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-amber-800 hover:shadow-md active:scale-[0.98] transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-70 cursor-pointer"
               >
-                <FcGoogle size={16} />
-                Simulate Google Sign-up (Dev Mode)
+                {loading ? "Creating Account..." : "Sign Up"}
               </button>
-            )}
 
-            <p className="mt-4 text-center text-xs text-slate-500">
-              Already have an account?{" "}
-              <Link to="/login" className="text-amber-800 font-bold hover:underline">
-                Log In
-              </Link>
-            </p>
-          </form>
+              {/* Divider */}
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-4 text-slate-400 text-xs font-semibold uppercase">Or</span>
+                <div className="flex-grow border-t border-slate-200"></div>
+              </div>
+
+              {/* Real Google Button Container */}
+              <div id="google-signup-btn" className="w-full flex justify-center"></div>
+
+              {/* Dev Mode Simulated Google Sign-in */}
+              {(!import.meta.env.VITE_GOOGLE_CLIENT_ID || import.meta.env.VITE_GOOGLE_CLIENT_ID === "your-google-client-id") && (
+                <button
+                  type="button"
+                  onClick={handleSimulatedGoogleLogin}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-300 rounded-full hover:bg-slate-50 hover:shadow-sm active:scale-[0.98] transition-all duration-200 font-semibold text-slate-700 text-xs cursor-pointer bg-white"
+                >
+                  <FcGoogle size={16} />
+                  Simulate Google Sign-up (Dev Mode)
+                </button>
+              )}
+
+              <p className="mt-4 text-center text-xs text-slate-500">
+                Already have an account?{" "}
+                <Link to="/login" className="text-amber-800 font-bold hover:underline">
+                  Log In
+                </Link>
+              </p>
+            </form>
+          )
         )}
 
         {step === "google-password" && (

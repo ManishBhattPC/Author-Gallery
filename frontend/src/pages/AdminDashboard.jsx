@@ -83,12 +83,14 @@ const AdminDashboard = () => {
   ]);
 
   // Mock Settings Config State
-  const [settingsConfig, setSettingsConfig] = useState({
-    maintenanceMode: false,
-    autoModeration: true,
-    allowRegistration: true,
-    stripeLiveMode: false,
-    announcementText: "System upgrade scheduled for Sunday, July 5th at 02:00 UTC.",
+  const [settingsConfig, setSettingsConfig] = useState(() => {
+    return {
+      maintenanceMode: localStorage.getItem("admin_setting_maintenanceMode") === "true",
+      autoModeration: localStorage.getItem("admin_setting_autoModeration") !== "false",
+      allowRegistration: localStorage.getItem("admin_setting_allowRegistration") !== "false",
+      stripeLiveMode: localStorage.getItem("admin_setting_stripeLiveMode") === "true",
+      announcementText: localStorage.getItem("admin_setting_announcementText") || "System upgrade scheduled for Sunday, July 5th at 02:00 UTC.",
+    };
   });
 
   const loadDashboardData = async () => {
@@ -198,7 +200,9 @@ const AdminDashboard = () => {
   // Mock quick action toggles
   const handleToggleSetting = (field) => {
     setSettingsConfig(prev => {
-      const next = { ...prev, [field]: !prev[field] };
+      const nextValue = !prev[field];
+      localStorage.setItem(`admin_setting_${field}`, String(nextValue));
+      const next = { ...prev, [field]: nextValue };
       triggerToast(`${field.replace(/([A-Z])/g, ' $1')} updated successfully`, "success");
       return next;
     });
@@ -1536,7 +1540,10 @@ const AdminDashboard = () => {
                   />
                   <div className="flex justify-end pt-3">
                     <button
-                      onClick={() => triggerToast("Header Banner announcement text saved", "success")}
+                      onClick={() => {
+                        localStorage.setItem("admin_setting_announcementText", settingsConfig.announcementText);
+                        triggerToast("Header Banner announcement text saved", "success");
+                      }}
                       className="bg-[#d87f4a] hover:bg-[#c26e3d] text-white px-5 py-2 rounded-xl text-xs font-bold transition shadow-md cursor-pointer"
                     >
                       Save Banner
@@ -1790,16 +1797,24 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              <div className="bg-zinc-900/35 p-3.5 border border-zinc-800 rounded-xl space-y-2">
+              <div className="bg-zinc-900/35 p-3.5 border border-zinc-800 rounded-xl space-y-2.5">
                 <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Quick Announcement Broadcast</span>
+                <textarea
+                  rows="2"
+                  value={settingsConfig.announcementText}
+                  onChange={(e) => setSettingsConfig(prev => ({ ...prev, announcementText: e.target.value }))}
+                  placeholder="Enter banner announcement message..."
+                  className="admin-input text-[11px] h-14 resize-none font-sans bg-zinc-950 border border-zinc-850"
+                />
                 <button
                   onClick={() => {
-                    setShowQuickActionModal(false);
+                    localStorage.setItem("admin_setting_announcementText", settingsConfig.announcementText);
                     triggerToast("Announcement broadcasted successfully to all active authors & readers", "success");
+                    setShowQuickActionModal(false);
                   }}
-                  className="w-full py-2.5 bg-gradient-to-r from-[#d87f4a] to-[#a05a3a] hover:from-[#c26e3d] hover:to-[#8c4e35] text-white text-xs font-bold rounded-xl shadow-md cursor-pointer transition text-center"
+                  className="w-full py-2 bg-gradient-to-r from-[#d87f4a] to-[#a05a3a] hover:from-[#c26e3d] hover:to-[#8c4e35] text-white text-xs font-bold rounded-xl shadow-md cursor-pointer transition text-center mt-1"
                 >
-                  Send Announcement
+                  Broadcast Announcement
                 </button>
               </div>
             </div>
