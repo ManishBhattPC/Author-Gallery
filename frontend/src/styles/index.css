@@ -263,3 +263,11 @@ img {
   animation: fadeInPage 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   will-change: transform, opacity; /* Tell the browser to prepare for GPU-acceleration */
 }
+
+/* Custom Literary Cursor overrides */
+@media (hover: hover) and (pointer: fine) {
+  .custom-cursor-active, 
+  .custom-cursor-active * {
+    cursor: none !important;
+  }
+}

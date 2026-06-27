@@ -8,14 +8,12 @@ const CustomCursor = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Detect touchscreen devices
-    const checkTouchDevice = () => {
-      const hasTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-      setIsMobile(hasTouch);
+    const handleTouchStart = () => {
+      setIsMobile(true);
+      window.removeEventListener("touchstart", handleTouchStart);
     };
-    checkTouchDevice();
-    window.addEventListener("resize", checkTouchDevice);
-    return () => window.removeEventListener("resize", checkTouchDevice);
+    window.addEventListener("touchstart", handleTouchStart);
+    return () => window.removeEventListener("touchstart", handleTouchStart);
   }, []);
 
   useEffect(() => {
@@ -146,7 +144,7 @@ const CustomCursor = () => {
         willChange: "transform",
         transform: "translate(0px, -40px)" // aligns bottom-left (nib tip) with mouse coords
       }}
-      className="select-none hidden lg:block"
+      className="select-none pointer-events-none"
     >
       {/* 3D Glowing Hover Circle behind the Nib */}
       <div
