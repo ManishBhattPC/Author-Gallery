@@ -4,9 +4,14 @@ import gsap from "gsap";
 const CustomCursor = () => {
   const cursorRef = useRef(null);
   const glowRef = useRef(null);
+  const spotlightRef = useRef(null);
+  
   const [isHoveringClickable, setIsHoveringClickable] = useState(false);
+  const [isHoveringIframe, setIsHoveringIframe] = useState(false);
+  const [isLongPressing, setIsLongPressing] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // 1. Detect Touchscreen Trigger
   useEffect(() => {
     const handleTouchStart = () => {
       setIsMobile(true);
@@ -16,13 +21,61 @@ const CustomCursor = () => {
     return () => window.removeEventListener("touchstart", handleTouchStart);
   }, []);
 
+  // 2. Manage Global Body Cursor Styles
+  useEffect(() => {
+    if (isMobile) {
+      document.body.classList.remove("custom-cursor-active");
+      return;
+    }
+
+    if (isHoveringIframe) {
+      document.body.classList.remove("custom-cursor-active");
+    } else {
+      document.body.classList.add("custom-cursor-active");
+    }
+
+    return () => {
+      document.body.classList.remove("custom-cursor-active");
+    };
+  }, [isMobile, isHoveringIframe]);
+
+  // 3. Monitor and Bind iFrame Mouse Over/Leaves to Prevent Quill Sticky Stuck
+  useEffect(() => {
+    if (isMobile) return;
+
+    const handleMouseEnter = () => setIsHoveringIframe(true);
+    const handleMouseLeave = () => setIsHoveringIframe(false);
+
+    const bindIframeEvents = () => {
+      const iframes = document.querySelectorAll("iframe");
+      iframes.forEach((iframe) => {
+        iframe.removeEventListener("mouseenter", handleMouseEnter);
+        iframe.removeEventListener("mouseleave", handleMouseLeave);
+        iframe.addEventListener("mouseenter", handleMouseEnter);
+        iframe.addEventListener("mouseleave", handleMouseLeave);
+      });
+    };
+
+    bindIframeEvents();
+    const intervalId = setInterval(bindIframeEvents, 1200);
+
+    return () => {
+      clearInterval(intervalId);
+      const iframes = document.querySelectorAll("iframe");
+      iframes.forEach((iframe) => {
+        iframe.removeEventListener("mouseenter", handleMouseEnter);
+        iframe.removeEventListener("mouseleave", handleMouseLeave);
+      });
+    };
+  }, [isMobile]);
+
+  // 4. Main GSAP Mouse Movement Tracking, Tilts, and Spotlight coordinates
   useEffect(() => {
     if (isMobile) return;
 
     const cursor = cursorRef.current;
     if (!cursor) return;
 
-    // Check system prefers-reduced-motion
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
@@ -44,7 +97,6 @@ const CustomCursor = () => {
     let lastParticleTime = 0;
     const spawnInkParticle = (x, y) => {
       const now = Date.now();
-      // Only spawn if mouse is moving and throttled
       if (now - lastParticleTime < 45) return;
       lastParticleTime = now;
 
@@ -71,20 +123,39 @@ const CustomCursor = () => {
       });
     };
 
+    // Spotlight & Long Press Triggers
+    let pressTimeout = null;
+
+    const handleMouseDown = (e) => {
+      if (e.button !== 0) return; // Left click only
+      pressTimeout = setTimeout(() => {
+        setIsLongPressing(true);
+        gsap.to(cursor, { scale: 1.3, duration: 0.35, ease: "power2.out" });
+      }, 250);
+    };
+
+    const handleMouseUp = () => {
+      clearTimeout(pressTimeout);
+      setIsLongPressing(false);
+      gsap.to(cursor, { scale: 1, duration: 0.3, ease: "power2.out" });
+    };
+
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mouseleave", handleMouseUp);
+
     // Animation Tick Loop
     const tick = () => {
-      const ease = 0.14; // Smooth follow latency
+      const ease = 0.14;
       currentX += (mouseX - currentX) * ease;
       currentY += (mouseY - currentY) * ease;
 
-      // Speed calculation for dynamic pen rotation
       speedX = currentX - lastX;
       lastX = currentX;
 
-      // Tilt pen based on velocity (cap at max 14 degrees)
       const rotation = Math.max(-14, Math.min(14, speedX * 1.6));
 
-      // Update positions
+      // Translate Pen Container
       gsap.set(cursor, {
         x: currentX,
         y: currentY,
@@ -92,7 +163,15 @@ const CustomCursor = () => {
         transformOrigin: "0px 0px"
       });
 
-      // Spawn ink particle trail if pen is moving
+      // Translate Spotlight (keeps vertical orientation, no rotations)
+      const spotlight = spotlightRef.current;
+      if (spotlight) {
+        gsap.set(spotlight, {
+          x: currentX,
+          y: currentY
+        });
+      }
+
       if (Math.abs(speedX) > 1.2) {
         spawnInkParticle(currentX, currentY);
       }
@@ -102,7 +181,7 @@ const CustomCursor = () => {
 
     const animId = requestAnimationFrame(tick);
 
-    // Hover state selectors
+    // Hover elements checker
     const handleMouseOver = (e) => {
       const target = e.target;
       if (!target) return;
@@ -123,113 +202,140 @@ const CustomCursor = () => {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseover", handleMouseOver);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mouseleave", handleMouseUp);
       cancelAnimationFrame(animId);
     };
   }, [isMobile]);
 
-  // Exclude touchscreens
   if (isMobile) return null;
 
   return (
-    <div
-      ref={cursorRef}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "40px",
-        height: "40px",
-        pointerEvents: "none",
-        zIndex: 999999,
-        transformStyle: "preserve-3d",
-        willChange: "transform"
-      }}
-      className="select-none pointer-events-none"
-    >
-      {/* 3D Glowing Hover Circle behind the Nib */}
+    <>
+      {/* Magical Microscope Spotlight Overlay (Centered exactly at nib top 0,0) */}
+      {isLongPressing && (
+        <div
+          ref={spotlightRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "160px",
+            height: "160px",
+            borderRadius: "50%",
+            pointerEvents: "none",
+            zIndex: 999998,
+            transform: "translate(-50%, -50%)",
+            background: "radial-gradient(circle, rgba(253, 224, 71, 0.28) 0%, rgba(216, 127, 74, 0.08) 45%, rgba(0, 0, 0, 0) 75%)",
+            border: "1px solid rgba(216, 127, 74, 0.35)",
+            boxShadow: "0 0 35px 12px rgba(216, 127, 74, 0.15), inset 0 0 15px rgba(253, 224, 71, 0.15)",
+            backdropFilter: "brightness(1.3) contrast(1.15) saturate(1.15)",
+            willChange: "transform"
+          }}
+          className="animate-pulse"
+        />
+      )}
+
+      {/* Main Quill Cursor Wrapper */}
       <div
-        ref={glowRef}
+        ref={cursorRef}
         style={{
-          position: "absolute",
+          position: "fixed",
           top: 0,
           left: 0,
-          transform: "translate(-50%, -50%)"
+          width: "40px",
+          height: "40px",
+          pointerEvents: "none",
+          zIndex: 999999,
+          transformStyle: "preserve-3d",
+          willChange: "transform",
+          opacity: isHoveringIframe ? 0 : 1,
+          transition: "opacity 0.25s ease"
         }}
-        className={`w-4 h-4 rounded-full bg-amber-500/20 filter blur-sm border border-amber-600/30 transition-all duration-300 scale-0 ${
-          isHoveringClickable ? "scale-[1.8] opacity-100 bg-[#d87f4a]/25 border-[#d87f4a]/45" : "opacity-0"
-        }`}
-      />
-
-      {/* Handcrafted Vector Quill Pen SVG */}
-      <svg
-        width="40"
-        height="40"
-        viewBox="0 0 40 40"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{
-          position: "absolute",
-          top: "-40px", // aligns bottom-left (nib tip) with container top-left (mouse)
-          left: 0,
-          transform: isHoveringClickable ? "scale(1.1) rotate(-8deg)" : "scale(1)",
-          transformOrigin: "bottom left",
-          transition: "transform 0.25s ease-out"
-        }}
+        className="select-none pointer-events-none"
       >
-        <defs>
-          <linearGradient id="quillFeatherGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#F5EFEB" /> {/* antique parchment cream */}
-            <stop offset="60%" stopColor="#d87f4a" /> {/* warm literary amber */}
-            <stop offset="100%" stopColor="#8C4E35" /> {/* copper-rust shadow */}
-          </linearGradient>
-          <linearGradient id="quillNibGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#E6C687" /> {/* polished antique gold */}
-            <stop offset="100%" stopColor="#9C7839" /> {/* weathered brass */}
-          </linearGradient>
-        </defs>
-
-        {/* Feather Quill Vanes (Barbs) */}
-        <path
-          d="M 6 34 C 10 28, 15 19, 23 11 C 29 7, 34 5, 38 2 C 34 11, 29 17, 21 23 C 14 29, 10 32, 6 34 Z"
-          fill="url(#quillFeatherGrad)"
-          stroke="#8C4E35"
-          strokeWidth="0.35"
-        />
-        {/* Shading Details */}
-        <path
-          d="M 6 34 C 8 31, 13 24, 19 18 C 25 12, 30 8, 38 2 C 32 6, 26 12, 17 18 C 11 24, 8 29, 6 34 Z"
-          fill="#8C4E35"
-          opacity="0.18"
+        {/* 3D Glowing Hover Circle behind the Nib */}
+        <div
+          ref={glowRef}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            transform: "translate(-50%, -50%)"
+          }}
+          className={`w-4 h-4 rounded-full bg-amber-500/20 filter blur-sm border border-amber-600/30 transition-all duration-300 scale-0 ${
+            isHoveringClickable ? "scale-[1.8] opacity-100 bg-[#d87f4a]/25 border-[#d87f4a]/45" : "opacity-0"
+          }`}
         />
 
-        {/* Main Shaft / Quill Spine */}
-        <path
-          d="M 2 38 C 10 30, 20 20, 38 2"
-          stroke="#8C4E35"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-        />
+        {/* Handcrafted Vector Quill Pen SVG */}
+        <svg
+          width="40"
+          height="40"
+          viewBox="0 0 40 40"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            position: "absolute",
+            top: "-40px",
+            left: 0,
+            transform: isHoveringClickable ? "scale(1.1) rotate(-8deg)" : "scale(1)",
+            transformOrigin: "bottom left",
+            transition: "transform 0.25s ease-out"
+          }}
+        >
+          <defs>
+            <linearGradient id="quillFeatherGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#F5EFEB" />
+              <stop offset="60%" stopColor="#d87f4a" />
+              <stop offset="100%" stopColor="#8C4E35" />
+            </linearGradient>
+            <linearGradient id="quillNibGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#E6C687" />
+              <stop offset="100%" stopColor="#9C7839" />
+            </linearGradient>
+          </defs>
 
-        {/* Polished Metal Nib tip at the bottom-left */}
-        <path
-          d="M 0 40 L 4 36 L 6 34 L 2 38 Z"
-          fill="url(#quillNibGrad)"
-        />
-        <path
-          d="M 0 40 L 4 36 M 2 38 L 4 40"
-          stroke="#5C3B1E"
-          strokeWidth="0.8"
-        />
-        <line
-          x1="0"
-          y1="40"
-          x2="2.5"
-          y2="37.5"
-          stroke="#2D1908"
-          strokeWidth="0.65"
-        />
-      </svg>
-    </div>
+          <path
+            d="M 6 34 C 10 28, 15 19, 23 11 C 29 7, 34 5, 38 2 C 34 11, 29 17, 21 23 C 14 29, 10 32, 6 34 Z"
+            fill="url(#quillFeatherGrad)"
+            stroke="#8C4E35"
+            strokeWidth="0.35"
+          />
+          <path
+            d="M 6 34 C 8 31, 13 24, 19 18 C 25 12, 30 8, 38 2 C 32 6, 26 12, 17 18 C 11 24, 8 29, 6 34 Z"
+            fill="#8C4E35"
+            opacity="0.18"
+          />
+
+          <path
+            d="M 2 38 C 10 30, 20 20, 38 2"
+            stroke="#8C4E35"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+
+          <path
+            d="M 0 40 L 4 36 L 6 34 L 2 38 Z"
+            fill="url(#quillNibGrad)"
+          />
+          <path
+            d="M 0 40 L 4 36 M 2 38 L 4 40"
+            stroke="#5C3B1E"
+            strokeWidth="0.8"
+          />
+          <line
+            x1="0"
+            y1="40"
+            x2="2.5"
+            y2="37.5"
+            stroke="#2D1908"
+            strokeWidth="0.65"
+          />
+        </svg>
+      </div>
+    </>
   );
 };
 

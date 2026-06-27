@@ -38,7 +38,7 @@ const Layout = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 custom-cursor-active">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <CustomCursor />
       <Navbar />
       <main className="flex-grow overflow-hidden">
