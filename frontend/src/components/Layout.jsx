@@ -3,6 +3,7 @@ import { Outlet, useLocation, Navigate } from "react-router-dom";
 import Navbar from "./navbar.jsx";
 import Footer from "./Footer.jsx";
 import { useAuth } from "../AuthContext.jsx";
+import CustomCursor from "./CustomCursor.jsx";
 
 const Layout = () => {
   const location = useLocation();
@@ -37,7 +38,8 @@ const Layout = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 lg:cursor-none">
+      <CustomCursor />
       <Navbar />
       <main className="flex-grow overflow-hidden">
         {/* Keyed div triggers entry animation on pathname change */}
