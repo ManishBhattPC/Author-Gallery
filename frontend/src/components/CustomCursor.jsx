@@ -9,6 +9,13 @@ const CustomCursor = () => {
   const [isHoveringIframe, setIsHoveringIframe] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  const [scrollMode, setScrollMode] = useState(false);
+  const scrollModeRef = useRef(false);
+
+  useEffect(() => {
+    scrollModeRef.current = scrollMode;
+  }, [scrollMode]);
+
   // 1. Detect Touchscreen Trigger
   useEffect(() => {
     const handleTouchStart = () => {
@@ -93,7 +100,7 @@ const CustomCursor = () => {
       mouseX = e.clientX;
       mouseY = e.clientY;
 
-      if (lastClientY !== null) {
+      if (scrollModeRef.current && lastClientY !== null) {
         const deltaY = e.clientY - lastClientY;
         // Skip large viewport jumps (e.g. entering window or tab switch)
         if (Math.abs(deltaY) < 150) {
@@ -108,7 +115,7 @@ const CustomCursor = () => {
     };
 
     const handleScroll = () => {
-      if (!isAnimatingScroll) {
+      if (!isAnimatingScroll || !scrollModeRef.current) {
         targetScrollY = window.scrollY;
         currentScrollY = window.scrollY;
       }
@@ -118,9 +125,31 @@ const CustomCursor = () => {
       lastClientY = null;
     };
 
+    let lastRightClickTime = 0;
+    const handleContextMenu = (e) => {
+      const now = Date.now();
+      if (now - lastRightClickTime < 500) {
+        e.preventDefault();
+        setScrollMode(true);
+      } else {
+        if (scrollModeRef.current) {
+          e.preventDefault();
+        }
+      }
+      lastRightClickTime = now;
+    };
+
+    const handleDblClick = (e) => {
+      if (scrollModeRef.current) {
+        setScrollMode(false);
+      }
+    };
+
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("scroll", handleScroll, { passive: true });
     document.addEventListener("mouseleave", handleMouseLeaveWindow);
+    window.addEventListener("contextmenu", handleContextMenu);
+    window.addEventListener("dblclick", handleDblClick);
 
     // Ink particle spawner
     let lastParticleTime = 0;
@@ -130,13 +159,20 @@ const CustomCursor = () => {
       lastParticleTime = now;
 
       const p = document.createElement("div");
-      p.className = "fixed pointer-events-none rounded-full bg-gradient-to-tr from-[#d87f4a] to-amber-200 z-[999999]";
+      p.className = "fixed pointer-events-none rounded-full z-[999999]";
       const size = Math.random() * 3.5 + 2.5;
       p.style.width = `${size}px`;
       p.style.height = `${size}px`;
       p.style.left = `${x}px`;
       p.style.top = `${y}px`;
-      p.style.filter = "blur(0.5px) drop-shadow(0 0 3px rgba(216, 127, 74, 0.55))";
+
+      if (scrollModeRef.current) {
+        p.style.background = "linear-gradient(to tr, #d87f4a, #f59e0b)";
+        p.style.filter = "blur(0.5px) drop-shadow(0 0 5px rgba(245, 158, 11, 0.8))";
+      } else {
+        p.style.background = "linear-gradient(to tr, #d87f4a, #ede6df)";
+        p.style.filter = "blur(0.5px) drop-shadow(0 0 3px rgba(216, 127, 74, 0.55))";
+      }
       p.style.opacity = "0.85";
 
       document.body.appendChild(p);
@@ -161,7 +197,9 @@ const CustomCursor = () => {
       speedX = currentX - lastX;
       lastX = currentX;
 
-      const rotation = Math.max(-14, Math.min(14, speedX * 1.6));
+      const scrollDelta = targetScrollY - currentScrollY;
+      const verticalTilt = Math.max(-20, Math.min(20, scrollDelta * 0.15));
+      const rotation = Math.max(-14, Math.min(14, speedX * 1.6)) + (scrollModeRef.current ? verticalTilt : 0);
 
       // Translate Pen Container
       gsap.set(cursor, {
@@ -171,13 +209,13 @@ const CustomCursor = () => {
         transformOrigin: "0px 0px"
       });
 
-      if (Math.abs(speedX) > 1.2) {
+      if (Math.abs(speedX) > 1.2 || (scrollModeRef.current && Math.abs(scrollDelta) > 2)) {
         spawnInkParticle(currentX, currentY);
       }
 
       // Smooth scroll interpolation
       const scrollEase = 0.15;
-      if (Math.abs(targetScrollY - currentScrollY) > 0.5) {
+      if (scrollModeRef.current && Math.abs(targetScrollY - currentScrollY) > 0.5) {
         currentScrollY += (targetScrollY - currentScrollY) * scrollEase;
         isAnimatingScroll = true;
         window.scrollTo(window.scrollX, currentScrollY);
@@ -211,6 +249,8 @@ const CustomCursor = () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("mouseleave", handleMouseLeaveWindow);
+      window.removeEventListener("contextmenu", handleContextMenu);
+      window.removeEventListener("dblclick", handleDblClick);
       document.removeEventListener("mouseover", handleMouseOver);
       cancelAnimationFrame(animId);
     };
@@ -245,10 +285,42 @@ const CustomCursor = () => {
           left: 0,
           transform: "translate(-50%, -50%)"
         }}
-        className={`w-4 h-4 rounded-full bg-amber-500/20 filter blur-sm border border-amber-600/30 transition-all duration-300 scale-0 ${
-          isHoveringClickable ? "scale-[1.8] opacity-100 bg-[#d87f4a]/25 border-[#d87f4a]/45" : "opacity-0"
+        className={`w-4 h-4 rounded-full filter blur-sm border transition-all duration-300 ${
+          scrollMode 
+            ? "scale-[2.4] opacity-100 bg-amber-500/35 border-amber-600/60 shadow-[0_0_15px_rgba(245,158,11,0.6)]"
+            : isHoveringClickable 
+            ? "scale-[1.8] opacity-100 bg-[#d87f4a]/25 border-[#d87f4a]/45" 
+            : "scale-0 opacity-0 bg-amber-500/20 border-amber-600/30"
         }`}
       />
+
+      {/* Dotted Radar Ring when Scroll Mode is active */}
+      {scrollMode && (
+        <div 
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            transform: "translate(-50%, -50%)"
+          }}
+          className="w-10 h-10 rounded-full border border-dashed border-[#d87f4a]/60 shadow-[0_0_12px_rgba(216,127,74,0.35)] animate-spin"
+        />
+      )}
+
+      {/* Floating Active Text Badge when Scroll Mode is active */}
+      {scrollMode && (
+        <div 
+          style={{
+            position: "absolute",
+            top: "22px",
+            left: "24px",
+            whiteSpace: "nowrap"
+          }}
+          className="text-[9px] font-bold tracking-widest text-[#d87f4a] bg-zinc-950/85 border border-[#d87f4a]/30 px-2 py-0.5 rounded shadow-lg select-none pointer-events-none uppercase animate-pulse"
+        >
+          ✦ Scroll Active
+        </div>
+      )}
 
       {/* Handcrafted Vector Quill Pen SVG */}
       <svg
