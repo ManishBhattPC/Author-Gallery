@@ -27,10 +27,13 @@ const getRazorpayInstance = () => {
  */
 export const requestDirectPayment = async (req, res) => {
   try {
-    const { bookId } = req.body;
+    const { bookId, whatsapp, address, note } = req.body;
 
     if (!bookId) {
       return res.status(400).json({ message: "Book ID is required" });
+    }
+    if (!whatsapp || !address) {
+      return res.status(400).json({ message: "WhatsApp number and address are required" });
     }
 
     const book = await Book.findById(bookId).populate("author", "name email");
@@ -65,6 +68,9 @@ export const requestDirectPayment = async (req, res) => {
       currency: "INR",
       paymentMethod: "direct",
       status: "pending",
+      whatsapp,
+      address,
+      note,
     });
 
     // Send notification email to the book's author
@@ -76,6 +82,9 @@ export const requestDirectPayment = async (req, res) => {
         buyerEmail: req.user.email,
         bookTitle: book.title,
         bookPrice: book.price,
+        whatsapp,
+        address,
+        note,
       });
     }
 

@@ -255,7 +255,7 @@ const logResetFallback = (email, otp) => {
   console.log("==================================================\n");
 };
 
-export const sendPurchaseRequestEmail = async ({ authorEmail, authorName, buyerName, buyerEmail, bookTitle, bookPrice }) => {
+export const sendPurchaseRequestEmail = async ({ authorEmail, authorName, buyerName, buyerEmail, bookTitle, bookPrice, whatsapp, address, note }) => {
   const subject = `New Book Purchase Request: "${bookTitle}"`;
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #FAF6F0;">
@@ -267,20 +267,23 @@ export const sendPurchaseRequestEmail = async ({ authorEmail, authorName, buyerN
         <h3 style="color: #8C4E35; margin-top: 0; font-size: 16px;">Buyer Details</h3>
         <p style="margin: 5px 0; font-size: 14px; color: #334155;"><strong>Name:</strong> ${buyerName}</p>
         <p style="margin: 5px 0; font-size: 14px; color: #334155;"><strong>Email:</strong> <a href="mailto:${buyerEmail}" style="color: #8C4E35; font-weight: bold;">${buyerEmail}</a></p>
+        <p style="margin: 5px 0; font-size: 14px; color: #334155;"><strong>WhatsApp Number:</strong> ${whatsapp || "N/A"}</p>
+        <p style="margin: 5px 0; font-size: 14px; color: #334155;"><strong>Delivery Address:</strong> ${address || "N/A"}</p>
+        ${note ? `<p style="margin: 5px 0; font-size: 14px; color: #334155;"><strong>Buyer Note:</strong> ${note}</p>` : ""}
       </div>
 
-      <p style="color: #334155; font-size: 15px; line-height: 1.6;">Please contact the buyer directly to arrange for payment offline. Once you receive the payment, you can approve their request in your Author Dashboard to grant them access.</p>
+      <p style="color: #334155; font-size: 15px; line-height: 1.6;">Please contact the buyer directly via email or WhatsApp to arrange for payment offline. Once you receive the payment, you can approve their request in your Author Dashboard to grant them access.</p>
       <p style="color: #64748b; font-size: 13px; margin-top: 30px;">Thank you for writing with Author Gallery.</p>
     </div>
   `;
   try {
     const success = await sendEmail({ to: authorEmail, subject, html });
     if (!success) {
-      logPurchaseFallback({ authorEmail, authorName, buyerName, buyerEmail, bookTitle, bookPrice });
+      logPurchaseFallback({ authorEmail, authorName, buyerName, buyerEmail, bookTitle, bookPrice, whatsapp, address, note });
     }
   } catch (err) {
     console.error("Failed to send purchase request email:", err);
-    logPurchaseFallback({ authorEmail, authorName, buyerName, buyerEmail, bookTitle, bookPrice });
+    logPurchaseFallback({ authorEmail, authorName, buyerName, buyerEmail, bookTitle, bookPrice, whatsapp, address, note });
   }
 };
 

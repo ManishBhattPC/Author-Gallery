@@ -4,8 +4,10 @@ import {
   deleteBookByAdmin, 
   deleteAuthorByAdmin, 
   dismissReportByAdmin, 
-  deleteReviewByAdmin 
+  deleteReviewByAdmin,
+  getAdminTransactions
 } from "../services/adminService.js";
+import { approvePurchaseRequest, declinePurchaseRequest } from "../services/paymentService.js";
 import { 
   BookOpen, 
   Users, 
@@ -74,6 +76,50 @@ const AdminDashboard = () => {
   const [genreFilter, setGenreFilter] = useState("all");
   const [sortField, setSortField] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
+
+  const [transactions, setTransactions] = useState([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
+
+  const loadTransactions = async () => {
+    try {
+      setLoadingTransactions(true);
+      const data = await getAdminTransactions();
+      setTransactions(data || []);
+    } catch (err) {
+      console.error("Failed to load admin transactions:", err);
+      setToast({ show: true, message: err.message || "Failed to load transactions", type: "error" });
+    } finally {
+      setLoadingTransactions(false);
+    }
+  };
+
+  const handleApproveTransaction = async (requestId) => {
+    try {
+      await approvePurchaseRequest(requestId);
+      setToast({ show: true, message: "Request approved and book access granted successfully.", type: "success" });
+      loadTransactions();
+    } catch (err) {
+      console.error("Failed to approve transaction:", err);
+      setToast({ show: true, message: err.message || "Failed to approve transaction", type: "error" });
+    }
+  };
+
+  const handleDeclineTransaction = async (requestId) => {
+    try {
+      await declinePurchaseRequest(requestId);
+      setToast({ show: true, message: "Request declined successfully.", type: "success" });
+      loadTransactions();
+    } catch (err) {
+      console.error("Failed to decline transaction:", err);
+      setToast({ show: true, message: err.message || "Failed to decline transaction", type: "error" });
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "payments") {
+      loadTransactions();
+    }
+  }, [activeTab]);
 
   // Mock Notification logs
   const [notificationLogs, setNotificationLogs] = useState([
@@ -1449,68 +1495,111 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {/* F. MOCK PAYMENTS / ORDERS PANEL */}
+          {/* F. PAYMENTS / ORDERS PANEL */}
           {activeTab === "payments" && (
             <div className="admin-glass-card p-6 text-left animate-fade-in space-y-6">
               <div className="flex justify-between items-center border-b border-zinc-800 pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-zinc-200">Payments & Invoicing Logs</h3>
-                  <p className="text-xs text-zinc-500">Audit logs for purchases and sales payouts</p>
+                  <p className="text-xs text-zinc-500">Audit logs for purchases and offline direct payouts</p>
                 </div>
               </div>
 
               <div className="overflow-x-auto admin-scroll">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Invoice ID</th>
-                      <th>Customer Details</th>
-                      <th>Reference Code</th>
-                      <th>Payer Status</th>
-                      <th>Invoice Date</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { id: "INV-29402941", name: "Ramesh Sharma", email: "ramesh@gmail.com", code: "TXN-827419", status: "completed", date: "June 25, 2026", amount: "₹499.00" },
-                      { id: "INV-29402830", name: "Anjali Gupta", email: "anjali@gmail.com", code: "TXN-827392", status: "completed", date: "June 24, 2026", amount: "₹1,200.00" },
-                      { id: "INV-29402772", name: "Vikram Seth", email: "seth@yahoo.com", code: "TXN-827310", status: "failed", date: "June 24, 2026", amount: "₹350.00" },
-                      { id: "INV-29402660", name: "Meera Nair", email: "meera@outlook.com", code: "TXN-827299", status: "completed", date: "June 23, 2026", amount: "₹750.00" },
-                      { id: "INV-29402510", name: "David Miller", email: "david@miller.co", code: "TXN-827101", status: "completed", date: "June 21, 2026", amount: "₹899.00" }
-                    ]
-                    .filter(txn => {
-                      if (searchQuery.trim()) {
-                        const q = searchQuery.toLowerCase();
-                        return (
-                          txn.id.toLowerCase().includes(q) ||
-                          txn.name.toLowerCase().includes(q) ||
-                          txn.code.toLowerCase().includes(q)
-                        );
-                      }
-                      return true;
-                    })
-                    .map((txn, idx) => (
-                      <tr key={idx}>
-                        <td><span className="font-serif font-bold text-zinc-300">{txn.id}</span></td>
-                        <td>
-                          <div className="text-left leading-none">
-                            <span className="font-semibold text-zinc-200 block text-xs">{txn.name}</span>
-                            <span className="text-[10px] text-zinc-500 mt-1 block">{txn.email}</span>
-                          </div>
-                        </td>
-                        <td><span className="text-xs font-serif text-zinc-450">{txn.code}</span></td>
-                        <td>
-                          <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${txn.status === "completed" ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/30" : "bg-rose-950/40 text-rose-400 border border-rose-900/30"}`}>
-                            {txn.status}
-                          </span>
-                        </td>
-                        <td><span className="text-xs text-zinc-500">{txn.date}</span></td>
-                        <td><span className="text-sm font-bold text-zinc-100">{txn.amount}</span></td>
+                {loadingTransactions ? (
+                  <div className="py-12 text-center text-zinc-500">
+                    Loading platform transactions...
+                  </div>
+                ) : transactions.length === 0 ? (
+                  <div className="py-12 text-center text-zinc-500">
+                    No transactions found.
+                  </div>
+                ) : (
+                  <table className="admin-table">
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Buyer</th>
+                        <th>Book Title / Author</th>
+                        <th>Contact & Address</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {transactions
+                      .filter(txn => {
+                        if (searchQuery.trim()) {
+                          const q = searchQuery.toLowerCase();
+                          return (
+                            txn._id.toLowerCase().includes(q) ||
+                            txn.user?.name?.toLowerCase().includes(q) ||
+                            txn.book?.title?.toLowerCase().includes(q) ||
+                            txn.whatsapp?.includes(q)
+                          );
+                        }
+                        return true;
+                      })
+                      .map((txn) => (
+                        <tr key={txn._id}>
+                          <td><span className="font-mono text-xs text-zinc-450">{txn._id}</span></td>
+                          <td>
+                            <div className="text-left leading-none">
+                              <span className="font-semibold text-zinc-200 block text-xs">{txn.user?.name || "Deleted User"}</span>
+                              <span className="text-[10px] text-zinc-500 mt-1 block">{txn.user?.email || ""}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="text-left leading-none">
+                              <span className="font-semibold text-zinc-200 block text-xs">{txn.book?.title || "Deleted Book"}</span>
+                              <span className="text-[10px] text-zinc-500 mt-1 block">Author: {txn.book?.author?.name || "N/A"}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="text-left leading-none space-y-1 py-1 max-w-[200px]">
+                              <p className="text-xs"><strong>WA:</strong> <a href={`https://wa.me/${txn.whatsapp?.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="text-[#d87f4a] hover:underline font-semibold">{txn.whatsapp}</a></p>
+                              <p className="text-[10px] text-zinc-400 truncate" title={txn.address}><strong>Addr:</strong> {txn.address}</p>
+                              {txn.note && <p className="text-[10px] text-zinc-500 italic truncate" title={txn.note}><strong>Note:</strong> "{txn.note}"</p>}
+                            </div>
+                          </td>
+                          <td>
+                            <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                              txn.status === "paid"
+                                ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/30"
+                                : txn.status === "pending"
+                                ? "bg-amber-950/40 text-amber-400 border border-amber-900/30"
+                                : "bg-rose-950/40 text-rose-400 border border-rose-900/30"
+                            }`}>
+                              {txn.status}
+                            </span>
+                          </td>
+                          <td><span className="text-xs text-zinc-550">{new Date(txn.createdAt).toLocaleDateString()}</span></td>
+                          <td><span className="text-sm font-bold text-zinc-100 font-mono">₹{txn.amount}</span></td>
+                          <td>
+                            {txn.status === "pending" && (
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={() => handleApproveTransaction(txn._id)}
+                                  className="px-2 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[10px] font-bold cursor-pointer transition"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleDeclineTransaction(txn._id)}
+                                  className="px-2 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded text-[10px] font-bold cursor-pointer transition"
+                                >
+                                  Decline
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </div>
           )}

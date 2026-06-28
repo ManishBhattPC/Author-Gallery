@@ -48,22 +48,36 @@ const BookDetails = () => {
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [purchasing, setPurchasing] = useState(false);
+  
+  const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
+  const [whatsapp, setWhatsapp] = useState("");
+  const [address, setAddress] = useState("");
+  const [note, setNote] = useState("");
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleBuyBook = async () => {
+  const handleBuyBook = () => {
     if (!user) {
       showToast("Please log in to purchase this book", "error");
       navigate("/login");
       return;
     }
+    setPurchaseModalOpen(true);
+  };
+
+  const handleConfirmPurchase = async (e) => {
+    e.preventDefault();
+    if (!whatsapp || !address) {
+      showToast("WhatsApp and Address details are required.", "error");
+      return;
+    }
 
     try {
       setPurchasing(true);
-      const data = await requestOfflinePayment(book._id);
+      const data = await requestOfflinePayment(book._id, whatsapp, address, note);
 
       if (data.success) {
         showToast("Purchase request sent! Arrange payment offline with the author.", "success");
@@ -71,6 +85,7 @@ const BookDetails = () => {
           ...prev,
           isPendingApproval: true,
         }));
+        setPurchaseModalOpen(false);
       }
     } catch (err) {
       console.error("Offline request failed:", err);
@@ -555,6 +570,85 @@ const BookDetails = () => {
           onClose={() => setReportModalOpen(false)}
           bookId={id}
         />
+
+        {/* Direct Purchase Details Form Modal */}
+        {purchaseModalOpen && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+            <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md shadow-2xl p-6 sm:p-8 animate-in fade-in zoom-in duration-200 text-left">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-extrabold text-slate-800 font-serif">
+                  Request Purchase
+                </h3>
+                <button
+                  onClick={() => setPurchaseModalOpen(false)}
+                  className="p-1.5 hover:bg-slate-100 text-slate-400 hover:text-slate-600 rounded-full transition cursor-pointer"
+                >
+                  <FaTimes size={16} />
+                </button>
+              </div>
+
+              <form onSubmit={handleConfirmPurchase} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    WhatsApp Number <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    required
+                    value={whatsapp}
+                    onChange={(e) => setWhatsapp(e.target.value)}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Delivery / Contact Address <span className="text-rose-500">*</span>
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Provide your city, state, pincode or contact address details..."
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Additional Note (Optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Preferred contact hours, payment query, etc."
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 text-slate-800 resize-none"
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setPurchaseModalOpen(false)}
+                    className="flex-1 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={purchasing}
+                    className="flex-1 px-4 py-3 bg-amber-700 hover:bg-amber-800 text-white text-sm font-bold rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-amber-800/10 cursor-pointer"
+                  >
+                    {purchasing ? "Sending..." : "Submit Request"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Immersive Fullscreen E-Reader Overlay */}

@@ -29,3 +29,9 @@ export const deleteReviewByAdmin = async (reviewId) => {
   const response = await apiClient.delete(`/api/admin/reviews/${reviewId}`);
   return response.data;
 };
+
+// Fetch all transactions/orders on platform
+export const getAdminTransactions = async () => {
+  const response = await apiClient.get("/api/admin/transactions");
+  return response.data;
+};

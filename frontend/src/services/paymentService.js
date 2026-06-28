@@ -5,8 +5,8 @@ import apiClient from "./apiClient.js";
  * @param {string} bookId 
  * @returns {Promise<object>} Request response
  */
-export const requestOfflinePayment = async (bookId) => {
-  const response = await apiClient.post("/api/payments/request", { bookId });
+export const requestOfflinePayment = async (bookId, whatsapp, address, note) => {
+  const response = await apiClient.post("/api/payments/request", { bookId, whatsapp, address, note });
   return response.data;
 };
 

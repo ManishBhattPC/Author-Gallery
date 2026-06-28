@@ -42,6 +42,7 @@ const Navbar = () => {
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [requestsOpen, setRequestsOpen] = useState(false);
+  const [mobileRequestsOpen, setMobileRequestsOpen] = useState(false);
 
   const loadPendingRequests = async () => {
     if (!user) return;
@@ -345,6 +346,14 @@ const Navbar = () => {
                                     <span>From: {req.user?.name}</span>
                                     <span className="font-semibold text-slate-700">₹{req.book?.price}</span>
                                   </div>
+                                  
+                                  {/* Buyer Contact details */}
+                                  <div className="mt-1.5 p-1.5 bg-slate-100 rounded-md text-[10px] text-slate-600 space-y-0.5">
+                                    <p><strong>WA:</strong> <a href={`https://wa.me/${req.whatsapp?.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="text-amber-800 hover:underline font-semibold">{req.whatsapp}</a></p>
+                                    <p className="line-clamp-2"><strong>Addr:</strong> {req.address}</p>
+                                    {req.note && <p className="italic line-clamp-1"><strong>Note:</strong> "{req.note}"</p>}
+                                  </div>
+
                                   <div className="flex gap-1.5 mt-2 justify-end">
                                     <button
                                       type="button"
@@ -513,6 +522,77 @@ const Navbar = () => {
                       <Settings size={18} />
                       <span>Profile Settings</span>
                     </NavLink>
+
+                    {/* Collapsible Purchase Requests (Mobile) */}
+                    <div className="border-t border-slate-200/50 mt-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMobileRequestsOpen(!mobileRequestsOpen);
+                          if (!mobileRequestsOpen) {
+                            loadPendingRequests();
+                          }
+                        }}
+                        className="w-full flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition text-left cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Bell size={18} className="text-slate-505" />
+                          <span>Purchase Requests</span>
+                        </div>
+                        {requests.length > 0 && (
+                          <span className="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
+                            {requests.length}
+                          </span>
+                        )}
+                      </button>
+
+                      {mobileRequestsOpen && (
+                        <div className="mt-2 ml-4 pl-3 border-l-2 border-amber-800/20 space-y-3.5 max-h-48 overflow-y-auto pr-1">
+                          {loadingRequests ? (
+                            <p className="text-xs text-slate-400 py-1">Loading requests...</p>
+                          ) : requests.length === 0 ? (
+                            <p className="text-xs text-slate-400 py-1 font-medium">No pending requests</p>
+                          ) : (
+                            requests.map((req) => (
+                              <div key={req._id} className="text-xs border-b border-slate-100 pb-2 last:border-0 last:pb-0 space-y-1">
+                                <p className="font-bold text-slate-800 truncate">{req.book?.title}</p>
+                                <div className="flex items-center justify-between text-[10px] text-slate-505">
+                                  <span>From: {req.user?.name}</span>
+                                  <span className="font-semibold text-slate-705">₹{req.book?.price}</span>
+                                </div>
+                                <div className="p-1.5 bg-slate-50 border border-slate-200/60 rounded-md text-[10px] text-slate-600 space-y-0.5">
+                                  <p><strong>WA:</strong> <a href={`https://wa.me/${req.whatsapp?.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="text-amber-800 hover:underline font-semibold">{req.whatsapp}</a></p>
+                                  <p className="line-clamp-2"><strong>Addr:</strong> {req.address}</p>
+                                  {req.note && <p className="italic line-clamp-1"><strong>Note:</strong> "{req.note}"</p>}
+                                </div>
+                                <div className="flex gap-1.5 mt-2 justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleDecline(req._id);
+                                    }}
+                                    className="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md font-bold transition flex items-center gap-0.5 text-[10px] cursor-pointer"
+                                  >
+                                    <X size={10} />
+                                    Decline
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleApprove(req._id);
+                                    }}
+                                    className="px-2.5 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-md font-bold transition flex items-center gap-0.5 text-[10px] cursor-pointer"
+                                  >
+                                    <Check size={10} />
+                                    Approve
+                                  </button>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </>
                 )}
               </div>

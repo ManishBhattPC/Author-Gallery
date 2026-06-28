@@ -3,6 +3,7 @@ import Book from "../models/Book.js";
 import AuthorProfile from "../models/authorProfile.js";
 import Review from "../models/Review.js";
 import Report from "../models/Report.js";
+import Order from "../models/Order.js";
 
 // Fetch all books, authors, reports, reviews for admin dashboard
 export const getDashboardData = async (req, res) => {
@@ -154,6 +155,24 @@ export const deleteReview = async (req, res) => {
 
     await review.deleteOne();
     res.status(200).json({ message: "Review deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Fetch all transactions/orders for admin panel
+export const getTransactions = async (req, res) => {
+  try {
+    const transactions = await Order.find({})
+      .populate("user", "name email")
+      .populate({
+        path: "book",
+        select: "title price author",
+        populate: { path: "author", select: "name email" }
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(transactions);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

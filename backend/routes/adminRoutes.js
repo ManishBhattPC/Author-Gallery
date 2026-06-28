@@ -4,7 +4,8 @@ import {
   deleteBook, 
   deleteAuthor, 
   dismissReport, 
-  deleteReview 
+  deleteReview,
+  getTransactions
 } from "../controllers/adminController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -15,6 +16,7 @@ router.use(protect);
 router.use(admin);
 
 router.get("/dashboard", getDashboardData);
+router.get("/transactions", getTransactions);
 router.delete("/books/:id", deleteBook);
 router.delete("/authors/:id", deleteAuthor);
 router.delete("/reports/:id", dismissReport);
