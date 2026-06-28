@@ -170,7 +170,11 @@ const HeroSection = () => {
           {/* Right Side Image (Dynamic Cross-fade Slideshow) */}
           <div 
             ref={heroContainerRef}
-            style={{ transformStyle: "preserve-3d" }}
+            style={{ 
+              transformStyle: "preserve-3d",
+              transform: "translate3d(0,0,0)",
+              isolation: "isolate"
+            }}
             className="relative h-[320px] sm:h-[420px] md:h-[500px] rounded-3xl overflow-hidden shadow-lg group"
           >
             {HERO_IMAGES.map((img, idx) => (
@@ -178,8 +182,13 @@ const HeroSection = () => {
                 key={img}
                 src={img}
                 alt={`Slide ${idx + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
-                  idx === currentImageIdx ? "opacity-100 z-10" : "opacity-0 z-0"
+                style={{
+                  transition: "opacity 1.2s ease-in-out, transform 1.8s cubic-bezier(0.16, 1, 0.3, 1)"
+                }}
+                className={`absolute inset-0 w-full h-full object-cover rounded-3xl will-change-transform ${
+                  idx === currentImageIdx 
+                    ? "opacity-100 z-10 scale-100" 
+                    : "opacity-0 z-0 scale-[1.07]"
                 }`}
               />
             ))}
