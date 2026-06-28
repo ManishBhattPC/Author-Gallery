@@ -168,20 +168,13 @@ const CustomCursor = () => {
       lastParticleTime = now;
 
       const p = document.createElement("div");
-      p.className = "fixed pointer-events-none rounded-full z-[999999]";
+      p.className = "fixed pointer-events-none rounded-full bg-gradient-to-tr from-[#d87f4a] to-amber-200 z-[999999]";
       const size = Math.random() * 3.5 + 2.5;
       p.style.width = `${size}px`;
       p.style.height = `${size}px`;
       p.style.left = `${x}px`;
       p.style.top = `${y}px`;
-
-      if (scrollModeRef.current) {
-        p.style.background = "linear-gradient(to tr, #d87f4a, #f59e0b)";
-        p.style.filter = "blur(0.5px) drop-shadow(0 0 5px rgba(245, 158, 11, 0.8))";
-      } else {
-        p.style.background = "linear-gradient(to tr, #d87f4a, #ede6df)";
-        p.style.filter = "blur(0.5px) drop-shadow(0 0 3px rgba(216, 127, 74, 0.55))";
-      }
+      p.style.filter = "blur(0.5px) drop-shadow(0 0 3.5px rgba(216, 127, 74, 0.65))";
       p.style.opacity = "0.85";
 
       document.body.appendChild(p);
@@ -354,20 +347,7 @@ const CustomCursor = () => {
         />
       )}
 
-      {/* Floating Active Text Badge when Scroll Mode is active */}
-      {scrollMode && (
-        <div 
-          style={{
-            position: "absolute",
-            top: "22px",
-            left: "24px",
-            whiteSpace: "nowrap"
-          }}
-          className="text-[9px] font-bold tracking-widest text-[#d87f4a] bg-zinc-950/85 border border-[#d87f4a]/30 px-2 py-0.5 rounded shadow-lg select-none pointer-events-none uppercase animate-pulse"
-        >
-          ✦ Scroll Active
-        </div>
-      )}
+
 
       {/* Handcrafted Vector Quill Pen SVG */}
       <svg
