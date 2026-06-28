@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { Flag, Info } from "lucide-react";
 import ReviewSection from "../ReviewSection.jsx";
 import ReportModal from "../ReportModal.jsx";
-import { createPaymentOrder, verifyPaymentSignature } from "../../services/paymentService.js";
+import { requestOfflinePayment, createPaymentOrder, verifyPaymentSignature } from "../../services/paymentService.js";
 import {
   FaDownload,
   FaArrowLeft,
@@ -31,6 +31,7 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaCreditCard,
+  FaClock,
 } from "react-icons/fa";
 
 const BookDetails = () => {
@@ -62,91 +63,19 @@ const BookDetails = () => {
 
     try {
       setPurchasing(true);
+      const data = await requestOfflinePayment(book._id);
 
-      // Load Razorpay Script Dynamically
-      const isScriptLoaded = await new Promise((resolve) => {
-        if (window.Razorpay) {
-          resolve(true);
-          return;
-        }
-        const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
-        document.body.appendChild(script);
-      });
-
-      if (!isScriptLoaded) {
-        showToast("Failed to load Razorpay payment gateway SDK.", "error");
-        setPurchasing(false);
-        return;
+      if (data.success) {
+        showToast("Purchase request sent! Arrange payment offline with the author.", "success");
+        setBook((prev) => ({
+          ...prev,
+          isPendingApproval: true,
+        }));
       }
-
-      // Create order in backend
-      const orderData = await createPaymentOrder(book._id);
-
-      // Open Checkout Options
-      const options = {
-        key: orderData.key,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: "Author Gallery",
-        description: `Purchase "${orderData.book.title}"`,
-        order_id: orderData.orderId,
-        prefill: {
-          name: user.name,
-          email: user.email,
-        },
-        theme: {
-          color: "#B45309",
-        },
-        handler: async function (response) {
-          try {
-            setPurchasing(true);
-            const verification = await verifyPaymentSignature({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            });
-
-            if (verification.success) {
-              showToast("Payment verified! Book unlocked successfully.", "success");
-              setBook((prev) => ({
-                ...prev,
-                isPurchased: true,
-                pdfFile: verification.pdfFile,
-                content: verification.content,
-              }));
-
-              if (updateUser) {
-                const purchasedList = user.purchasedBooks || [];
-                updateUser({
-                  purchasedBooks: [...new Set([...purchasedList, book._id])],
-                });
-              }
-            } else {
-              showToast("Payment signature verification failed.", "error");
-            }
-          } catch (err) {
-            console.error("Verification verification call failed:", err);
-            showToast(err.message || "Failed to verify transaction.", "error");
-          } finally {
-            setPurchasing(false);
-          }
-        },
-        modal: {
-          onDismiss: function () {
-            showToast("Payment cancelled by user", "info");
-            setPurchasing(false);
-          },
-        },
-      };
-
-      const paymentObject = new window.Razorpay(options);
-      paymentObject.open();
     } catch (err) {
-      console.error("Order creation failed:", err);
-      showToast(err.message || "Could not initiate payment order.", "error");
+      console.error("Offline request failed:", err);
+      showToast(err.message || "Could not submit purchase request.", "error");
+    } finally {
       setPurchasing(false);
     }
   };
@@ -489,18 +418,36 @@ const BookDetails = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
-                  <p className="text-sm font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center flex items-center justify-center gap-1.5">
-                    <FaInfoCircle />
-                    This is a premium eBook. Buy it to unlock reading and PDF downloads.
-                  </p>
-                  <button
-                    onClick={handleBuyBook}
-                    disabled={purchasing}
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-6 py-4 rounded-xl font-bold transition duration-200 cursor-pointer shadow-lg shadow-amber-800/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <FaCreditCard />
-                    {purchasing ? "Processing Payment..." : `Buy Now - ₹${book?.price}`}
-                  </button>
+                  {book?.isPendingApproval ? (
+                    <>
+                      <p className="text-sm font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center flex items-center justify-center gap-1.5">
+                        <FaInfoCircle />
+                        Purchase request is pending. Arrange payment offline with the author ({book?.author?.email || "author"}).
+                      </p>
+                      <button
+                        disabled
+                        className="w-full flex items-center justify-center gap-2 bg-slate-100 border-2 border-dashed border-slate-300 text-slate-500 px-6 py-4 rounded-xl font-bold cursor-not-allowed opacity-75"
+                      >
+                        <FaClock className="text-slate-400" />
+                        Pending Author Approval
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center flex items-center justify-center gap-1.5">
+                        <FaInfoCircle />
+                        This is a premium eBook. Request purchase to complete payment offline.
+                      </p>
+                      <button
+                        onClick={handleBuyBook}
+                        disabled={purchasing}
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-6 py-4 rounded-xl font-bold transition duration-200 cursor-pointer shadow-lg shadow-amber-800/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <FaCreditCard />
+                        {purchasing ? "Sending Request..." : `Request Purchase - ₹${book?.price}`}
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

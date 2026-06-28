@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
 import { getMyAuthorProfile } from "../services/authorProfileService.js";
+import { fetchAuthorRequests, approvePurchaseRequest, declinePurchaseRequest } from "../services/paymentService.js";
 import { 
   LayoutDashboard, 
   User, 
@@ -17,7 +18,10 @@ import {
   Settings,
   PenTool,
   Sun,
-  Moon
+  Moon,
+  Bell,
+  Check,
+  Clock,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -34,6 +38,52 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+
+  const [requests, setRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [requestsOpen, setRequestsOpen] = useState(false);
+
+  const loadPendingRequests = async () => {
+    if (!user) return;
+    try {
+      setLoadingRequests(true);
+      const data = await fetchAuthorRequests();
+      setRequests(data || []);
+    } catch (err) {
+      console.error("Failed to load author requests:", err);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleApprove = async (requestId) => {
+    try {
+      await approvePurchaseRequest(requestId);
+      setRequests((prev) => prev.filter((r) => r._id !== requestId));
+    } catch (err) {
+      console.error("Approval failed:", err);
+    }
+  };
+
+  const handleDecline = async (requestId) => {
+    try {
+      await declinePurchaseRequest(requestId);
+      setRequests((prev) => prev.filter((r) => r._id !== requestId));
+    } catch (err) {
+      console.error("Decline failed:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      loadPendingRequests();
+      // Poll requests every 30 seconds for live updates
+      const intervalId = setInterval(loadPendingRequests, 30000);
+      return () => clearInterval(intervalId);
+    } else {
+      setRequests([]);
+    }
+  }, [user]);
 
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "system";
@@ -256,6 +306,70 @@ const Navbar = () => {
                       <User size={16} className="text-slate-400" />
                       <span>Edit Profile</span>
                     </Link>
+
+                    {/* Collapsible Purchase Requests for Authors */}
+                    <div className="border-t border-slate-100/70 border-b border-slate-100/70 my-1 py-0.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRequestsOpen(!requestsOpen);
+                          if (!requestsOpen) {
+                            loadPendingRequests();
+                          }
+                        }}
+                        className="w-full flex items-center justify-between px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition text-left cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <Bell size={16} className="text-slate-400" />
+                          <span>Purchase Requests</span>
+                        </div>
+                        {requests.length > 0 && (
+                          <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                            {requests.length}
+                          </span>
+                        )}
+                      </button>
+
+                      {requestsOpen && (
+                        <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 max-h-48 overflow-y-auto">
+                          {loadingRequests ? (
+                            <p className="text-xs text-slate-400 text-center py-2">Loading requests...</p>
+                          ) : requests.length === 0 ? (
+                            <p className="text-xs text-slate-400 text-center py-2">No pending requests</p>
+                          ) : (
+                            <div className="space-y-3.5 py-1">
+                              {requests.map((req) => (
+                                <div key={req._id} className="text-xs border-b border-slate-200 pb-2 last:border-0 last:pb-0">
+                                  <p className="font-bold text-slate-800 truncate">{req.book?.title}</p>
+                                  <div className="flex items-center justify-between mt-1 text-[10px] text-slate-500">
+                                    <span>From: {req.user?.name}</span>
+                                    <span className="font-semibold text-slate-700">₹{req.book?.price}</span>
+                                  </div>
+                                  <div className="flex gap-1.5 mt-2 justify-end">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDecline(req._id)}
+                                      className="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md font-bold transition flex items-center gap-0.5 text-[10px] cursor-pointer"
+                                    >
+                                      <X size={10} />
+                                      Decline
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleApprove(req._id)}
+                                      className="px-2 py-1 bg-amber-700 hover:bg-amber-800 text-white rounded-md font-bold transition flex items-center gap-0.5 text-[10px] cursor-pointer"
+                                    >
+                                      <Check size={10} />
+                                      Approve
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     <button
                       type="button"
                       onClick={toggleTheme}

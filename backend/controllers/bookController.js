@@ -77,6 +77,7 @@ export const getBookById = async (req, res) => {
 
     // Determine access to book content/PDF (Free vs. Premium)
     let hasAccess = false;
+    let isPendingApproval = false;
     if (book.price === 0) {
       hasAccess = true;
     } else {
@@ -98,8 +99,17 @@ export const getBookById = async (req, res) => {
             status: "paid",
           });
 
+          const pendingOrder = await Order.findOne({
+            user: userId,
+            book: book._id,
+            status: "pending",
+          });
+
           if (isAuthor || isAdmin || paidOrder) {
             hasAccess = true;
+          }
+          if (pendingOrder) {
+            isPendingApproval = true;
           }
         } catch (err) {
           // Token is invalid/expired, default to no access
@@ -112,8 +122,10 @@ export const getBookById = async (req, res) => {
       bookData.pdfFile = null;
       bookData.content = null;
       bookData.isPurchased = false;
+      bookData.isPendingApproval = isPendingApproval;
     } else {
       bookData.isPurchased = true;
+      bookData.isPendingApproval = false;
     }
 
     res.status(200).json(bookData);

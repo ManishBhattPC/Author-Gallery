@@ -3,14 +3,15 @@ import crypto from "crypto";
 import Order from "../models/Order.js";
 import Book from "../models/Book.js";
 import User from "../models/User.js";
+import { sendPurchaseRequestEmail } from "../utils/mailService.js";
 
-// Helper to check if key is set up
+// Helper to check if key is set up (optional now, since direct payments are primary)
 const getRazorpayInstance = () => {
   const keyId = process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
-    throw new Error("Razorpay credentials are missing in backend environment configurations.");
+    return null;
   }
 
   return new Razorpay({
@@ -20,7 +21,178 @@ const getRazorpayInstance = () => {
 };
 
 /**
- * Create a new Razorpay order
+ * Request Direct Author Payment (Offline)
+ * @route POST /api/payments/request
+ * @access Private
+ */
+export const requestDirectPayment = async (req, res) => {
+  try {
+    const { bookId } = req.body;
+
+    if (!bookId) {
+      return res.status(400).json({ message: "Book ID is required" });
+    }
+
+    const book = await Book.findById(bookId).populate("author", "name email");
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    if (book.price <= 0) {
+      return res.status(400).json({ message: "Cannot purchase a free book" });
+    }
+
+    // Check if user has already requested or purchased the book
+    const existingOrder = await Order.findOne({
+      user: req.user._id,
+      book: bookId,
+      status: { $in: ["pending", "paid"] },
+    });
+
+    if (existingOrder) {
+      if (existingOrder.status === "paid") {
+        return res.status(400).json({ message: "You have already purchased this book" });
+      } else {
+        return res.status(400).json({ message: "Your purchase request is already pending author approval" });
+      }
+    }
+
+    // Create the order with Direct payment method and Pending status
+    const order = await Order.create({
+      user: req.user._id,
+      book: bookId,
+      amount: book.price,
+      currency: "INR",
+      paymentMethod: "direct",
+      status: "pending",
+    });
+
+    // Send notification email to the book's author
+    if (book.author && book.author.email) {
+      await sendPurchaseRequestEmail({
+        authorEmail: book.author.email,
+        authorName: book.author.name,
+        buyerName: req.user.name,
+        buyerEmail: req.user.email,
+        bookTitle: book.title,
+        bookPrice: book.price,
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Purchase request sent to the author successfully.",
+      order,
+    });
+  } catch (error) {
+    console.error("Error creating direct payment request:", error);
+    res.status(500).json({ message: error.message || "Failed to submit purchase request" });
+  }
+};
+
+/**
+ * Get pending purchase requests for books authored by the logged-in user
+ * @route GET /api/payments/requests/author
+ * @access Private
+ */
+export const getAuthorRequests = async (req, res) => {
+  try {
+    // Find all books authored by current user
+    const books = await Book.find({ author: req.user._id });
+    const bookIds = books.map((b) => b._id);
+
+    // Find all pending direct orders for these books
+    const requests = await Order.find({
+      book: { $in: bookIds },
+      paymentMethod: "direct",
+      status: "pending",
+    })
+      .populate("user", "name email")
+      .populate("book", "title price coverImage")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(requests);
+  } catch (error) {
+    console.error("Error fetching author requests:", error);
+    res.status(500).json({ message: error.message || "Failed to fetch purchase requests" });
+  }
+};
+
+/**
+ * Approve a purchase request and grant buyer access
+ * @route POST /api/payments/requests/:id/approve
+ * @access Private
+ */
+export const approveRequest = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate("book");
+    if (!order) {
+      return res.status(404).json({ message: "Purchase request not found" });
+    }
+
+    // Verify current user is the author of this book
+    if (order.book.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You are not authorized to approve this request" });
+    }
+
+    if (order.status !== "pending") {
+      return res.status(400).json({ message: `Request cannot be approved. Current status is '${order.status}'` });
+    }
+
+    // Grant access & set status to paid
+    order.status = "paid";
+    await order.save();
+
+    await User.findByIdAndUpdate(order.user, {
+      $addToSet: { purchasedBooks: order.book._id },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Request approved and book access granted successfully.",
+    });
+  } catch (error) {
+    console.error("Error approving request:", error);
+    res.status(500).json({ message: error.message || "Failed to approve request" });
+  }
+};
+
+/**
+ * Decline/Reject a purchase request
+ * @route POST /api/payments/requests/:id/decline
+ * @access Private
+ */
+export const declineRequest = async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id).populate("book");
+    if (!order) {
+      return res.status(404).json({ message: "Purchase request not found" });
+    }
+
+    // Verify current user is the author of this book
+    if (order.book.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "You are not authorized to decline this request" });
+    }
+
+    if (order.status !== "pending") {
+      return res.status(400).json({ message: `Request cannot be declined. Current status is '${order.status}'` });
+    }
+
+    order.status = "failed";
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Purchase request declined successfully.",
+    });
+  } catch (error) {
+    console.error("Error declining request:", error);
+    res.status(500).json({ message: error.message || "Failed to decline request" });
+  }
+};
+
+/**
+ * Create a new Razorpay order (Kept for modularity / future use)
  * @route POST /api/payments/order
  * @access Private
  */
@@ -41,7 +213,6 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: "Cannot purchase a free book" });
     }
 
-    // Check if user has already purchased the book
     const existingOrder = await Order.findOne({
       user: req.user._id,
       book: bookId,
@@ -53,6 +224,10 @@ export const createOrder = async (req, res) => {
     }
 
     const razorpay = getRazorpayInstance();
+    if (!razorpay) {
+      return res.status(503).json({ message: "Razorpay payment services are currently disabled." });
+    }
+
     const amountInPaise = Math.round(book.price * 100);
 
     const options = {
@@ -63,13 +238,13 @@ export const createOrder = async (req, res) => {
 
     const rpOrder = await razorpay.orders.create(options);
 
-    // Save order in database with status 'created'
     const order = await Order.create({
       user: req.user._id,
       book: bookId,
       amount: book.price,
       currency: "INR",
       razorpayOrderId: rpOrder.id,
+      paymentMethod: "razorpay",
       status: "created",
     });
 
@@ -90,7 +265,7 @@ export const createOrder = async (req, res) => {
 };
 
 /**
- * Verify Razorpay payment signature
+ * Verify Razorpay payment signature (Kept for modularity / future use)
  * @route POST /api/payments/verify
  * @access Private
  */
@@ -102,7 +277,6 @@ export const verifyPayment = async (req, res) => {
       return res.status(400).json({ message: "Payment verification parameters are missing" });
     }
 
-    // Cryptographic signature check
     const sign = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSign = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -115,17 +289,14 @@ export const verifyPayment = async (req, res) => {
     }
 
     if (razorpay_signature === expectedSign) {
-      // Payment matches signature!
       order.status = "paid";
       order.razorpayPaymentId = razorpay_payment_id;
       await order.save();
 
-      // Add book to user's purchased list
       await User.findByIdAndUpdate(req.user._id, {
         $addToSet: { purchasedBooks: order.book },
       });
 
-      // Fetch the full book details to return pdfFile / content links to the client
       const book = await Book.findById(order.book);
 
       res.status(200).json({

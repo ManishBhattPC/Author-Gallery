@@ -255,3 +255,40 @@ const logResetFallback = (email, otp) => {
   console.log("==================================================\n");
 };
 
+export const sendPurchaseRequestEmail = async ({ authorEmail, authorName, buyerName, buyerEmail, bookTitle, bookPrice }) => {
+  const subject = `New Book Purchase Request: "${bookTitle}"`;
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #FAF6F0;">
+      <h2 style="color: #8C4E35; font-family: Georgia, serif;">New Purchase Request</h2>
+      <p style="color: #334155; font-size: 15px; line-height: 1.6;">Hello <strong>${authorName}</strong>,</p>
+      <p style="color: #334155; font-size: 15px; line-height: 1.6;">A reader wants to purchase your premium eBook <strong>"${bookTitle}"</strong> for <strong>₹${bookPrice}</strong>.</p>
+      
+      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin: 20px 0;">
+        <h3 style="color: #8C4E35; margin-top: 0; font-size: 16px;">Buyer Details</h3>
+        <p style="margin: 5px 0; font-size: 14px; color: #334155;"><strong>Name:</strong> ${buyerName}</p>
+        <p style="margin: 5px 0; font-size: 14px; color: #334155;"><strong>Email:</strong> <a href="mailto:${buyerEmail}" style="color: #8C4E35; font-weight: bold;">${buyerEmail}</a></p>
+      </div>
+
+      <p style="color: #334155; font-size: 15px; line-height: 1.6;">Please contact the buyer directly to arrange for payment offline. Once you receive the payment, you can approve their request in your Author Dashboard to grant them access.</p>
+      <p style="color: #64748b; font-size: 13px; margin-top: 30px;">Thank you for writing with Author Gallery.</p>
+    </div>
+  `;
+  try {
+    const success = await sendEmail({ to: authorEmail, subject, html });
+    if (!success) {
+      logPurchaseFallback({ authorEmail, authorName, buyerName, buyerEmail, bookTitle, bookPrice });
+    }
+  } catch (err) {
+    console.error("Failed to send purchase request email:", err);
+    logPurchaseFallback({ authorEmail, authorName, buyerName, buyerEmail, bookTitle, bookPrice });
+  }
+};
+
+const logPurchaseFallback = (data) => {
+  console.log("\n==================================================");
+  console.log(`✉️ [DEV-FALLBACK] PURCHASE REQUEST FOR ${data.authorEmail.toUpperCase()}:`);
+  console.log(` BOOK: "${data.bookTitle}" (₹${data.bookPrice})`);
+  console.log(` BUYER: ${data.buyerName} <${data.buyerEmail}>`);
+  console.log("==================================================\n");
+};
+

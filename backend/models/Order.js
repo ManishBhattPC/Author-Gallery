@@ -25,18 +25,21 @@ const orderSchema = new mongoose.Schema(
     },
     razorpayOrderId: {
       type: String,
-      required: true,
-      unique: true,
-      index: true,
+      required: false,
     },
     razorpayPaymentId: {
       type: String,
       required: false,
     },
+    paymentMethod: {
+      type: String,
+      enum: ["razorpay", "direct"],
+      default: "direct",
+    },
     status: {
       type: String,
-      enum: ["created", "paid", "failed"],
-      default: "created",
+      enum: ["created", "pending", "paid", "failed"],
+      default: "pending",
     },
   },
   {

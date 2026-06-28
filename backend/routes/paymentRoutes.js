@@ -1,13 +1,24 @@
 import express from "express";
 import { protect } from "../middleware/authMiddleware.js";
-import { createOrder, verifyPayment } from "../controllers/paymentController.js";
+import {
+  requestDirectPayment,
+  getAuthorRequests,
+  approveRequest,
+  declineRequest,
+  createOrder,
+  verifyPayment,
+} from "../controllers/paymentController.js";
 
 const router = express.Router();
 
-// Order creation endpoint
-router.post("/order", protect, createOrder);
+// --- Direct Offline Payments (Primary Options) ---
+router.post("/request", protect, requestDirectPayment);
+router.get("/requests/author", protect, getAuthorRequests);
+router.post("/requests/:id/approve", protect, approveRequest);
+router.post("/requests/:id/decline", protect, declineRequest);
 
-// Payment verification endpoint
+// --- Online Payments (Razorpay - Kept for modularity / future use) ---
+router.post("/order", protect, createOrder);
 router.post("/verify", protect, verifyPayment);
 
 export default router;
