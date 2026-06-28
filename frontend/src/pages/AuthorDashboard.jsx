@@ -83,19 +83,23 @@ const Dashboard = () => {
           <div className="lg:col-span-2 xl:col-span-3 space-y-6">
             
             {/* Banner card prompting to write a book using template covers */}
-            <div className="bg-gradient-to-r from-amber-800 to-amber-950 rounded-3xl p-6 sm:p-8 text-[#FAF6F0] flex flex-col md:flex-row justify-between items-center gap-6 shadow-md border border-amber-900/30 text-left">
+            <div 
+              style={{ background: 'linear-gradient(135deg, #6c321c 0%, #351409 100%)' }}
+              className="rounded-3xl p-6 sm:p-8 text-[#FAF6F0] flex flex-col md:flex-row justify-between items-center gap-6 shadow-md border border-amber-900/20 text-left"
+            >
               <div className="space-y-2 text-center md:text-left">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-700/40 border border-amber-600/30 rounded-full text-xs font-bold tracking-wide">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-600/20 border border-amber-500/25 rounded-full text-xs font-bold tracking-wide text-amber-200">
                   ✨ NEW FEATURE
                 </span>
-                <h2 className="text-xl sm:text-2xl font-serif font-bold">Write Your Masterpiece Online</h2>
-                <p className="text-amber-100/70 text-xs sm:text-sm max-w-xl">
+                <h2 className="text-xl sm:text-2xl font-serif font-bold text-white">Write Your Masterpiece Online</h2>
+                <p className="text-slate-200 text-xs sm:text-sm max-w-xl">
                   Use our premium Book Notepad to draft your thoughts, select stunning Canvas cover templates with official Author Gallery attributions, and publish instantly as a formatted PDF!
                 </p>
               </div>
               <Link
                 to="/dashboard/write"
-                className="px-6 py-3 bg-[#FAF6F0] text-amber-900 hover:bg-white rounded-2xl font-bold text-xs sm:text-sm shadow-md transition-all active:scale-[0.98] shrink-0 flex items-center gap-2 group cursor-pointer"
+                style={{ color: '#4a1b0c', backgroundColor: '#FAF6F0' }}
+                className="px-6 py-3 hover:bg-white rounded-2xl font-bold text-xs sm:text-sm shadow-md transition-all active:scale-[0.98] shrink-0 flex items-center gap-2 group cursor-pointer"
               >
                 ✍️ Start Writing Now
                 <span className="group-hover:translate-x-1 transition-transform">→</span>

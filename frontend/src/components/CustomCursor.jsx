@@ -84,12 +84,43 @@ const CustomCursor = () => {
     let lastX = 0;
     let speedX = 0;
 
+    let lastClientY = null;
+    let targetScrollY = window.scrollY;
+    let currentScrollY = window.scrollY;
+    let isAnimatingScroll = false;
+
     const handleMouseMove = (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
+
+      if (lastClientY !== null) {
+        const deltaY = e.clientY - lastClientY;
+        // Skip large viewport jumps (e.g. entering window or tab switch)
+        if (Math.abs(deltaY) < 150) {
+          const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+          if (maxScroll > 0) {
+            targetScrollY += deltaY * 1.8; // Scroll multiplier
+            targetScrollY = Math.max(0, Math.min(targetScrollY, maxScroll));
+          }
+        }
+      }
+      lastClientY = e.clientY;
+    };
+
+    const handleScroll = () => {
+      if (!isAnimatingScroll) {
+        targetScrollY = window.scrollY;
+        currentScrollY = window.scrollY;
+      }
+    };
+
+    const handleMouseLeaveWindow = () => {
+      lastClientY = null;
     };
 
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("mouseleave", handleMouseLeaveWindow);
 
     // Ink particle spawner
     let lastParticleTime = 0;
@@ -144,6 +175,15 @@ const CustomCursor = () => {
         spawnInkParticle(currentX, currentY);
       }
 
+      // Smooth scroll interpolation
+      const scrollEase = 0.08;
+      if (Math.abs(targetScrollY - currentScrollY) > 0.5) {
+        currentScrollY += (targetScrollY - currentScrollY) * scrollEase;
+        isAnimatingScroll = true;
+        window.scrollTo(window.scrollX, currentScrollY);
+        isAnimatingScroll = false;
+      }
+
       requestAnimationFrame(tick);
     };
 
@@ -169,6 +209,8 @@ const CustomCursor = () => {
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("mouseleave", handleMouseLeaveWindow);
       document.removeEventListener("mouseover", handleMouseOver);
       cancelAnimationFrame(animId);
     };
