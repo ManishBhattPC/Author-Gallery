@@ -3,6 +3,8 @@ import User from "../models/User.js"
 import AuthorProfile from "../models/authorProfile.js"
 import uploadToCloudinary from "../utils/uploadToCloudinary.js"
 import PDFDocument from "pdfkit"
+import jwt from "jsonwebtoken"
+import Order from "../models/Order.js"
 export const getBooks = async (req, res) => {
   try {
     const { search, genre, page = 1, limit = 10 } = req.query
@@ -73,7 +75,48 @@ export const getBookById = async (req, res) => {
       })
     }
 
-    res.status(200).json(book);
+    // Determine access to book content/PDF (Free vs. Premium)
+    let hasAccess = false;
+    if (book.price === 0) {
+      hasAccess = true;
+    } else {
+      // Premium book: verify token optionally
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer")) {
+        try {
+          const token = authHeader.split(" ")[1];
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          const userId = decoded.id;
+
+          const isAuthor = book.author._id.toString() === userId;
+          const userObj = await User.findById(userId);
+          const isAdmin = userObj?.role === "admin";
+
+          const paidOrder = await Order.findOne({
+            user: userId,
+            book: book._id,
+            status: "paid",
+          });
+
+          if (isAuthor || isAdmin || paidOrder) {
+            hasAccess = true;
+          }
+        } catch (err) {
+          // Token is invalid/expired, default to no access
+        }
+      }
+    }
+
+    const bookData = book.toObject();
+    if (!hasAccess) {
+      bookData.pdfFile = null;
+      bookData.content = null;
+      bookData.isPurchased = false;
+    } else {
+      bookData.isPurchased = true;
+    }
+
+    res.status(200).json(bookData);
   } catch (error) {
     res.status(500).json({
       message: error.message,

@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { Flag, Info } from "lucide-react";
 import ReviewSection from "../ReviewSection.jsx";
 import ReportModal from "../ReportModal.jsx";
+import { createPaymentOrder, verifyPaymentSignature } from "../../services/paymentService.js";
 import {
   FaDownload,
   FaArrowLeft,
@@ -29,12 +30,13 @@ import {
   FaMoon,
   FaChevronDown,
   FaChevronUp,
+  FaCreditCard,
 } from "react-icons/fa";
 
 const BookDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
 
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,12 +46,116 @@ const BookDetails = () => {
   const [imageError, setImageError] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [purchasing, setPurchasing] = useState(false);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
-  
+
+  const handleBuyBook = async () => {
+    if (!user) {
+      showToast("Please log in to purchase this book", "error");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setPurchasing(true);
+
+      // Load Razorpay Script Dynamically
+      const isScriptLoaded = await new Promise((resolve) => {
+        if (window.Razorpay) {
+          resolve(true);
+          return;
+        }
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.body.appendChild(script);
+      });
+
+      if (!isScriptLoaded) {
+        showToast("Failed to load Razorpay payment gateway SDK.", "error");
+        setPurchasing(false);
+        return;
+      }
+
+      // Create order in backend
+      const orderData = await createPaymentOrder(book._id);
+
+      // Open Checkout Options
+      const options = {
+        key: orderData.key,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Author Gallery",
+        description: `Purchase "${orderData.book.title}"`,
+        order_id: orderData.orderId,
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+        theme: {
+          color: "#B45309",
+        },
+        handler: async function (response) {
+          try {
+            setPurchasing(true);
+            const verification = await verifyPaymentSignature({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+
+            if (verification.success) {
+              showToast("Payment verified! Book unlocked successfully.", "success");
+              setBook((prev) => ({
+                ...prev,
+                isPurchased: true,
+                pdfFile: verification.pdfFile,
+                content: verification.content,
+              }));
+
+              if (updateUser) {
+                const purchasedList = user.purchasedBooks || [];
+                updateUser({
+                  purchasedBooks: [...new Set([...purchasedList, book._id])],
+                });
+              }
+            } else {
+              showToast("Payment signature verification failed.", "error");
+            }
+          } catch (err) {
+            console.error("Verification verification call failed:", err);
+            showToast(err.message || "Failed to verify transaction.", "error");
+          } finally {
+            setPurchasing(false);
+          }
+        },
+        modal: {
+          onDismiss: function () {
+            showToast("Payment cancelled by user", "info");
+            setPurchasing(false);
+          },
+        },
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+    } catch (err) {
+      console.error("Order creation failed:", err);
+      showToast(err.message || "Could not initiate payment order.", "error");
+      setPurchasing(false);
+    }
+  };
+
+  const isAuthor = book && user && (book.author?._id === user._id || book.author === user._id);
+  const isAdmin = user && user.role === "admin";
+  const isAlreadyPurchased = book?.isPurchased || (user && user.purchasedBooks && user.purchasedBooks.includes(book._id));
+  const hasAccess = !book || book.price === 0 || isAuthor || isAdmin || isAlreadyPurchased;
+
   // Immersive E-Reader States
   const [readerOpen, setReaderOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
@@ -358,25 +464,44 @@ const BookDetails = () => {
               )}
             </div>
 
-            <div className="m-6 flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => setReaderOpen(true)}
-                className="flex-1 flex items-center justify-center gap-2 bg-amber-700 hover:bg-amber-800 text-white px-6 py-4 rounded-xl font-bold transition duration-200 cursor-pointer shadow-md shadow-amber-800/10 active:scale-[0.98]"
-              >
-                <FaBookOpen />
-                Start Reading
-              </button>
+            <div className="m-6 flex flex-col gap-4">
+              {hasAccess ? (
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    onClick={() => setReaderOpen(true)}
+                    className="flex-1 flex items-center justify-center gap-2 bg-amber-700 hover:bg-amber-800 text-white px-6 py-4 rounded-xl font-bold transition duration-200 cursor-pointer shadow-md shadow-amber-800/10 active:scale-[0.98]"
+                  >
+                    <FaBookOpen />
+                    Start Reading
+                  </button>
 
-              {book?.pdfFile && (
-                <a
-                  href={book.pdfFile}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 hover:border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100 px-6 py-3 rounded-xl font-semibold transition duration-200"
-                >
-                  <FaDownload />
-                  Download PDF
-                </a>
+                  {book?.pdfFile && (
+                    <a
+                      href={book.pdfFile}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 hover:border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100 px-6 py-3 rounded-xl font-semibold transition duration-200"
+                    >
+                      <FaDownload />
+                      Download PDF
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm font-semibold text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-center flex items-center justify-center gap-1.5">
+                    <FaInfoCircle />
+                    This is a premium eBook. Buy it to unlock reading and PDF downloads.
+                  </p>
+                  <button
+                    onClick={handleBuyBook}
+                    disabled={purchasing}
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white px-6 py-4 rounded-xl font-bold transition duration-200 cursor-pointer shadow-lg shadow-amber-800/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <FaCreditCard />
+                    {purchasing ? "Processing Payment..." : `Buy Now - ₹${book?.price}`}
+                  </button>
+                </div>
               )}
             </div>
           </div>

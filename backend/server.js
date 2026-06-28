@@ -12,6 +12,7 @@ import adminRoutes from "./routes/adminRoutes.js"
 import reviewRoutes from "./routes/reviewRoutes.js"
 import reportRoutes from "./routes/reportRoutes.js"
 import contactRoutes from "./routes/contactRoutes.js"
+import paymentRoutes from "./routes/paymentRoutes.js"
 import helmet from "helmet"
 import rateLimit from "express-rate-limit"
 
@@ -75,6 +76,7 @@ app.use("/api/admin", adminRoutes)
 app.use("/api/reviews", reviewRoutes)
 app.use("/api/reports", reportRoutes)
 app.use("/api/contact", contactRoutes)
+app.use("/api/payments", paymentRoutes)
 
 
 app.get("/", (req, res) => {
