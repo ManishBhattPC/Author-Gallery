@@ -47,12 +47,28 @@ const syncAuthorRoles = async () => {
   }
 };
 
+const dropDuplicateIndex = async () => {
+  try {
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    const orderColExists = collections.some(col => col.name === "orders");
+    if (orderColExists) {
+      await mongoose.connection.db.collection("orders").dropIndex("razorpayOrderId_1");
+      console.log("Successfully dropped legacy unique index 'razorpayOrderId_1' from orders collection.");
+    }
+  } catch (err) {
+    if (err.code !== 27 && err.codeName !== "IndexNotFound") {
+      console.warn("Index drop check result:", err.message);
+    }
+  }
+};
+
 const connectDB = async () => {
   try {
     const mongoURI = process.env.MONGO_URI || process.env.MONGODB_URI;
     console.log("Connecting to primary MongoDB URI...");
     await mongoose.connect(mongoURI);
     console.log("MongoDB Connected to Atlas successfully");
+    await dropDuplicateIndex();
     await seedAdmin();
     await syncAuthorRoles();
   } catch (error) {
@@ -61,6 +77,7 @@ const connectDB = async () => {
     try {
       await mongoose.connect("mongodb://127.0.0.1:27017/author-gallery");
       console.log("Connected to local MongoDB successfully");
+      await dropDuplicateIndex();
       await seedAdmin();
       await syncAuthorRoles();
     } catch (localError) {
