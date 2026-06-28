@@ -4,10 +4,12 @@ import gsap from "gsap";
 const CustomCursor = () => {
   const cursorRef = useRef(null);
   const glowRef = useRef(null);
+  const spotlightRef = useRef(null);
   
   const [isHoveringClickable, setIsHoveringClickable] = useState(false);
   const [isHoveringIframe, setIsHoveringIframe] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isLongPressing, setIsLongPressing] = useState(false);
 
   const [scrollMode, setScrollMode] = useState(false);
   const scrollModeRef = useRef(false);
@@ -125,24 +127,28 @@ const CustomCursor = () => {
       lastClientY = null;
     };
 
-    let lastRightClickTime = 0;
-    const handleContextMenu = (e) => {
-      const now = Date.now();
-      if (now - lastRightClickTime < 500) {
-        e.preventDefault();
-        setScrollMode(true);
-      } else {
-        if (scrollModeRef.current) {
-          e.preventDefault();
-        }
+    let longPressTimeout = null;
+    const handleMouseDown = (e) => {
+      if (e.button === 0) {
+        longPressTimeout = setTimeout(() => {
+          setIsLongPressing(true);
+        }, 300);
       }
-      lastRightClickTime = now;
+    };
+
+    const handleMouseUp = () => {
+      clearTimeout(longPressTimeout);
+      setIsLongPressing(false);
+    };
+
+    const handleContextMenu = (e) => {
+      if (scrollModeRef.current) {
+        e.preventDefault();
+      }
     };
 
     const handleDblClick = (e) => {
-      if (scrollModeRef.current) {
-        setScrollMode(false);
-      }
+      setScrollMode((prev) => !prev);
     };
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -150,6 +156,9 @@ const CustomCursor = () => {
     document.addEventListener("mouseleave", handleMouseLeaveWindow);
     window.addEventListener("contextmenu", handleContextMenu);
     window.addEventListener("dblclick", handleDblClick);
+    window.addEventListener("mousedown", handleMouseDown);
+    window.addEventListener("mouseup", handleMouseUp);
+    window.addEventListener("mouseleave", handleMouseUp);
 
     // Ink particle spawner
     let lastParticleTime = 0;
@@ -209,6 +218,15 @@ const CustomCursor = () => {
         transformOrigin: "0px 0px"
       });
 
+      // Translate Spotlight
+      const spotlight = spotlightRef.current;
+      if (spotlight) {
+        gsap.set(spotlight, {
+          x: currentX,
+          y: currentY
+        });
+      }
+
       if (Math.abs(speedX) > 1.2 || (scrollModeRef.current && Math.abs(scrollDelta) > 2)) {
         spawnInkParticle(currentX, currentY);
       }
@@ -251,6 +269,9 @@ const CustomCursor = () => {
       document.removeEventListener("mouseleave", handleMouseLeaveWindow);
       window.removeEventListener("contextmenu", handleContextMenu);
       window.removeEventListener("dblclick", handleDblClick);
+      window.removeEventListener("mousedown", handleMouseDown);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("mouseleave", handleMouseUp);
       document.removeEventListener("mouseover", handleMouseOver);
       cancelAnimationFrame(animId);
     };
@@ -259,23 +280,49 @@ const CustomCursor = () => {
   if (isMobile) return null;
 
   return (
-    <div
-      ref={cursorRef}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "40px",
-        height: "40px",
-        pointerEvents: "none",
-        zIndex: 999999,
-        transformStyle: "preserve-3d",
-        willChange: "transform",
-        opacity: isHoveringIframe ? 0 : 1,
-        transition: "opacity 0.25s ease"
-      }}
-      className="select-none pointer-events-none"
-    >
+    <>
+      {/* Magical Microscope Spotlight Overlay (Centered exactly at nib top 0,0) */}
+      {isLongPressing && (
+        <div
+          ref={spotlightRef}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "160px",
+            height: "160px",
+            borderRadius: "50%",
+            pointerEvents: "none",
+            zIndex: 999998,
+            transform: "translate(-50%, -50%)",
+            background: "radial-gradient(circle, rgba(253, 224, 71, 0.28) 0%, rgba(216, 127, 74, 0.08) 45%, rgba(0, 0, 0, 0) 75%)",
+            border: "1px solid rgba(216, 127, 74, 0.35)",
+            boxShadow: "0 0 35px 12px rgba(216, 127, 74, 0.15), inset 0 0 15px rgba(253, 224, 71, 0.15)",
+            backdropFilter: "brightness(1.3) contrast(1.15) saturate(1.15)",
+            willChange: "transform"
+          }}
+          className="animate-pulse"
+        />
+      )}
+
+      {/* Main Quill Cursor Wrapper */}
+      <div
+        ref={cursorRef}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "40px",
+          height: "40px",
+          pointerEvents: "none",
+          zIndex: 999999,
+          transformStyle: "preserve-3d",
+          willChange: "transform",
+          opacity: isHoveringIframe ? 0 : 1,
+          transition: "opacity 0.25s ease"
+        }}
+        className="select-none pointer-events-none"
+      >
       {/* 3D Glowing Hover Circle behind the Nib */}
       <div
         ref={glowRef}
@@ -388,6 +435,7 @@ const CustomCursor = () => {
         />
       </svg>
     </div>
+    </>
   );
 };
 
