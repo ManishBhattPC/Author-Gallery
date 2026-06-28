@@ -192,7 +192,7 @@ const Login = () => {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
               />
             </div>
 
@@ -209,7 +209,7 @@ const Login = () => {
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 required
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
               />
             </div>
 
@@ -269,7 +269,7 @@ const Login = () => {
                 onChange={(e) => setGooglePassword(e.target.value)}
                 required
                 placeholder="At least 6 characters"
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
               />
             </div>
 
@@ -282,7 +282,7 @@ const Login = () => {
                 onChange={(e) => setGoogleConfirmPassword(e.target.value)}
                 required
                 placeholder="Re-enter password"
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
               />
             </div>
 

@@ -99,7 +99,7 @@ const CustomCursor = () => {
         if (Math.abs(deltaY) < 150) {
           const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
           if (maxScroll > 0) {
-            targetScrollY += deltaY * 1.8; // Scroll multiplier
+            targetScrollY += deltaY * 2.3; // Scroll multiplier
             targetScrollY = Math.max(0, Math.min(targetScrollY, maxScroll));
           }
         }
@@ -176,7 +176,7 @@ const CustomCursor = () => {
       }
 
       // Smooth scroll interpolation
-      const scrollEase = 0.08;
+      const scrollEase = 0.15;
       if (Math.abs(targetScrollY - currentScrollY) > 0.5) {
         currentScrollY += (targetScrollY - currentScrollY) * scrollEase;
         isAnimatingScroll = true;

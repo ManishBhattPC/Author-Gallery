@@ -53,7 +53,7 @@ const About = () => {
 
       {/* Core Mission Cards */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200/40 hover:shadow-md hover:-translate-y-1 transition duration-300 space-y-4">
             <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-800">

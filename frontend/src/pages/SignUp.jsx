@@ -280,7 +280,7 @@ const Signup = () => {
                   value={form.name}
                   onChange={handleChange}
                   required
-                  className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                  className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
                 />
               </div>
 
@@ -292,7 +292,7 @@ const Signup = () => {
                   value={form.email}
                   onChange={handleChange}
                   required
-                  className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                  className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
                 />
               </div>
 
@@ -304,7 +304,7 @@ const Signup = () => {
                   value={form.password}
                   onChange={handleChange}
                   required
-                  className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                  className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
                 />
               </div>
 
@@ -367,7 +367,7 @@ const Signup = () => {
                 onChange={(e) => setGooglePassword(e.target.value)}
                 required
                 placeholder="At least 6 characters"
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
               />
             </div>
 
@@ -380,7 +380,7 @@ const Signup = () => {
                 onChange={(e) => setGoogleConfirmPassword(e.target.value)}
                 required
                 placeholder="Re-enter password"
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
               />
             </div>
 
@@ -430,7 +430,7 @@ const Signup = () => {
                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                 required
                 placeholder="######"
-                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-center text-xl font-bold tracking-[8px] text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 placeholder:tracking-normal placeholder:font-normal"
+                className="mt-2 w-full rounded-3xl border border-slate-300 bg-slate-50 px-4 py-3 text-center text-xl font-bold tracking-[8px] text-slate-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100 placeholder:tracking-normal placeholder:font-normal dark:bg-slate-900/40 dark:border-slate-800 dark:text-slate-100 dark:focus:ring-amber-950/20"
               />
             </div>
 

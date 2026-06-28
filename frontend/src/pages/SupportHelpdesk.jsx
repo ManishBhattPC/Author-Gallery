@@ -111,8 +111,8 @@ const SupportHelpdesk = () => {
                   placeholder="Enter your name..."
                   className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none border transition-all ${
                     user 
-                      ? "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed" 
-                      : "bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 text-slate-800"
+                      ? "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-500" 
+                      : "bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 text-slate-800 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-100 dark:focus:bg-slate-900 dark:focus:ring-amber-950/20"
                   }`}
                 />
               </div>
@@ -128,8 +128,8 @@ const SupportHelpdesk = () => {
                   placeholder="Enter your email address..."
                   className={`w-full px-4 py-2.5 rounded-xl text-xs font-medium outline-none border transition-all ${
                     user 
-                      ? "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed" 
-                      : "bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 text-slate-800"
+                      ? "bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-500" 
+                      : "bg-slate-50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 text-slate-800 dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-100 dark:focus:bg-slate-900 dark:focus:ring-amber-950/20"
                   }`}
                 />
               </div>
@@ -142,7 +142,7 @@ const SupportHelpdesk = () => {
                 value={form.reason}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-800 outline-none text-xs font-medium transition-all"
+                className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-800 outline-none text-xs font-medium transition-all dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-100 dark:focus:bg-slate-900 dark:focus:ring-amber-950/20"
               >
                 {reasons.map((reason) => (
                   <option key={reason} value={reason}>
@@ -161,7 +161,7 @@ const SupportHelpdesk = () => {
                 onChange={handleChange}
                 required
                 placeholder="Please describe what is happening in detail, including steps to reproduce if it's a bug."
-                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-800 outline-none text-xs transition-all leading-relaxed"
+                className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-amber-50/50 focus:border-amber-600 rounded-xl text-slate-800 outline-none text-xs transition-all leading-relaxed dark:bg-slate-900/50 dark:border-slate-800 dark:text-slate-100 dark:focus:bg-slate-900 dark:focus:ring-amber-950/20"
               />
             </div>
 
