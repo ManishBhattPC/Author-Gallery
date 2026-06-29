@@ -44,7 +44,7 @@ const TrendingWorks = () => {
                 key={i}
                 className="bg-white rounded-3xl overflow-hidden shadow-sm animate-pulse"
               >
-                <div className="w-full h-56 sm:h-64 md:h-72 bg-gray-200" />
+                <div className="w-full aspect-[3/4] bg-gray-200" />
                 <div className="p-4 sm:p-5">
                   <div className="h-4 bg-gray-200 rounded w-16" />
                   <div className="h-6 bg-gray-200 rounded mt-3 w-3/4" />
@@ -88,15 +88,17 @@ const TrendingWorks = () => {
               >
                 <div>
                   <Link to={`/books/${work._id || work.id}`}>
-                    <img
-                      src={work.coverImage || work.image}
-                      alt={work.title}
-                      className="w-full h-56 sm:h-64 md:h-72 object-cover hover:opacity-95 transition duration-200"
-                      onError={(e) => {
-                        e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
-                        e.currentTarget.onerror = null;
-                      }}
-                    />
+                    <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden">
+                      <img
+                        src={work.coverImage || work.image}
+                        alt={work.title}
+                        className="w-full h-full object-cover hover:opacity-95 transition duration-200"
+                        onError={(e) => {
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
+                          e.currentTarget.onerror = null;
+                        }}
+                      />
+                    </div>
                   </Link>
 
                   <div className="p-4 sm:p-5">
