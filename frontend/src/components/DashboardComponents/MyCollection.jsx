@@ -128,7 +128,7 @@ const MyCollection = ({
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           {books.map((book) => (
             <div key={book._id} className="group border border-slate-300/80 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-300 bg-white flex flex-col h-full text-left">
-              <div className="relative overflow-hidden aspect-[4/3] bg-slate-100">
+              <div className="relative overflow-hidden aspect-[3/4] bg-slate-100">
                 <img
                   src={book.coverImage}
                   alt={book.title}
@@ -139,7 +139,10 @@ const MyCollection = ({
                   className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 {book.genres && (
-                  <span className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-wider bg-white/95 backdrop-blur-sm text-amber-900 border border-slate-300/45 px-2.5 py-1 rounded-full shadow-sm">
+                  <span 
+                    style={{ color: "#8C4E35" }}
+                    className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-wider bg-white/95 backdrop-blur-sm border border-slate-300/45 px-2.5 py-1 rounded-full shadow-sm"
+                  >
                     {Array.isArray(book.genres) ? book.genres.join(", ") : book.genres}
                   </span>
                 )}

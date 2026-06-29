@@ -11,29 +11,29 @@ const AuthorStats = ({ stats, loading = false }) => {
     {
       label: "Followers",
       value: statValue(stats?.followers),
-      color: "from-blue-500 to-indigo-500",
-      bg: "bg-[#FAF1E6] text-amber-850",
+      bg: "#FAF1E6",
+      color: "#8C4E35",
       icon: Users,
     },
     {
       label: "Published",
       value: statValue(stats?.published),
-      color: "from-emerald-500 to-teal-500",
-      bg: "bg-[#E8F3EE] text-emerald-850",
+      bg: "#E8F3EE",
+      color: "#1E5E42",
       icon: BookOpen,
     },
     {
       label: "Genres",
       value: statValue(stats?.totalGenres),
-      color: "from-amber-500 to-orange-500",
-      bg: "bg-[#FCF4E7] text-amber-900",
+      bg: "#FCF4E7",
+      color: "#A2621C",
       icon: Tag,
     },
     {
       label: "Total Value",
       value: totalValue,
-      color: "from-purple-500 to-pink-500",
-      bg: "bg-[#FAF1E6] text-[#4E3E2F]",
+      bg: "#FAF1E6",
+      color: "#544335",
       icon: IndianRupee,
     },
   ];
@@ -51,7 +51,10 @@ const AuthorStats = ({ stats, loading = false }) => {
             <div key={idx} className="p-4 rounded-xl border border-slate-300/60 hover:border-slate-300 transition-colors bg-white text-left shadow-sm">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-bold text-slate-700">{card.label}</span>
-                <div className={`p-2 rounded-lg ${card.bg}`}>
+                <div 
+                  style={{ backgroundColor: card.bg, color: card.color }}
+                  className="p-2 rounded-lg"
+                >
                   <IconComponent className="w-4 h-4" />
                 </div>
               </div>
