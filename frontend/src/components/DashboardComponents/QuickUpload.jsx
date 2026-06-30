@@ -221,7 +221,6 @@ const QuickUpload = ({ onPublished }) => {
               onChange={handleFileChange}
               accept="image/*"
               className="hidden"
-              required
             />
           </label>
           {fileNames.cover && (
@@ -244,7 +243,6 @@ const QuickUpload = ({ onPublished }) => {
               onChange={handleFileChange}
               accept=".pdf"
               className="hidden"
-              required
             />
           </label>
           {fileNames.pdf && (
