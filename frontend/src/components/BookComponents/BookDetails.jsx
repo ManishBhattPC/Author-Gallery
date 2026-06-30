@@ -104,9 +104,15 @@ const BookDetails = () => {
   const [readerOpen, setReaderOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [activeChapterIndex, setActiveChapterIndex] = useState(0);
-  const [fontSize, setFontSize] = useState(18); // Default font size in px
-  const [fontFamily, setFontFamily] = useState("serif"); // serif, sans, open-dyslexic
-  const [readerTheme, setReaderTheme] = useState("cream"); // cream, dark, sepia
+  const [fontSize, setFontSize] = useState(() => {
+    return Number(localStorage.getItem("reader_font_size")) || 18;
+  });
+  const [fontFamily, setFontFamily] = useState(() => {
+    return localStorage.getItem("reader_font_family") || "serif";
+  });
+  const [readerTheme, setReaderTheme] = useState(() => {
+    return localStorage.getItem("reader_theme") || "cream";
+  });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
@@ -275,6 +281,58 @@ const BookDetails = () => {
       document.body.style.overflow = "";
     };
   }, [readerOpen]);
+
+  // Persist font size changes
+  useEffect(() => {
+    localStorage.setItem("reader_font_size", fontSize);
+  }, [fontSize]);
+
+  // Persist font family changes
+  useEffect(() => {
+    localStorage.setItem("reader_font_family", fontFamily);
+  }, [fontFamily]);
+
+  // Persist theme changes
+  useEffect(() => {
+    localStorage.setItem("reader_theme", readerTheme);
+  }, [readerTheme]);
+
+  // Load and save reading progress for this specific book
+  useEffect(() => {
+    if (book?._id) {
+      const savedProgress = localStorage.getItem(`reader_progress_${book._id}`);
+      if (savedProgress !== null) {
+        setActiveChapterIndex(Number(savedProgress));
+      }
+    }
+  }, [book?._id]);
+
+  useEffect(() => {
+    if (book?._id) {
+      localStorage.setItem(`reader_progress_${book._id}`, activeChapterIndex);
+    }
+  }, [activeChapterIndex, book?._id]);
+
+  // Keyboard navigation for page turning (Left/Right arrow keys)
+  useEffect(() => {
+    if (!readerOpen) return;
+    const handleKeyDown = (e) => {
+      if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") {
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        if (activeChapterIndex < chapters.length - 1) {
+          setActiveChapterIndex((prev) => prev + 1);
+        }
+      } else if (e.key === "ArrowLeft") {
+        if (activeChapterIndex > 0) {
+          setActiveChapterIndex((prev) => prev - 1);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [readerOpen, activeChapterIndex, chapters.length]);
 
   const THEME_STYLES = {
     cream: {
@@ -1035,8 +1093,18 @@ const BookDetails = () => {
 
                 {/* Centered Book Pages Canvas */}
                 <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-6 sm:py-12 flex justify-center">
-                  <div className={`w-full max-w-3xl min-h-full rounded-2xl shadow-lg border p-6 sm:p-12 transition-all duration-300 ${THEME_STYLES[readerTheme].bg} ${THEME_STYLES[readerTheme].text} ${THEME_STYLES[readerTheme].border} flex flex-col justify-between`}>
+                  <div className={`w-full max-w-3xl h-fit min-h-full rounded-2xl shadow-lg border p-6 sm:p-12 transition-all duration-300 ${THEME_STYLES[readerTheme].bg} ${THEME_STYLES[readerTheme].text} ${THEME_STYLES[readerTheme].border} flex flex-col justify-between`}>
                     
+                    {/* Visual Reading Progress Bar */}
+                    {chapters.length > 0 && (
+                      <div className="w-full h-1 bg-amber-900/10 rounded-full overflow-hidden mb-6 shrink-0">
+                        <div 
+                          style={{ width: `${((activeChapterIndex + 1) / chapters.length) * 100}%` }}
+                          className="h-full bg-gradient-to-r from-amber-600 to-amber-800 transition-all duration-300"
+                        />
+                      </div>
+                    )}
+
                     {/* Chapter Header Typography */}
                     <div className={`border-b ${THEME_STYLES[readerTheme].divider} pb-4 mb-6 sm:mb-8 text-center`}>
                       <span className={`font-serif font-bold uppercase tracking-wider text-xs ${THEME_STYLES[readerTheme].tag}`}>
