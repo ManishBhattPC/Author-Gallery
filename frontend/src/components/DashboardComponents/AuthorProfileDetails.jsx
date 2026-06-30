@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { FaUser, FaInstagram, FaTwitter, FaGlobe, FaSave, FaUserCheck } from "react-icons/fa";
 import { Sun, Moon } from "lucide-react";
 
@@ -33,6 +33,8 @@ const AuthorProfileDetails = ({ initialValues = {}, onSubmit }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
 
   const [theme, setTheme] = useState(() => {
     return localStorage.getItem("theme") || "system";
@@ -118,7 +120,19 @@ const AuthorProfileDetails = ({ initialValues = {}, onSubmit }) => {
   const handleImageChange = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    setProfileImage(file);
+    
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageSrc(reader.result);
+      setCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+    event.target.value = "";
+  };
+
+  const handleCropComplete = (croppedFile) => {
+    setProfileImage(croppedFile);
+    setCropModalOpen(false);
   };
 
   const handleSubmit = async (event) => {
@@ -440,6 +454,211 @@ const AuthorProfileDetails = ({ initialValues = {}, onSubmit }) => {
           </button>
         </div>
       </form>
+
+      {cropModalOpen && (
+        <ImageCropperModal
+          imageSrc={imageSrc}
+          onCropComplete={handleCropComplete}
+          onClose={() => setCropModalOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+// WhatsApp-like Custom Profile Picture Cropper Modal (Self-contained with HTML5 Canvas)
+const ImageCropperModal = ({ imageSrc, onCropComplete, onClose }) => {
+  const [zoom, setZoom] = useState(1);
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0, offsetX: 0, offsetY: 0 });
+  const viewportRef = useRef(null);
+  const imgRef = useRef(null);
+
+  const handleStart = (clientX, clientY) => {
+    setIsDragging(true);
+    dragStart.current = {
+      x: clientX,
+      y: clientY,
+      offsetX: offsetX,
+      offsetY: offsetY,
+    };
+  };
+
+  const handleMove = (clientX, clientY) => {
+    if (!isDragging) return;
+    const dx = clientX - dragStart.current.x;
+    const dy = clientY - dragStart.current.y;
+    setOffsetX(dragStart.current.offsetX + dx);
+    setOffsetY(dragStart.current.offsetY + dy);
+  };
+
+  const handleEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    handleStart(e.clientX, e.clientY);
+  };
+
+  const handleMouseMove = (e) => {
+    handleMove(e.clientX, e.clientY);
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      handleStart(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 1) {
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleImageLoad = (e) => {
+    const { naturalWidth, naturalHeight } = e.target;
+    if (naturalWidth > naturalHeight) {
+      e.target.style.height = "200px";
+      e.target.style.width = "auto";
+    } else {
+      e.target.style.width = "200px";
+      e.target.style.height = "auto";
+    }
+  };
+
+  const handleSave = () => {
+    const img = imgRef.current;
+    if (!img) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = 300;
+    canvas.height = 300;
+    const ctx = canvas.getContext("2d");
+
+    // Map screen coordinates to output canvas coordinate space (300px target size)
+    const scale = 300 / 200;
+
+    const rect = img.getBoundingClientRect();
+    const viewRect = viewportRef.current.getBoundingClientRect();
+
+    // The crop box starts at viewport top-left + 40px
+    const cropBoxLeft = viewRect.left + 40;
+    const cropBoxTop = viewRect.top + 40;
+
+    const dx = rect.left - cropBoxLeft;
+    const dy = rect.top - cropBoxTop;
+    const dw = rect.width;
+    const dh = rect.height;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, 300, 300);
+
+    ctx.drawImage(img, dx * scale, dy * scale, dw * scale, dh * scale);
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          const croppedFile = new File([blob], "profile-avatar.jpg", { type: "image/jpeg" });
+          onCropComplete(croppedFile);
+        }
+      },
+      "image/jpeg",
+      0.95
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+      <div className="bg-[#FAF6F0] border border-[#DFD5C6] rounded-3xl p-6 max-w-sm w-full shadow-2xl flex flex-col items-center select-none">
+        <h3 className="font-serif font-bold text-lg text-[#2C1F15] mb-1">Crop Profile Photo</h3>
+        <p className="text-[11px] text-[#8C7B67] mb-6 text-center">Drag and zoom to align your photo inside the circular frame.</p>
+
+        {/* Crop Viewport */}
+        <div 
+          ref={viewportRef}
+          style={{ width: "280px", height: "280px" }}
+          className="relative bg-zinc-950 rounded-2xl overflow-hidden cursor-move border border-[#DFD5C6]/60 shadow-inner select-none touch-none"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleEnd}
+        >
+          {/* Zoomable Image */}
+          <img 
+            ref={imgRef}
+            src={imageSrc} 
+            alt="Crop area preview" 
+            onLoad={handleImageLoad}
+            style={{
+              position: "absolute",
+              top: "40px",
+              left: "40px",
+              transform: `translate(${offsetX}px, ${offsetY}px) scale(${zoom})`,
+              transformOrigin: "center center",
+              cursor: isDragging ? "grabbing" : "grab",
+              userSelect: "none",
+              pointerEvents: "none"
+            }}
+          />
+
+          {/* Circular Cutout Mask Overlay */}
+          <div 
+            style={{ 
+              position: "absolute", 
+              top: "40px",
+              left: "40px",
+              width: "200px",
+              height: "200px",
+              borderRadius: "50%", 
+              border: "2.5px solid #D87F4A", 
+              boxShadow: "0 0 0 9999px rgba(10, 8, 7, 0.72)", 
+              pointerEvents: "none" 
+            }} 
+          />
+        </div>
+
+        {/* Zoom Controller */}
+        <div className="w-full mt-6 space-y-2">
+          <div className="flex justify-between text-[10px] font-bold text-[#8C7B67] uppercase tracking-wider">
+            <span>Zoom</span>
+            <span>{Math.round(zoom * 100)}%</span>
+          </div>
+          <input 
+            type="range" 
+            min="1" 
+            max="3" 
+            step="0.01"
+            value={zoom}
+            onChange={(e) => setZoom(parseFloat(e.target.value))}
+            className="w-full h-1.5 bg-[#DFD5C6] rounded-lg appearance-none cursor-pointer accent-[#D87F4A]"
+          />
+        </div>
+
+        {/* Modal Buttons */}
+        <div className="flex gap-3 w-full mt-8">
+          <button 
+            type="button"
+            onClick={onClose}
+            className="flex-1 py-2.5 border border-[#DFD5C6] hover:bg-[#DFD5C6]/30 text-[#6D5E4D] font-bold text-xs rounded-xl transition duration-200 cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button 
+            type="button"
+            onClick={handleSave}
+            className="flex-1 py-2.5 bg-[#D87F4A] hover:bg-[#C16D3A] text-white font-bold text-xs rounded-xl transition duration-200 cursor-pointer shadow-md shadow-[#D87F4A]/25"
+          >
+            Crop & Save
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
