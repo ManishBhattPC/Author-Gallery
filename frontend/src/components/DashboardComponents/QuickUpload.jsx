@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import apiClient from "../../services/apiClient.js";
 import { UploadCloud, FileImage, FileText, CheckCircle2, AlertCircle } from "lucide-react";
 
@@ -23,6 +23,8 @@ const QuickUpload = ({ onPublished }) => {
 
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [cropModalOpen, setCropModalOpen] = useState(false);
+  const [imageSrc, setImageSrc] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,12 +36,28 @@ const QuickUpload = ({ onPublished }) => {
     const file = e.target.files?.[0];
 
     if (file) {
-      setFiles({ ...files, [name]: file });
-      setFileNames({
-        ...fileNames,
-        [name === "coverImage" ? "cover" : "pdf"]: file.name,
-      });
+      if (name === "coverImage") {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImageSrc(reader.result);
+          setCropModalOpen(true);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setFiles({ ...files, [name]: file });
+        setFileNames({
+          ...fileNames,
+          pdf: file.name,
+        });
+      }
+      e.target.value = "";
     }
+  };
+
+  const handleCropComplete = (croppedFile) => {
+    setFiles((prev) => ({ ...prev, coverImage: croppedFile }));
+    setFileNames((prev) => ({ ...prev, cover: croppedFile.name || "cropped-cover.jpg" }));
+    setCropModalOpen(false);
   };
 
   const handlePublish = async (e) => {
@@ -256,6 +274,215 @@ const QuickUpload = ({ onPublished }) => {
           {uploading ? "Publishing…" : "Publish Now"}
         </button>
       </form>
+
+      {cropModalOpen && (
+        <ImageCropperModal
+          imageSrc={imageSrc}
+          onCropComplete={handleCropComplete}
+          onClose={() => setCropModalOpen(false)}
+        />
+      )}
+    </div>
+  );
+};
+
+// Custom Book Cover Cropper Modal (Standard 3:4 Portrait Aspect Ratio cutout)
+const ImageCropperModal = ({ imageSrc, onCropComplete, onClose }) => {
+  const [zoom, setZoom] = useState(1);
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0, offsetX: 0, offsetY: 0 });
+  const viewportRef = useRef(null);
+  const imgRef = useRef(null);
+
+  const handleStart = (clientX, clientY) => {
+    setIsDragging(true);
+    dragStart.current = {
+      x: clientX,
+      y: clientY,
+      offsetX: offsetX,
+      offsetY: offsetY,
+    };
+  };
+
+  const handleMove = (clientX, clientY) => {
+    if (!isDragging) return;
+    const dx = clientX - dragStart.current.x;
+    const dy = clientY - dragStart.current.y;
+    setOffsetX(dragStart.current.offsetX + dx);
+    setOffsetY(dragStart.current.offsetY + dy);
+  };
+
+  const handleEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseDown = (e) => {
+    e.preventDefault();
+    handleStart(e.clientX, e.clientY);
+  };
+
+  const handleMouseMove = (e) => {
+    handleMove(e.clientX, e.clientY);
+  };
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      handleStart(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 1) {
+      handleMove(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  const handleImageLoad = (e) => {
+    const { naturalWidth, naturalHeight } = e.target;
+    const imageRatio = naturalWidth / naturalHeight;
+    const targetRatio = 210 / 280;
+
+    if (imageRatio > targetRatio) {
+      e.target.style.height = "280px";
+      e.target.style.width = "auto";
+    } else {
+      e.target.style.width = "210px";
+      e.target.style.height = "auto";
+    }
+  };
+
+  const handleSave = () => {
+    const img = imgRef.current;
+    if (!img) return;
+
+    const canvas = document.createElement("canvas");
+    // Target resolution is 300x400 (exactly 3:4 aspect ratio)
+    canvas.width = 300;
+    canvas.height = 400;
+    const ctx = canvas.getContext("2d");
+
+    // The crop box is 210px on screen. The canvas output is 300px.
+    const scale = 300 / 210;
+
+    const rect = img.getBoundingClientRect();
+    const viewRect = viewportRef.current.getBoundingClientRect();
+
+    // The crop box starts at viewport top-left + left offset (35px), top offset (30px)
+    const cropBoxLeft = viewRect.left + 35;
+    const cropBoxTop = viewRect.top + 30;
+
+    const dx = rect.left - cropBoxLeft;
+    const dy = rect.top - cropBoxTop;
+    const dw = rect.width;
+    const dh = rect.height;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, 300, 400);
+
+    ctx.drawImage(img, dx * scale, dy * scale, dw * scale, dh * scale);
+
+    canvas.toBlob(
+      (blob) => {
+        if (blob) {
+          const croppedFile = new File([blob], "book-cover.jpg", { type: "image/jpeg" });
+          onCropComplete(croppedFile);
+        }
+      },
+      "image/jpeg",
+      0.95
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+      <div className="bg-[#FAF6F0] border border-[#DFD5C6] rounded-3xl p-6 max-w-sm w-full shadow-2xl flex flex-col items-center select-none">
+        <h3 className="font-serif font-bold text-lg text-[#2C1F15] mb-1">Crop Book Cover</h3>
+        <p className="text-[11px] text-[#8C7B67] mb-6 text-center">Drag and zoom to align your cover inside the portrait frame.</p>
+
+        {/* Crop Viewport */}
+        <div 
+          ref={viewportRef}
+          style={{ width: "280px", height: "340px" }}
+          className="relative bg-zinc-950 rounded-2xl overflow-hidden cursor-move border border-[#DFD5C6]/60 shadow-inner select-none touch-none"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleEnd}
+        >
+          {/* Zoomable Image */}
+          <img 
+            ref={imgRef}
+            src={imageSrc} 
+            alt="Cover area preview" 
+            onLoad={handleImageLoad}
+            style={{
+              position: "absolute",
+              top: "30px",
+              left: "35px",
+              transform: `translate(${offsetX}px, ${offsetY}px) scale(${zoom})`,
+              transformOrigin: "center center",
+              cursor: isDragging ? "grabbing" : "grab",
+              userSelect: "none",
+              pointerEvents: "none"
+            }}
+          />
+
+          {/* Rectangular Book Cover Outline Mask Overlay */}
+          <div 
+            style={{ 
+              position: "absolute", 
+              top: "30px",
+              left: "35px",
+              width: "210px",
+              height: "280px",
+              borderRadius: "12px", 
+              border: "2.5px solid #D87F4A", 
+              boxShadow: "0 0 0 9999px rgba(10, 8, 7, 0.72)", 
+              pointerEvents: "none" 
+            }} 
+          />
+        </div>
+
+        {/* Zoom Controller */}
+        <div className="w-full mt-6 space-y-2">
+          <div className="flex justify-between text-[10px] font-bold text-[#8C7B67] uppercase tracking-wider">
+            <span>Zoom</span>
+            <span>{Math.round(zoom * 100)}%</span>
+          </div>
+          <input 
+            type="range" 
+            min="1" 
+            max="3" 
+            step="0.01"
+            value={zoom}
+            onChange={(e) => setZoom(parseFloat(e.target.value))}
+            className="w-full h-1.5 bg-[#DFD5C6] rounded-lg appearance-none cursor-pointer accent-[#D87F4A]"
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 w-full mt-8">
+          <button 
+            type="button"
+            onClick={onClose}
+            className="flex-1 py-2.5 border border-[#DFD5C6] hover:bg-[#DFD5C6]/30 text-[#6D5E4D] font-bold text-xs rounded-xl transition duration-200 cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button 
+            type="button"
+            onClick={handleSave}
+            className="flex-1 py-2.5 bg-[#D87F4A] hover:bg-[#C16D3A] text-white font-bold text-xs rounded-xl transition duration-200 cursor-pointer shadow-md shadow-[#D87F4A]/25"
+          >
+            Crop & Save
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
