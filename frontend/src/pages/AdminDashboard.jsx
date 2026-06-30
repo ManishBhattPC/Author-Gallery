@@ -111,6 +111,18 @@ const AdminDashboard = () => {
     }
   };
 
+  // Lock body scroll when mobile menu or modal overlays are active
+  useEffect(() => {
+    if (isMobileMenuOpen || showQuickActionModal || previewItem || confirmModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileMenuOpen, showQuickActionModal, previewItem, confirmModal]);
+
   const handleApproveTransaction = async (requestId) => {
     try {
       await approvePurchaseRequest(requestId);
