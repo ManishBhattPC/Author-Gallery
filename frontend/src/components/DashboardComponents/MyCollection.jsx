@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMyBooks, updateBook, deleteBook } from "../../services/bookService.js";
-import { Eye, Edit3, Trash2, BookOpen, AlertCircle, Loader, X } from "lucide-react";
+import { Eye, Edit3, Trash2, BookOpen, AlertCircle, Loader, X, Download } from "lucide-react";
 
 const MyCollection = ({
   books: providedBooks,
@@ -161,6 +161,18 @@ const MyCollection = ({
                 <div>
                   <h3 className="font-bold font-serif text-slate-900 line-clamp-1">{book.title}</h3>
                   <p className="text-sm font-bold text-amber-800 mt-1">₹{Number(book.price).toFixed(2)}</p>
+                  
+                  {/* Views & Downloads Stats */}
+                  <div className="flex items-center gap-4 mt-2.5 text-slate-600 text-xs font-semibold select-none">
+                    <span className="flex items-center gap-1" title="Reads / Views">
+                      <Eye className="w-3.5 h-3.5 text-slate-400" />
+                      {book.views ?? 0}
+                    </span>
+                    <span className="flex items-center gap-1" title="PDF Downloads">
+                      <Download className="w-3.5 h-3.5 text-slate-400" />
+                      {book.downloads ?? 0}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-300/60 text-xs font-bold text-slate-800">

@@ -637,14 +637,14 @@ const BookDetails = () => {
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
 
               <div className="bg-slate-100 rounded-xl p-4">
                 <p className="text-sm text-slate-500">
                   Genre
                 </p>
 
-                <p className="font-semibold">
+                <p className="font-semibold truncate" title={book?.genres?.join(", ")}>
                   {book?.genres?.join(", ")}
                 </p>
               </div>
@@ -656,6 +656,26 @@ const BookDetails = () => {
 
                 <p className="font-semibold">
                   ₹{book?.price}
+                </p>
+              </div>
+
+              <div className="bg-slate-100 rounded-xl p-4">
+                <p className="text-sm text-slate-500">
+                  Reads / Views
+                </p>
+
+                <p className="font-semibold">
+                  {book?.views ?? 0}
+                </p>
+              </div>
+
+              <div className="bg-slate-100 rounded-xl p-4">
+                <p className="text-sm text-slate-500">
+                  Downloads
+                </p>
+
+                <p className="font-semibold">
+                  {book?.downloads ?? 0}
                 </p>
               </div>
 
