@@ -76,7 +76,12 @@ export const updateBook = async (id, bookPayload) => {
 
 export const deleteBook = async (id) => {
   const response = await apiClient.delete(`/api/books/${id}`);
+  apiCache.invalidate("books:"); // Invalidate cached books
+  return response.data;
+};
 
+export const incrementBookDownloads = async (id) => {
+  const response = await apiClient.post(`/api/books/${id}/download`);
   apiCache.invalidate("books:"); // Invalidate cached books
   return response.data;
 };

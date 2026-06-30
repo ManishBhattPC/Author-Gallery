@@ -7,6 +7,7 @@ import {
   getMyBooks,
   updateBook,
   deleteBook,
+  incrementDownloads,
 } from "../controllers/bookController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -17,6 +18,8 @@ router.get("/", getBooks); // Public: Explore all books
 router.get("/my-books", protect, getMyBooks); // Logged-in author's books
 
 router.get("/:id", getBookById); // Public: Single book details
+
+router.post("/:id/download", incrementDownloads); // Increment downloads count
 
 router.post(
   "/",

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { fetchBookById } from "../../services/bookService.js";
+import { fetchBookById, incrementBookDownloads } from "../../services/bookService.js";
 import { useAuth } from "../../AuthContext.jsx";
 import { createPortal } from "react-dom";
 import { Flag, Info } from "lucide-react";
@@ -258,6 +258,16 @@ const BookDetails = () => {
       }
     }
   }, [readerOpen, id]);
+
+  const handleDownloadClick = async () => {
+    try {
+      if (book) {
+        await incrementBookDownloads(book._id || book.id);
+      }
+    } catch (err) {
+      console.error("Failed to increment book downloads count:", err);
+    }
+  };
 
   const handleSaveNotes = (val) => {
     setNotes(val);
@@ -544,6 +554,7 @@ const BookDetails = () => {
                       href={book.pdfFile}
                       target="_blank"
                       rel="noreferrer"
+                      onClick={handleDownloadClick}
                       className="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 hover:border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100 px-6 py-3 rounded-xl font-semibold transition duration-200"
                     >
                       <FaDownload />

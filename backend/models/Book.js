@@ -85,6 +85,14 @@ const bookSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    views: {
+      type: Number,
+      default: 0,
+    },
+    downloads: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

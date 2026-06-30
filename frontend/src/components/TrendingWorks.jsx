@@ -11,7 +11,7 @@ const TrendingWorks = ({ limit = 4, showViewAll = false }) => {
     const fetchTrendingWorks = async () => {
       try {
         setLoading(true);
-        const data = await getBooks({ limit });
+        const data = await getBooks({ limit, sortBy: "trending" });
         setTrendingWorks(Array.isArray(data.books) ? data.books : data);
         setError(null);
       } catch (err) {

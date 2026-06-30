@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken"
 import Order from "../models/Order.js"
 export const getBooks = async (req, res) => {
   try {
-    const { search, genre, page = 1, limit = 10 } = req.query
+    const { search, genre, sortBy, page = 1, limit = 10 } = req.query
 
     const query = {}
 
@@ -41,9 +41,16 @@ export const getBooks = async (req, res) => {
       query.genres = genre; // Filter by genre
     }
 
+    const sortOption = {};
+    if (sortBy === "trending") {
+      sortOption.views = -1;
+      sortOption.downloads = -1;
+    }
+    sortOption.createdAt = -1; // Fallback
+
     const books = await Book.find(query)
       .populate("author", "name email") // Include author details
-      .sort({ createdAt: -1 }) // Newest books first
+      .sort(sortOption)
       .skip((page - 1) * limit) // Pagination
       .limit(Number(limit))
 
@@ -74,6 +81,9 @@ export const getBookById = async (req, res) => {
         message: "Book not found",
       })
     }
+
+    // Increment views count
+    await Book.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
 
     // Determine access to book content/PDF (Free vs. Premium)
     let hasAccess = false;
@@ -358,6 +368,22 @@ export const deleteBook = async (req, res) => {
     })
   }
 }
+
+export const incrementDownloads = async (req, res) => {
+  try {
+    const book = await Book.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { downloads: 1 } },
+      { new: true }
+    );
+    if (!book) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+    res.status(200).json({ message: "Download count incremented successfully", downloads: book.downloads });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 /*
 Future Roadmap

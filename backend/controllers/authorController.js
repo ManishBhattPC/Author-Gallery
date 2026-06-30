@@ -39,6 +39,7 @@ export const getAuthors = async (req, res) => {
       {
         $addFields: {
           works: { $size: "$books" }, // Count total books per author
+          followersCount: { $size: { $ifNull: ["$followers", []] } }, // Count total followers
           resolvedName: { $ifNull: ["$profile.displayName", "$name"] },
           resolvedBio: { $ifNull: ["$profile.bio", { $ifNull: ["$bio", ""] }] },
           resolvedProfileImage: { $ifNull: ["$profile.profileImage", { $ifNull: ["$profileImage", ""] }] },
@@ -73,9 +74,9 @@ export const getAuthors = async (req, res) => {
       },
     });
 
-    // If featured query param is true, get top 5 authors by book count
+    // If featured query param is true, get top 5 authors by followers count
     if (featured === "true") {
-      pipeline.push({ $sort: { works: -1, name: 1 } }) // Sort by works descending
+      pipeline.push({ $sort: { followersCount: -1, works: -1, name: 1 } }) // Sort by followers count descending
       pipeline.push({ $limit: 5 }) // Limit to 5 authors
     } else {
       pipeline.push({ $sort: { name: 1 } }) // Standard sort alphabetically
