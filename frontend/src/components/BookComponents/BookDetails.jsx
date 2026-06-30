@@ -892,7 +892,7 @@ const BookDetails = () => {
             {/* MAIN READER WORKSPACE PANEL */}
             {hasTextContent ? (
               // Immersive HTML Text E-Reader
-              <div className={`flex-1 flex flex-col overflow-y-auto relative ${THEME_STYLES[readerTheme].bg} transition-colors duration-300`}>
+              <div className={`flex-1 flex flex-col overflow-y-auto overflow-x-hidden relative ${THEME_STYLES[readerTheme].bg} transition-colors duration-300`}>
                 
                 {/* Desktop Floating Settings Panel / Mobile bottom sheet */}
                 {controlsOpen && (
@@ -1065,7 +1065,7 @@ const BookDetails = () => {
                           return (
                             <div 
                               style={{ fontSize: `${fontSize}px` }} 
-                              className={`leading-relaxed text-justify select-text space-y-5 ${
+                              className={`leading-relaxed text-justify select-text space-y-5 break-words ${
                                 fontFamily === "serif" ? "font-serif" : "font-sans"
                               }`}
                             >
