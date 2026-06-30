@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchBookById } from "../../services/bookService.js";
 import { useAuth } from "../../AuthContext.jsx";
@@ -124,6 +124,68 @@ const BookDetails = () => {
   const [chaptersExpanded, setChaptersExpanded] = useState(true);
   const [bookmarksExpanded, setBookmarksExpanded] = useState(false);
   const [notesExpanded, setNotesExpanded] = useState(false);
+
+  const bookSidebarRef = useRef(null);
+
+  useEffect(() => {
+    const sidebar = bookSidebarRef.current;
+    if (!sidebar) return;
+
+    const handleWheel = (e) => {
+      const el = sidebar;
+      const scrollTop = el.scrollTop;
+      const scrollHeight = el.scrollHeight;
+      const clientHeight = el.clientHeight;
+      
+      if (scrollHeight <= clientHeight) {
+        e.preventDefault();
+        return;
+      }
+      
+      const delta = e.deltaY;
+      if (delta < 0 && scrollTop <= 0) {
+        e.preventDefault();
+      } else if (delta > 0 && scrollTop + clientHeight >= scrollHeight) {
+        e.preventDefault();
+      }
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      const el = sidebar;
+      const scrollTop = el.scrollTop;
+      const scrollHeight = el.scrollHeight;
+      const clientHeight = el.clientHeight;
+      
+      if (scrollHeight <= clientHeight) {
+        e.preventDefault();
+        return;
+      }
+      
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchY;
+      
+      if (deltaY < 0 && scrollTop <= 0) {
+        e.preventDefault();
+      } else if (deltaY > 0 && scrollTop + clientHeight >= scrollHeight) {
+        e.preventDefault();
+      }
+    };
+
+    sidebar.addEventListener("wheel", handleWheel, { passive: false });
+    sidebar.addEventListener("touchstart", handleTouchStart, { passive: true });
+    sidebar.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    return () => {
+      sidebar.removeEventListener("wheel", handleWheel);
+      sidebar.removeEventListener("touchstart", handleTouchStart);
+      sidebar.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [sidebarOpen]);
 
   // Helper to parse chapters dynamically from editor content
   const parseChapters = (text) => {
@@ -794,7 +856,11 @@ const BookDetails = () => {
 
             {/* Vintage Parchment Collapsible Sidebar */}
             {sidebarOpen && (
-              <aside className="w-72 sm:w-80 bg-[#FDF8F3] text-[#3E3024] flex flex-col shrink-0 shadow-2xl z-20 transition-all duration-300 overflow-y-auto absolute md:relative top-0 bottom-0 left-0 h-full border-r border-[#DFD5C6]">
+               <aside 
+                 ref={bookSidebarRef}
+                 className="w-72 sm:w-80 bg-[#FDF8F3] text-[#3E3024] flex flex-col shrink-0 shadow-2xl z-20 transition-all duration-300 overflow-y-auto absolute md:relative top-0 bottom-0 left-0 h-full border-r border-[#DFD5C6]"
+                 style={{ overscrollBehavior: "contain" }}
+               >
                 <div className="p-5 sm:p-6 space-y-5 sm:space-y-6">
                   {/* Mobile Close Button inside sidebar header */}
                   <div className="flex justify-between items-center md:hidden">

@@ -38,6 +38,67 @@ const Navbar = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const mobileDrawerRef = useRef(null);
+
+  useEffect(() => {
+    const drawer = mobileDrawerRef.current;
+    if (!drawer) return;
+
+    const handleWheel = (e) => {
+      const el = drawer;
+      const scrollTop = el.scrollTop;
+      const scrollHeight = el.scrollHeight;
+      const clientHeight = el.clientHeight;
+      
+      if (scrollHeight <= clientHeight) {
+        e.preventDefault();
+        return;
+      }
+      
+      const delta = e.deltaY;
+      if (delta < 0 && scrollTop <= 0) {
+        e.preventDefault();
+      } else if (delta > 0 && scrollTop + clientHeight >= scrollHeight) {
+        e.preventDefault();
+      }
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      const el = drawer;
+      const scrollTop = el.scrollTop;
+      const scrollHeight = el.scrollHeight;
+      const clientHeight = el.clientHeight;
+      
+      if (scrollHeight <= clientHeight) {
+        e.preventDefault();
+        return;
+      }
+      
+      const touchY = e.touches[0].clientY;
+      const deltaY = touchStartY - touchY;
+      
+      if (deltaY < 0 && scrollTop <= 0) {
+        e.preventDefault();
+      } else if (deltaY > 0 && scrollTop + clientHeight >= scrollHeight) {
+        e.preventDefault();
+      }
+    };
+
+    drawer.addEventListener("wheel", handleWheel, { passive: false });
+    drawer.addEventListener("touchstart", handleTouchStart, { passive: true });
+    drawer.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    return () => {
+      drawer.removeEventListener("wheel", handleWheel);
+      drawer.removeEventListener("touchstart", handleTouchStart);
+      drawer.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [menuOpen]);
 
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
@@ -443,7 +504,9 @@ const Navbar = () => {
           />
           {/* Mobile Drawer Content */}
           <div 
-            className="lg:hidden fixed right-0 top-[60px] bottom-0 w-72 bg-white border-l border-slate-200/50 p-6 flex flex-col justify-between shadow-2xl z-40 transition-transform"
+            ref={mobileDrawerRef}
+            className="lg:hidden fixed right-0 top-[60px] bottom-0 w-72 bg-white border-l border-slate-200/50 p-6 flex flex-col justify-between shadow-2xl z-40 transition-transform overflow-y-auto"
+            style={{ overscrollBehavior: "contain" }}
           >
             <div className="space-y-6">
               {/* User Profile Card (Mobile) */}
