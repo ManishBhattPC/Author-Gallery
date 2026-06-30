@@ -703,7 +703,7 @@ const AdminDashboard = () => {
           <div className="flex items-center gap-4">
             
             {/* Global Search Bar (Only render on searchable tabs) */}
-            {["users", "books", "reports", "reviews", "payments"].includes(activeTab) ? (
+            {["users", "books", "reports", "reviews", "payments"].includes(activeTab) && (
               <div className="relative max-w-xs w-48 sm:w-64">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 animate-pulse" />
                 <input
@@ -714,11 +714,6 @@ const AdminDashboard = () => {
                   className="admin-input text-xs focus:ring-1 focus:ring-[#d87f4a]/50"
                   style={{ paddingLeft: "38px" }}
                 />
-              </div>
-            ) : (
-              <div className="hidden sm:flex items-center gap-2 bg-zinc-900/35 border border-zinc-800/80 px-3.5 py-1.5 rounded-xl">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Workspace Synced</span>
               </div>
             )}
 
