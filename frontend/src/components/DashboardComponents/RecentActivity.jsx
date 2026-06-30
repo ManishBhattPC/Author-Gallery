@@ -18,7 +18,10 @@ const RecentActivity = ({ books = [], loading = false }) => {
         <div className="relative border-l border-slate-300 pl-4 ml-2 space-y-6">
           {books.map((book) => (
             <div key={book._id} className="relative text-left">
-              <div className="absolute -left-6 top-1.5 bg-[#FAF1E6] text-amber-850 rounded-full p-1 ring-4 ring-slate-50">
+              <div 
+                className="absolute -left-6 top-1.5 bg-[#FAF1E6] rounded-full p-1 ring-4 ring-slate-50"
+                style={{ color: "#8C4E35" }}
+              >
                 <PlusCircle className="w-3.5 h-3.5" />
               </div>
               <div>

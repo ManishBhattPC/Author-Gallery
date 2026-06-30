@@ -42,7 +42,7 @@ const DashboardHeader = ({ stats, loading = false }) => {
           )}
         </button>
         <div className="text-left">
-          <span className="text-[10px] font-bold text-amber-850 uppercase tracking-widest flex items-center gap-1 select-none">
+          <span className="text-[10px] font-bold text-amber-800 uppercase tracking-widest flex items-center gap-1 select-none">
             {getGreeting()} <span className="animate-bounce inline-block">✨</span>
           </span>
           <h2 className="text-2xl font-bold font-serif text-slate-900">
@@ -57,7 +57,10 @@ const DashboardHeader = ({ stats, loading = false }) => {
           to="/dashboard/network?tab=followers"
           className="flex items-center gap-2 sm:gap-3 hover:bg-slate-200/50 p-1.5 sm:p-2 rounded-xl transition-all duration-200 cursor-pointer text-left group min-w-0"
         >
-          <div className="p-2 sm:p-3 bg-[#FAF1E6] rounded-xl text-amber-850 shrink-0 group-hover:scale-105 transition-transform">
+          <div 
+            className="p-2 sm:p-3 bg-[#FAF1E6] rounded-xl shrink-0 group-hover:scale-105 transition-transform"
+            style={{ color: "#8C4E35" }}
+          >
             <Users className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </div>
           <div className="text-left min-w-0">
@@ -88,7 +91,10 @@ const DashboardHeader = ({ stats, loading = false }) => {
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2">
-          <div className="p-2 sm:p-3 bg-[#E8F3EE] rounded-xl text-emerald-850 shrink-0">
+          <div 
+            className="p-2 sm:p-3 bg-[#E8F3EE] rounded-xl shrink-0"
+            style={{ color: "#1E5E42" }}
+          >
             <BookOpen className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </div>
           <div className="text-left min-w-0">

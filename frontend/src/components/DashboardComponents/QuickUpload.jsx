@@ -214,7 +214,7 @@ const QuickUpload = ({ onPublished }) => {
           <label className="block text-xs font-bold text-slate-800 mb-2">Cover Image *</label>
           <label className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-300 hover:border-amber-700/50 bg-white hover:bg-slate-100/20 rounded-xl cursor-pointer transition-all duration-300">
             <UploadCloud className="w-6 h-6 text-amber-700 mb-1" />
-            <span className="text-xs text-slate-850 font-bold">Upload cover photo</span>
+            <span className="text-xs text-slate-800 font-bold">Upload cover photo</span>
             <input
               type="file"
               name="coverImage"
@@ -236,7 +236,7 @@ const QuickUpload = ({ onPublished }) => {
           <label className="block text-xs font-bold text-slate-800 mb-2">PDF Document *</label>
           <label className="flex flex-col items-center justify-center p-4 border border-dashed border-slate-300 hover:border-amber-700/50 bg-white hover:bg-slate-100/20 rounded-xl cursor-pointer transition-all duration-300">
             <UploadCloud className="w-6 h-6 text-amber-700 mb-1" />
-            <span className="text-xs text-slate-850 font-bold">Upload PDF eBook</span>
+            <span className="text-xs text-slate-800 font-bold">Upload PDF eBook</span>
             <input
               type="file"
               name="pdfFile"

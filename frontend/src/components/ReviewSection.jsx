@@ -165,7 +165,7 @@ const ReviewSection = ({ bookId, authorId }) => {
               <div key={rev._id} className={`pt-4 ${idx === 0 ? "pt-0" : ""}`}>
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <h5 className="font-bold text-slate-850 text-sm">
+                    <h5 className="font-bold text-slate-800 text-sm">
                       {rev.reviewer?.name || "Anonymous User"}
                     </h5>
                     <div className="flex items-center gap-2 mt-1">

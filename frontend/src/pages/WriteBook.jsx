@@ -562,7 +562,7 @@ const WriteBook = () => {
                   </h3>
                   <button 
                     onClick={handleCreateNewDraft}
-                    className="p-1 hover:bg-slate-200 text-amber-850 hover:text-amber-900 rounded-lg border border-slate-300 cursor-pointer transition-colors"
+                    className="p-1 hover:bg-slate-200 text-amber-800 hover:text-amber-900 rounded-lg border border-slate-300 cursor-pointer transition-colors"
                     title="Create New Draft"
                   >
                     <Plus size={15} />

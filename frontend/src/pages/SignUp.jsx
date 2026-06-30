@@ -253,7 +253,7 @@ const Signup = () => {
         {step === "details" && (
           isRegistrationClosed ? (
             <div className="mt-8 p-6 bg-amber-50/50 border border-amber-200/60 rounded-3xl text-center space-y-4 animate-fade-in">
-              <div className="w-12 h-12 bg-amber-700/10 rounded-full flex items-center justify-center text-amber-850 mx-auto">
+              <div className="w-12 h-12 bg-amber-700/10 rounded-full flex items-center justify-center text-amber-800 mx-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                 </svg>
