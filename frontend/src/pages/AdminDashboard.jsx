@@ -297,7 +297,7 @@ const AdminDashboard = () => {
       { id: "authors", label: "Active Authors", value: authorsCount, change: `${((authorsCount / Math.max(totalUsers, 1)) * 100).toFixed(0)}% of users`, trend: "up", icon: <UserCheck className="w-5 h-5 text-emerald-400" /> },
       { id: "books", label: "Published Books", value: publishedBooks, change: `${publishedBooks} total`, trend: "up", icon: <BookOpen className="w-5 h-5 text-amber-400" /> },
       { id: "reports", label: "Pending Reports", value: pendingReports, change: pendingReports > 0 ? "Action Required" : "Healthy", trend: pendingReports > 0 ? "down" : "up", icon: <AlertTriangle className="w-5 h-5 text-red-400" /> },
-      { id: "revenue", label: "Total Revenue", value: `₹${totalPaidRevenue}`, change: `Approved orders`, trend: "up", icon: <DollarSign className="w-5 h-5 text-emerald-400" /> },
+      { id: "revenue", label: "Total Revenue", value: `₹${Number(totalPaidRevenue.toFixed(2))}`, change: `Approved orders`, trend: "up", icon: <DollarSign className="w-5 h-5 text-emerald-400" /> },
       { id: "sales", label: "Monthly Sales", value: `${monthlySalesCount} Books`, change: "Last 30 days", trend: "up", icon: <ShoppingBag className="w-5 h-5 text-indigo-400" /> },
       { id: "newReg", label: "New Registrations", value: newRegistrationsCount, change: "Last 30 days", trend: "up", icon: <Activity className="w-5 h-5 text-cyan-400" /> },
       { id: "growth", label: "Platform Growth", value: `+${platformGrowthPct}%`, change: "30 day user trend", trend: growthTrend, icon: <TrendingUp className="w-5 h-5 text-amber-400" /> },
