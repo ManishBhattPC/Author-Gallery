@@ -10,8 +10,8 @@ function Home() {
     <>
       
       <HeroSection />
-      <FeaturedAuthors />
-      <TrendingWorks />
+      <FeaturedAuthors limit={3} />
+      <TrendingWorks limit={4} showViewAll={true} />
   
     </>
   );

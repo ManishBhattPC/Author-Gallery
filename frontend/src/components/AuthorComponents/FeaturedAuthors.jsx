@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import AuthorCard from "./AuthorCard";
 import { fetchTopAuthors } from "../../services/authorService.js";
 
-const FeaturedAuthors = () => {
+const FeaturedAuthors = ({ limit }) => {
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -55,22 +56,35 @@ const FeaturedAuthors = () => {
             No featured authors found.
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {authors.map((author) => (
-              <AuthorCard
-                key={author._id || author.id}
-                id={author._id || author.id}
-                image={author.profileImage || author.image || "/default-avatar.png"}
-                name={author.name}
-                genre={
-                  Array.isArray(author.genres) && author.genres.length > 0
-                    ? author.genres.join(", ")
-                    : (author.role || author.genre || "Author")
-                }
-                works={author.works ?? 0}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {(limit ? authors.slice(0, limit) : authors).map((author) => (
+                <AuthorCard
+                  key={author._id || author.id}
+                  id={author._id || author.id}
+                  image={author.profileImage || author.image || "/default-avatar.png"}
+                  name={author.name}
+                  genre={
+                    Array.isArray(author.genres) && author.genres.length > 0
+                      ? author.genres.join(", ")
+                      : (author.role || author.genre || "Author")
+                  }
+                  works={author.works ?? 0}
+                />
+              ))}
+            </div>
+
+            {limit && authors.length > limit && (
+              <div className="text-center mt-12">
+                <Link 
+                  to="/authors" 
+                  className="inline-flex items-center gap-2 bg-amber-800 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-amber-900 transition duration-300 transform active:scale-[0.98]"
+                >
+                  View All Authors →
+                </Link>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>

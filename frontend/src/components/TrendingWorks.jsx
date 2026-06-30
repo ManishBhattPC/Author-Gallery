@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getBooks } from "../services/bookService.js";
 
-const TrendingWorks = () => {
+const TrendingWorks = ({ limit = 4, showViewAll = false }) => {
   const [trendingWorks, setTrendingWorks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,7 +11,7 @@ const TrendingWorks = () => {
     const fetchTrendingWorks = async () => {
       try {
         setLoading(true);
-        const data = await getBooks({ limit: 4 });
+        const data = await getBooks({ limit });
         setTrendingWorks(Array.isArray(data.books) ? data.books : data);
         setError(null);
       } catch (err) {
@@ -24,7 +24,7 @@ const TrendingWorks = () => {
     };
 
     fetchTrendingWorks();
-  }, []);
+  }, [limit]);
 
   if (loading) {
     return (
@@ -133,6 +133,17 @@ const TrendingWorks = () => {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {showViewAll && (
+          <div className="text-center mt-12">
+            <Link 
+              to="/books" 
+              className="inline-flex items-center gap-2 bg-amber-800 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-amber-900 transition duration-300 transform active:scale-[0.98]"
+            >
+              View All Books →
+            </Link>
           </div>
         )}
       </div>
