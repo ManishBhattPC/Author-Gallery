@@ -35,3 +35,15 @@ export const getAdminTransactions = async () => {
   const response = await apiClient.get("/api/admin/transactions");
   return response.data;
 };
+
+// Fetch all contact messages/inquiries
+export const getAdminContacts = async () => {
+  const response = await apiClient.get("/api/admin/contacts");
+  return response.data;
+};
+
+// Delete a contact message
+export const deleteContactByAdmin = async (contactId) => {
+  const response = await apiClient.delete(`/api/admin/contacts/${contactId}`);
+  return response.data;
+};

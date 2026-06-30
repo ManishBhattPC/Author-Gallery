@@ -5,7 +5,9 @@ import {
   deleteAuthorByAdmin, 
   dismissReportByAdmin, 
   deleteReviewByAdmin,
-  getAdminTransactions
+  getAdminTransactions,
+  getAdminContacts,
+  deleteContactByAdmin
 } from "../services/adminService.js";
 import { approvePurchaseRequest, declinePurchaseRequest } from "../services/paymentService.js";
 import { 
@@ -41,7 +43,8 @@ import {
   UserCheck,
   MoreVertical,
   SlidersHorizontal,
-  ChevronUp
+  ChevronUp,
+  Mail
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
@@ -79,6 +82,8 @@ const AdminDashboard = () => {
 
   const [transactions, setTransactions] = useState([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
+  const [contacts, setContacts] = useState([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
 
   const loadTransactions = async () => {
     try {
@@ -90,6 +95,19 @@ const AdminDashboard = () => {
       setToast({ show: true, message: err.message || "Failed to load transactions", type: "error" });
     } finally {
       setLoadingTransactions(false);
+    }
+  };
+
+  const loadContactsData = async () => {
+    try {
+      setLoadingContacts(true);
+      const list = await getAdminContacts();
+      setContacts(list || []);
+    } catch (err) {
+      console.error("Failed to load admin contact messages:", err);
+      setToast({ show: true, message: err.message || "Failed to load contact messages", type: "error" });
+    } finally {
+      setLoadingContacts(false);
     }
   };
 
@@ -115,9 +133,29 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteContact = (contactId) => {
+    setConfirmModal({
+      title: "Delete Support Inquiry",
+      message: "Are you sure you want to delete this contact form inquiry? This action is permanent and cannot be undone.",
+      type: "danger",
+      onConfirm: async () => {
+        try {
+          await deleteContactByAdmin(contactId);
+          triggerToast("Contact inquiry successfully deleted", "success");
+          loadContactsData();
+        } catch (err) {
+          triggerToast("Failed to delete contact inquiry", "error");
+        }
+        setConfirmModal(null);
+      }
+    });
+  };
+
   useEffect(() => {
     if (activeTab === "payments") {
       loadTransactions();
+    } else if (activeTab === "contacts") {
+      loadContactsData();
     }
   }, [activeTab]);
 
@@ -144,12 +182,14 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       setError("");
-      const [res, txs] = await Promise.all([
+      const [res, txs, list] = await Promise.all([
         getAdminDashboardData(),
-        getAdminTransactions().catch(() => [])
+        getAdminTransactions().catch(() => []),
+        getAdminContacts().catch(() => [])
       ]);
       setData(res);
       setTransactions(txs || []);
+      setContacts(list || []);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load dashboard data.");
     } finally {
@@ -643,6 +683,7 @@ const AdminDashboard = () => {
               { id: "reports", label: "Content Reports", icon: <AlertTriangle size={18} />, badge: data.reports?.filter(r => r.status === "pending").length },
               { id: "reviews", label: "User Reviews", icon: <MessageSquare size={18} /> },
               { id: "payments", label: "Payments / Orders", icon: <CreditCard size={18} /> },
+              { id: "contacts", label: "Contact Inquiries", icon: <Mail size={18} />, badge: contacts.length },
               { id: "super-admin", label: "Super Admin", icon: <Shield size={18} /> },
               { id: "settings", label: "Portal Settings", icon: <Settings size={18} /> }
             ].map((item) => (
@@ -673,10 +714,11 @@ const AdminDashboard = () => {
         <div className="space-y-2">
           <button
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="w-full flex items-center justify-center p-2.5 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition cursor-pointer"
-            title="Expand/Collapse Sidebar"
+            className="admin-sidebar-item w-full"
+            title={isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
           >
-            <SlidersHorizontal size={16} />
+            {isSidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            {!isSidebarCollapsed && <span>Collapse Sidebar</span>}
           </button>
           
           <button
@@ -690,8 +732,8 @@ const AdminDashboard = () => {
         </div>
       </aside>
 
-      {/* 2. MAIN WORKSPACE CONTAINER */}
-      <main className="flex-1 flex flex-col min-w-0 relative">
+      {/* 2. MAIN CONTENT VIEWPORT */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         
         {/* Sticky Top Navigation Bar */}
         <header className="sticky top-0 bg-[#0B0B0D]/85 backdrop-blur-md border-b border-zinc-800 px-6 py-4 flex items-center justify-between z-40 gap-4">
@@ -720,7 +762,7 @@ const AdminDashboard = () => {
           <div className="flex items-center gap-4">
             
             {/* Global Search Bar (Only render on searchable tabs) */}
-            {["users", "books", "reports", "reviews", "payments"].includes(activeTab) && (
+            {["users", "books", "reports", "reviews", "payments", "contacts"].includes(activeTab) && (
               <div className="relative max-w-xs w-48 sm:w-64">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 animate-pulse" />
                 <input
@@ -1431,6 +1473,130 @@ const AdminDashboard = () => {
             </div>
           )}
 
+          {/* D_CONTACTS. CONTACT MESSAGES PANEL */}
+          {activeTab === "contacts" && (
+            <div className="space-y-6 animate-fade-in text-left">
+              
+              <div className="admin-glass-card p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h3 className="text-lg font-bold text-zinc-200 font-serif">Contact Inquiry Registry</h3>
+                  <p className="text-xs text-zinc-500">Read, track, and reply to client inquiries, feedback, and technical support messages</p>
+                </div>
+                <div className="flex items-center gap-2 bg-zinc-900/35 border border-zinc-800/85 px-3 py-1 rounded-xl">
+                  <span className="text-xs text-zinc-400 font-semibold">Active Inquiries:</span>
+                  <span className="bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full text-[10px] font-bold border border-amber-500/20">
+                    {contacts.length || 0} Total
+                  </span>
+                </div>
+              </div>
+
+              {loadingContacts ? (
+                <div className="admin-glass-card p-16 text-center text-zinc-500">
+                  <Loader className="w-8 h-8 text-[#d87f4a] animate-spin mx-auto mb-3" />
+                  <p className="text-xs">Loading contact inquiries...</p>
+                </div>
+              ) : contacts.length === 0 ? (
+                <div className="admin-glass-card p-16 text-center text-zinc-500 space-y-3">
+                  <Mail className="w-12 h-12 mx-auto text-amber-500 opacity-60" />
+                  <h5 className="font-serif font-bold text-base text-zinc-300">Clean Inquiry Log</h5>
+                  <p className="text-xs max-w-sm mx-auto leading-relaxed text-zinc-500">
+                    No contact inquiries or guest feedback submissions found in the database.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-6">
+                  {contacts
+                    .filter(msg => {
+                      if (searchQuery.trim()) {
+                        const q = searchQuery.toLowerCase();
+                        return (
+                          msg.name.toLowerCase().includes(q) ||
+                          msg.email.toLowerCase().includes(q) ||
+                          msg.message.toLowerCase().includes(q)
+                        );
+                      }
+                      return true;
+                    })
+                    .map((msg) => {
+                      const dateStr = new Date(msg.createdAt).toLocaleString("en-IN", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      });
+                      
+                      return (
+                        <div key={msg._id} className="admin-glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-zinc-800/70 hover:border-zinc-750">
+                          <div className="space-y-4 flex-1 min-w-0">
+                            
+                            {/* Card Header badges */}
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider">
+                                <Mail size={11} className="shrink-0" />
+                                Support Inquiry
+                              </span>
+                              <span className="text-[10px] text-zinc-500 font-bold font-mono">
+                                Ticket ID: {msg._id.substring(12).toUpperCase()}
+                              </span>
+                              <span className="text-[10px] text-zinc-650">•</span>
+                              <span className="text-[10px] text-zinc-500 font-medium">
+                                Submitted {dateStr}
+                              </span>
+                            </div>
+
+                            {/* Details Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-b border-zinc-900/60 py-3.5">
+                              <div>
+                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Submitted By</span>
+                                <span className="text-xs text-zinc-200 font-semibold block">{msg.name}</span>
+                              </div>
+                              <div>
+                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Email Address</span>
+                                <a 
+                                  href={`mailto:${msg.email}`}
+                                  className="text-[#d87f4a] hover:underline text-xs font-bold block truncate"
+                                >
+                                  {msg.email}
+                                </a>
+                              </div>
+                            </div>
+
+                            {/* Inquiry message content */}
+                            <div className="space-y-1.5 text-left">
+                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">Message Body</span>
+                              <p className="text-xs text-zinc-300 bg-zinc-950/40 p-4 rounded-xl border border-zinc-900/50 leading-relaxed font-sans max-w-3xl whitespace-pre-wrap select-text">
+                                {msg.message}
+                              </p>
+                            </div>
+
+                          </div>
+
+                          {/* Action buttons */}
+                          <div className="flex md:flex-col gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-zinc-900 pt-4 md:pt-0">
+                            <a 
+                              href={`mailto:${msg.email}?subject=Re: Author Gallery Inquiry`}
+                              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-[#d87f4a] to-[#a05a3a] hover:from-[#c26e3d] hover:to-[#8c4e35] text-white rounded-xl text-xs font-bold transition shadow-md hover:scale-[1.01] cursor-pointer text-center"
+                            >
+                              <Mail size={13} className="shrink-0" />
+                              Reply via Email
+                            </a>
+
+                            <button
+                              onClick={() => handleDeleteContact(msg._id)}
+                              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 rounded-xl text-xs font-bold transition cursor-pointer"
+                            >
+                              <Trash2 size={13} className="shrink-0" />
+                              Dismiss / Resolve
+                            </button>
+                          </div>
+
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+
+            </div>
+          )}
+
           {/* E. REVIEWS PANEL */}
           {activeTab === "reviews" && (
             <div className="admin-glass-card p-6 text-left animate-fade-in space-y-6">
@@ -1911,7 +2077,7 @@ const AdminDashboard = () => {
           )}
 
         </div>
-      </main>
+      </div>
 
       {/* 3. SYSTEM CONTROLS / MAINTENANCES QUICK ACTION MODAL */}
       {showQuickActionModal && (

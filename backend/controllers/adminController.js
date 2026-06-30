@@ -4,6 +4,7 @@ import AuthorProfile from "../models/authorProfile.js";
 import Review from "../models/Review.js";
 import Report from "../models/Report.js";
 import Order from "../models/Order.js";
+import ContactMessage from "../models/ContactMessage.js";
 
 // Fetch all books, authors, reports, reviews for admin dashboard
 export const getDashboardData = async (req, res) => {
@@ -173,6 +174,31 @@ export const getTransactions = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.status(200).json(transactions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Fetch all contact form submissions/messages
+export const getContactMessages = async (req, res) => {
+  try {
+    const messages = await ContactMessage.find({}).sort({ createdAt: -1 });
+    res.status(200).json(messages);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Delete a contact form submission/message
+export const deleteContactMessage = async (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const message = await ContactMessage.findById(messageId);
+    if (!message) {
+      return res.status(404).json({ message: "Contact message not found" });
+    }
+    await message.deleteOne();
+    res.status(200).json({ message: "Contact inquiry deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

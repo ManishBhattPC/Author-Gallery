@@ -5,7 +5,9 @@ import {
   deleteAuthor, 
   dismissReport, 
   deleteReview,
-  getTransactions
+  getTransactions,
+  getContactMessages,
+  deleteContactMessage
 } from "../controllers/adminController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -17,9 +19,11 @@ router.use(admin);
 
 router.get("/dashboard", getDashboardData);
 router.get("/transactions", getTransactions);
+router.get("/contacts", getContactMessages);
 router.delete("/books/:id", deleteBook);
 router.delete("/authors/:id", deleteAuthor);
 router.delete("/reports/:id", dismissReport);
 router.delete("/reviews/:id", deleteReview);
+router.delete("/contacts/:id", deleteContactMessage);
 
 export default router;
