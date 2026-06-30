@@ -391,6 +391,116 @@ const AdminDashboard = () => {
 
   const totalPages = Math.ceil(filteredAuthors.length / rowsPerPage);
 
+  // Books Pagination Selector
+  const filteredBooks = useMemo(() => {
+    return (data.books || []).filter(b => {
+      if (searchQuery.trim()) {
+        return b.title.toLowerCase().includes(searchQuery.toLowerCase());
+      }
+      if (genreFilter !== "all") {
+        return b.genres?.includes(genreFilter);
+      }
+      return true;
+    });
+  }, [data.books, searchQuery, genreFilter]);
+
+  const paginatedBooks = useMemo(() => {
+    const start = (currentPage - 1) * 8;
+    return filteredBooks.slice(start, start + 8);
+  }, [filteredBooks, currentPage]);
+
+  const booksTotalPages = Math.ceil(filteredBooks.length / 8);
+
+  // Reports Pagination Selector
+  const filteredReports = useMemo(() => {
+    return (data.reports || []).filter(r => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          r.reason.toLowerCase().includes(q) ||
+          r.description.toLowerCase().includes(q) ||
+          (r.reporter?.name || r.guestName || "").toLowerCase().includes(q) ||
+          (r.book?.title || "").toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [data.reports, searchQuery]);
+
+  const paginatedReports = useMemo(() => {
+    const start = (currentPage - 1) * 5;
+    return filteredReports.slice(start, start + 5);
+  }, [filteredReports, currentPage]);
+
+  const reportsTotalPages = Math.ceil(filteredReports.length / 5);
+
+  // Reviews Pagination Selector
+  const filteredReviews = useMemo(() => {
+    return (data.reviews || []).filter(rev => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          rev.comment.toLowerCase().includes(q) ||
+          rev.reviewer?.name.toLowerCase().includes(q) ||
+          rev.book?.title.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [data.reviews, searchQuery]);
+
+  const paginatedReviews = useMemo(() => {
+    const start = (currentPage - 1) * 5;
+    return filteredReviews.slice(start, start + 5);
+  }, [filteredReviews, currentPage]);
+
+  const reviewsTotalPages = Math.ceil(filteredReviews.length / 5);
+
+  // Transactions Pagination Selector
+  const filteredTransactions = useMemo(() => {
+    return (transactions || []).filter(txn => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          txn._id.toLowerCase().includes(q) ||
+          txn.user?.name?.toLowerCase().includes(q) ||
+          txn.book?.title?.toLowerCase().includes(q) ||
+          txn.whatsapp?.includes(q)
+        );
+      }
+      return true;
+    });
+  }, [transactions, searchQuery]);
+
+  const paginatedTransactions = useMemo(() => {
+    const start = (currentPage - 1) * 5;
+    return filteredTransactions.slice(start, start + 5);
+  }, [filteredTransactions, currentPage]);
+
+  const transactionsTotalPages = Math.ceil(filteredTransactions.length / 5);
+
+  // Contacts Pagination Selector
+  const filteredContacts = useMemo(() => {
+    return (contacts || []).filter(msg => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        return (
+          msg.name.toLowerCase().includes(q) ||
+          msg.email.toLowerCase().includes(q) ||
+          msg.message.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [contacts, searchQuery]);
+
+  const paginatedContacts = useMemo(() => {
+    const start = (currentPage - 1) * 5;
+    return filteredContacts.slice(start, start + 5);
+  }, [filteredContacts, currentPage]);
+
+  const contactsTotalPages = Math.ceil(filteredContacts.length / 5);
+
   // Custom SVG Chart Generators (Guarantees zero package build dependency issues)
   const drawLineChart = () => {
     // Generate the last 7 days dates
@@ -1106,6 +1216,7 @@ const AdminDashboard = () => {
                       value={roleFilter}
                       onChange={(e) => { setRoleFilter(e.target.value); setCurrentPage(1); }}
                       className="admin-input pl-8 py-1.5 text-xs w-36 bg-zinc-950/80 border-zinc-800/80"
+                      style={{ paddingLeft: "32px" }}
                     >
                       <option value="all">All Roles</option>
                       <option value="author">Authors Only</option>
@@ -1226,8 +1337,9 @@ const AdminDashboard = () => {
                     <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
                     <select
                       value={genreFilter}
-                      onChange={(e) => setGenreFilter(e.target.value)}
+                      onChange={(e) => { setGenreFilter(e.target.value); setCurrentPage(1); }}
                       className="admin-input pl-8 py-1.5 text-xs w-40 bg-zinc-950/80 border-zinc-800/80"
+                      style={{ paddingLeft: "32px" }}
                     >
                       <option value="all">All Genres</option>
                       {allGenres.map((g, idx) => (
@@ -1239,70 +1351,85 @@ const AdminDashboard = () => {
               </div>
 
               {/* Books Grid */}
-              {data.books?.length === 0 ? (
+              {filteredBooks.length === 0 ? (
                 <div className="admin-glass-card p-12 text-center text-zinc-500">
                   <p className="text-sm">No books found in database.</p>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {data.books
-                    ?.filter(b => {
-                      if (searchQuery.trim()) {
-                        return b.title.toLowerCase().includes(searchQuery.toLowerCase());
-                      }
-                      if (genreFilter !== "all") {
-                        return b.genres?.includes(genreFilter);
-                      }
-                      return true;
-                    })
-                    .map((book) => (
-                      <div key={book._id} className="admin-glass-card overflow-hidden flex flex-col justify-between">
-                        <div className="aspect-[3/4] bg-zinc-900 relative">
-                          <img
-                            src={book.coverImage}
-                            alt={book.title}
-                            onError={(e) => {
-                              e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500";
-                              e.currentTarget.onerror = null;
-                            }}
-                            className="w-full h-full object-cover"
-                          />
+                  {paginatedBooks.map((book) => (
+                    <div key={book._id} className="admin-glass-card overflow-hidden flex flex-col justify-between">
+                      <div className="aspect-[3/4] bg-zinc-900 relative">
+                        <img
+                          src={book.coverImage}
+                          alt={book.title}
+                          onError={(e) => {
+                            e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500";
+                            e.currentTarget.onerror = null;
+                          }}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-4 space-y-3.5 flex-grow flex flex-col justify-between">
+                        <div>
+                          <span className="text-[9px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
+                            {book.genres?.[0] || "eBook"}
+                          </span>
+                          <h4 className="font-bold text-zinc-250 line-clamp-2 text-sm mt-2" title={book.title}>
+                            {book.title}
+                          </h4>
+                          <p className="text-xs text-zinc-500 mt-1">
+                            by {book.author?.name || "Unknown Author"}
+                          </p>
                         </div>
-                        <div className="p-4 space-y-3.5 flex-grow flex flex-col justify-between">
-                          <div>
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                              {book.genres?.[0] || "eBook"}
-                            </span>
-                            <h4 className="font-bold text-zinc-250 line-clamp-2 text-sm mt-2" title={book.title}>
-                              {book.title}
-                            </h4>
-                            <p className="text-xs text-zinc-500 mt-1">
-                              by {book.author?.name || "Unknown Author"}
-                            </p>
-                          </div>
-                          
-                          <div className="flex items-center justify-between border-t border-zinc-800/80 pt-3 mt-2">
-                            <span className="text-xs font-bold text-zinc-300">₹{book.price || 0}</span>
-                            <div className="flex gap-1.5">
-                              <button
-                                  onClick={() => setPreviewItem({ type: "book", data: book })}
-                                  className="p-2 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition cursor-pointer"
-                                  title="Inspect Book Content"
-                                >
-                                  <ExternalLink size={13} />
-                                </button>
-                              <button
-                                onClick={() => handleDeleteBook(book._id)}
-                                className="p-2 border border-zinc-800 hover:bg-rose-950/40 text-zinc-500 hover:text-rose-500 rounded-lg transition cursor-pointer"
-                                title="Delete Listing"
+                        
+                        <div className="flex items-center justify-between border-t border-zinc-800/80 pt-3 mt-2">
+                          <span className="text-xs font-bold text-zinc-300">₹{book.price || 0}</span>
+                          <div className="flex gap-1.5">
+                            <button
+                                onClick={() => setPreviewItem({ type: "book", data: book })}
+                                className="p-2 border border-zinc-800 hover:bg-zinc-800 text-zinc-400 hover:text-white rounded-lg transition cursor-pointer"
+                                title="Inspect Book Content"
                               >
-                                <Trash2 size={13} />
+                                <ExternalLink size={13} />
                               </button>
-                            </div>
+                            <button
+                              onClick={() => handleDeleteBook(book._id)}
+                              className="p-2 border border-zinc-800 hover:bg-rose-950/40 text-zinc-500 hover:text-rose-500 rounded-lg transition cursor-pointer"
+                              title="Delete Listing"
+                            >
+                              <Trash2 size={13} />
+                            </button>
                           </div>
                         </div>
                       </div>
-                    ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Books Pagination Controls */}
+              {booksTotalPages > 1 && (
+                <div className="flex items-center justify-between border-t border-zinc-800 pt-5">
+                  <span className="text-xs text-zinc-500">
+                    Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {booksTotalPages} ({filteredBooks.length} total)
+                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(booksTotalPages, prev + 1))}
+                      disabled={currentPage === booksTotalPages}
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -1325,7 +1452,7 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {data.reports?.length === 0 ? (
+              {filteredReports.length === 0 ? (
                 <div className="admin-glass-card p-16 text-center text-zinc-500 space-y-3">
                   <CheckCircle className="w-12 h-12 mx-auto text-emerald-500" />
                   <h5 className="font-serif font-bold text-base text-zinc-300">Clean Workspace Log</h5>
@@ -1335,138 +1462,150 @@ const AdminDashboard = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-6">
-                  {data.reports
-                    ?.filter(r => {
-                      if (searchQuery.trim()) {
-                        const q = searchQuery.toLowerCase();
-                        return (
-                          r.reason.toLowerCase().includes(q) ||
-                          r.description.toLowerCase().includes(q) ||
-                          (r.reporter?.name || r.guestName || "").toLowerCase().includes(q) ||
-                          (r.book?.title || "").toLowerCase().includes(q)
-                        );
-                      }
-                      return true;
-                    })
-                    .map((report) => {
-                      const isContentFlag = report.book || report.author;
-                      const dateStr = new Date(report.createdAt).toLocaleString("en-IN", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      });
-                      
-                      return (
-                        <div key={report._id} className="admin-glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-zinc-800/70 hover:border-zinc-750">
-                          <div className="space-y-4 flex-1 min-w-0">
+                  {paginatedReports.map((report) => {
+                    const isContentFlag = report.book || report.author;
+                    const dateStr = new Date(report.createdAt).toLocaleString("en-IN", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    });
+                    
+                    return (
+                      <div key={report._id} className="admin-glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-zinc-800/70 hover:border-zinc-750">
+                        <div className="space-y-4 flex-1 min-w-0">
+                          
+                          {/* Card Header badges */}
+                          <div className="flex flex-wrap items-center gap-2">
+                            {isContentFlag ? (
+                              <span className="inline-flex items-center gap-1 bg-rose-500/10 text-rose-400 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-rose-500/20 uppercase tracking-wider">
+                                <AlertTriangle size={11} className="shrink-0" />
+                                Violation Report
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider">
+                                <HelpCircle size={11} className="shrink-0" />
+                                Support Desk Ticket
+                              </span>
+                            )}
                             
-                            {/* Card Header badges */}
-                            <div className="flex flex-wrap items-center gap-2">
-                              {isContentFlag ? (
-                                <span className="inline-flex items-center gap-1 bg-rose-500/10 text-rose-400 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-rose-500/20 uppercase tracking-wider">
-                                  <AlertTriangle size={11} className="shrink-0" />
-                                  Violation Report
-                                </span>
+                            <span className="text-[10px] text-zinc-500 font-bold font-mono">
+                              Ticket ID: {report._id.substring(12).toUpperCase()}
+                            </span>
+                            <span className="text-[10px] text-zinc-650">•</span>
+                            <span className="text-[10px] text-zinc-500 font-medium">
+                              Submitted {dateStr}
+                            </span>
+                          </div>
+
+                          {/* Details Grid */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 border-t border-b border-zinc-900/60 py-3.5">
+                            <div>
+                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Subject Reason</span>
+                              <span className="text-xs text-zinc-200 font-semibold block">{report.reason}</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Submitted By</span>
+                              <span className="text-xs text-zinc-200 font-semibold block">
+                                {report.reporter?.name || report.guestName || "Guest User"}
+                              </span>
+                              <span className="text-[10px] text-zinc-500 font-mono block">
+                                {report.reporter?.email || report.guestEmail}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Target Scope</span>
+                              {report.book ? (
+                                <button
+                                  onClick={() => setPreviewItem({ type: "book", data: report.book })}
+                                  className="text-[#d87f4a] hover:underline text-xs font-bold bg-transparent border-0 p-0 text-left cursor-pointer flex items-center gap-1"
+                                >
+                                  Book: {report.book.title}
+                                  <ExternalLink size={11} className="shrink-0" />
+                                </button>
+                              ) : report.author ? (
+                                <button
+                                  onClick={() => setPreviewItem({ type: "author", data: report.author })}
+                                  className="text-[#d87f4a] hover:underline text-xs font-bold bg-transparent border-0 p-0 text-left cursor-pointer flex items-center gap-1"
+                                >
+                                  Profile: {report.author.name}
+                                  <ExternalLink size={11} className="shrink-0" />
+                                </button>
                               ) : (
-                                <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider">
-                                  <HelpCircle size={11} className="shrink-0" />
-                                  Support Desk Ticket
-                                </span>
+                                <span className="text-xs text-zinc-500 font-medium">General Application Support</span>
                               )}
-                              
-                              <span className="text-[10px] text-zinc-500 font-bold font-mono">
-                                Ticket ID: {report._id.substring(12).toUpperCase()}
-                              </span>
-                              <span className="text-[10px] text-zinc-650">•</span>
-                              <span className="text-[10px] text-zinc-500 font-medium">
-                                Submitted {dateStr}
-                              </span>
                             </div>
-
-                            {/* Details Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 border-t border-b border-zinc-900/60 py-3.5">
-                              <div>
-                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Subject Reason</span>
-                                <span className="text-xs text-zinc-200 font-semibold block">{report.reason}</span>
-                              </div>
-                              <div>
-                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Submitted By</span>
-                                <span className="text-xs text-zinc-200 font-semibold block">
-                                  {report.reporter?.name || report.guestName || "Guest User"}
-                                </span>
-                                <span className="text-[10px] text-zinc-500 font-mono block">
-                                  {report.reporter?.email || report.guestEmail}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Target Scope</span>
-                                {report.book ? (
-                                  <button
-                                    onClick={() => setPreviewItem({ type: "book", data: report.book })}
-                                    className="text-[#d87f4a] hover:underline text-xs font-bold bg-transparent border-0 p-0 text-left cursor-pointer flex items-center gap-1"
-                                  >
-                                    Book: {report.book.title}
-                                    <ExternalLink size={11} className="shrink-0" />
-                                  </button>
-                                ) : report.author ? (
-                                  <button
-                                    onClick={() => setPreviewItem({ type: "author", data: report.author })}
-                                    className="text-[#d87f4a] hover:underline text-xs font-bold bg-transparent border-0 p-0 text-left cursor-pointer flex items-center gap-1"
-                                  >
-                                    Profile: {report.author.name}
-                                    <ExternalLink size={11} className="shrink-0" />
-                                  </button>
-                                ) : (
-                                  <span className="text-xs text-zinc-500 font-medium">General Application Support</span>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* Ticket Description */}
-                            {report.description && (
-                              <div className="space-y-1.5">
-                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">Issue Description</span>
-                                <p className="text-xs text-zinc-400 bg-zinc-950/40 p-3.5 rounded-xl border border-zinc-900/50 leading-relaxed font-sans max-w-3xl">
-                                  {report.description}
-                                </p>
-                              </div>
-                            )}
-
                           </div>
 
-                          {/* Action panel */}
-                          <div className="flex md:flex-col gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-zinc-900 pt-4 md:pt-0">
-                            <button
-                              onClick={() => handleDismissReport(report._id)}
-                              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 border border-zinc-800 hover:bg-zinc-850 text-zinc-300 rounded-xl text-xs font-bold transition cursor-pointer"
-                            >
-                              <CheckCircle size={13} className="text-emerald-500 shrink-0" />
-                              Dismiss / Resolve
-                            </button>
-
-                            {report.book && (
-                              <button
-                                onClick={() => handleDeleteBook(report.book._id)}
-                                className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 rounded-xl text-xs font-bold transition cursor-pointer"
-                              >
-                                <Trash2 size={13} className="shrink-0" />
-                                Purge eBook
-                              </button>
-                            )}
-
-                            {report.author && (
-                              <button
-                                onClick={() => handleDeleteAuthor(report.author._id)}
-                                className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 rounded-xl text-xs font-bold transition cursor-pointer"
-                              >
-                                <Trash2 size={13} className="shrink-0" />
-                                Block Account
-                              </button>
-                            )}
-                          </div>
+                          {/* Ticket Description */}
+                          {report.description && (
+                            <div className="space-y-1.5">
+                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">Issue Description</span>
+                              <p className="text-xs text-zinc-400 bg-zinc-950/40 p-3.5 rounded-xl border border-zinc-900/50 leading-relaxed font-sans max-w-3xl">
+                                {report.description}
+                              </p>
+                            </div>
+                          )}
 
                         </div>
-                      );
-                    })}
+
+                        {/* Action panel */}
+                        <div className="flex md:flex-col gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-zinc-900 pt-4 md:pt-0">
+                          <button
+                            onClick={() => handleDismissReport(report._id)}
+                            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 border border-zinc-800 hover:bg-zinc-850 text-zinc-300 rounded-xl text-xs font-bold transition cursor-pointer"
+                          >
+                            <CheckCircle size={13} className="text-emerald-500 shrink-0" />
+                            Dismiss / Resolve
+                          </button>
+
+                          {report.book && (
+                            <button
+                              onClick={() => handleDeleteBook(report.book._id)}
+                              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 rounded-xl text-xs font-bold transition cursor-pointer"
+                            >
+                              <Trash2 size={13} className="shrink-0" />
+                              Purge eBook
+                            </button>
+                          )}
+
+                          {report.author && (
+                            <button
+                              onClick={() => handleDeleteAuthor(report.author._id)}
+                              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 rounded-xl text-xs font-bold transition cursor-pointer"
+                            >
+                              <Trash2 size={13} className="shrink-0" />
+                              Block Account
+                            </button>
+                          )}
+                        </div>
+
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Reports Pagination Controls */}
+              {reportsTotalPages > 1 && (
+                <div className="flex items-center justify-between border-t border-zinc-800 pt-5">
+                  <span className="text-xs text-zinc-500">
+                    Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {reportsTotalPages} ({filteredReports.length} total)
+                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(reportsTotalPages, prev + 1))}
+                      disabled={currentPage === reportsTotalPages}
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -1495,7 +1634,7 @@ const AdminDashboard = () => {
                   <Loader className="w-8 h-8 text-[#d87f4a] animate-spin mx-auto mb-3" />
                   <p className="text-xs">Loading contact inquiries...</p>
                 </div>
-              ) : contacts.length === 0 ? (
+              ) : filteredContacts.length === 0 ? (
                 <div className="admin-glass-card p-16 text-center text-zinc-500 space-y-3">
                   <Mail className="w-12 h-12 mx-auto text-amber-500 opacity-60" />
                   <h5 className="font-serif font-bold text-base text-zinc-300">Clean Inquiry Log</h5>
@@ -1505,92 +1644,105 @@ const AdminDashboard = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-6">
-                  {contacts
-                    .filter(msg => {
-                      if (searchQuery.trim()) {
-                        const q = searchQuery.toLowerCase();
-                        return (
-                          msg.name.toLowerCase().includes(q) ||
-                          msg.email.toLowerCase().includes(q) ||
-                          msg.message.toLowerCase().includes(q)
-                        );
-                      }
-                      return true;
-                    })
-                    .map((msg) => {
-                      const dateStr = new Date(msg.createdAt).toLocaleString("en-IN", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      });
-                      
-                      return (
-                        <div key={msg._id} className="admin-glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-zinc-800/70 hover:border-zinc-750">
-                          <div className="space-y-4 flex-1 min-w-0">
-                            
-                            {/* Card Header badges */}
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider">
-                                <Mail size={11} className="shrink-0" />
-                                Support Inquiry
-                              </span>
-                              <span className="text-[10px] text-zinc-500 font-bold font-mono">
-                                Ticket ID: {msg._id.substring(12).toUpperCase()}
-                              </span>
-                              <span className="text-[10px] text-zinc-650">•</span>
-                              <span className="text-[10px] text-zinc-500 font-medium">
-                                Submitted {dateStr}
-                              </span>
-                            </div>
-
-                            {/* Details Grid */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-b border-zinc-900/60 py-3.5">
-                              <div>
-                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Submitted By</span>
-                                <span className="text-xs text-zinc-200 font-semibold block">{msg.name}</span>
-                              </div>
-                              <div>
-                                <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Email Address</span>
-                                <a 
-                                  href={`mailto:${msg.email}`}
-                                  className="text-[#d87f4a] hover:underline text-xs font-bold block truncate"
-                                >
-                                  {msg.email}
-                                </a>
-                              </div>
-                            </div>
-
-                            {/* Inquiry message content */}
-                            <div className="space-y-1.5 text-left">
-                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">Message Body</span>
-                              <p className="text-xs text-zinc-300 bg-zinc-950/40 p-4 rounded-xl border border-zinc-900/50 leading-relaxed font-sans max-w-3xl whitespace-pre-wrap select-text">
-                                {msg.message}
-                              </p>
-                            </div>
-
+                  {paginatedContacts.map((msg) => {
+                    const dateStr = new Date(msg.createdAt).toLocaleString("en-IN", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    });
+                    
+                    return (
+                      <div key={msg._id} className="admin-glass-card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-zinc-800/70 hover:border-zinc-750">
+                        <div className="space-y-4 flex-1 min-w-0">
+                          
+                          {/* Card Header badges */}
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 px-2.5 py-0.5 rounded-lg text-[10px] font-bold border border-amber-500/20 uppercase tracking-wider">
+                              <Mail size={11} className="shrink-0" />
+                              Support Inquiry
+                            </span>
+                            <span className="text-[10px] text-zinc-500 font-bold font-mono">
+                              Ticket ID: {msg._id.substring(12).toUpperCase()}
+                            </span>
+                            <span className="text-[10px] text-zinc-650">•</span>
+                            <span className="text-[10px] text-zinc-500 font-medium">
+                              Submitted {dateStr}
+                            </span>
                           </div>
 
-                          {/* Action buttons */}
-                          <div className="flex md:flex-col gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-zinc-900 pt-4 md:pt-0">
-                            <a 
-                              href={`mailto:${msg.email}?subject=Re: Author Gallery Inquiry`}
-                              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-[#d87f4a] to-[#a05a3a] hover:from-[#c26e3d] hover:to-[#8c4e35] text-white rounded-xl text-xs font-bold transition shadow-md hover:scale-[1.01] cursor-pointer text-center"
-                            >
-                              <Mail size={13} className="shrink-0" />
-                              Reply via Email
-                            </a>
+                          {/* Details Grid */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-b border-zinc-900/60 py-3.5">
+                            <div>
+                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Submitted By</span>
+                              <span className="text-xs text-zinc-200 font-semibold block">{msg.name}</span>
+                            </div>
+                            <div>
+                              <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block mb-0.5">Email Address</span>
+                              <a 
+                                href={`mailto:${msg.email}`}
+                                className="text-[#d87f4a] hover:underline text-xs font-bold block truncate"
+                              >
+                                {msg.email}
+                              </a>
+                            </div>
+                          </div>
 
-                            <button
-                              onClick={() => handleDeleteContact(msg._id)}
-                              className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 rounded-xl text-xs font-bold transition cursor-pointer"
-                            >
-                              <Trash2 size={13} className="shrink-0" />
-                              Dismiss / Resolve
-                            </button>
+                          {/* Inquiry message content */}
+                          <div className="space-y-1.5 text-left">
+                            <span className="text-[9px] uppercase tracking-wider text-zinc-500 font-bold block">Message Body</span>
+                            <p className="text-xs text-zinc-300 bg-zinc-950/40 p-4 rounded-xl border border-zinc-900/50 leading-relaxed font-sans max-w-3xl whitespace-pre-wrap select-text">
+                              {msg.message}
+                            </p>
                           </div>
 
                         </div>
-                      );
-                    })}
+
+                        {/* Action buttons */}
+                        <div className="flex md:flex-col gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-zinc-900 pt-4 md:pt-0">
+                          <a 
+                            href={`mailto:${msg.email}?subject=Re: Author Gallery Inquiry`}
+                            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-[#d87f4a] to-[#a05a3a] hover:from-[#c26e3d] hover:to-[#8c4e35] text-white rounded-xl text-xs font-bold transition shadow-md hover:scale-[1.01] cursor-pointer text-center"
+                          >
+                            <Mail size={13} className="shrink-0" />
+                            Reply via Email
+                          </a>
+
+                          <button
+                            onClick={() => handleDeleteContact(msg._id)}
+                            className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-rose-950/20 hover:bg-rose-950/30 text-rose-400 border border-rose-900/30 rounded-xl text-xs font-bold transition cursor-pointer"
+                          >
+                            <Trash2 size={13} className="shrink-0" />
+                            Dismiss / Resolve
+                          </button>
+                        </div>
+
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Contacts Pagination Controls */}
+              {contactsTotalPages > 1 && (
+                <div className="flex items-center justify-between border-t border-zinc-800 pt-5">
+                  <span className="text-xs text-zinc-500">
+                    Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {contactsTotalPages} ({filteredContacts.length} total)
+                  </span>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                    >
+                      <ChevronLeft size={14} />
+                    </button>
+                    <button
+                      onClick={() => setCurrentPage(prev => Math.min(contactsTotalPages, prev + 1))}
+                      disabled={currentPage === contactsTotalPages}
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                    >
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -1607,23 +1759,12 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {data.reviews?.length === 0 ? (
+              {filteredReviews.length === 0 ? (
                 <p className="text-center text-zinc-500 py-16 text-sm">No reviews found in database.</p>
               ) : (
-                <div className="space-y-4 divide-y divide-zinc-850">
-                  {data.reviews
-                    ?.filter(rev => {
-                      if (searchQuery.trim()) {
-                        const q = searchQuery.toLowerCase();
-                        return (
-                          rev.comment.toLowerCase().includes(q) ||
-                          rev.reviewer?.name.toLowerCase().includes(q) ||
-                          rev.book?.title.toLowerCase().includes(q)
-                        );
-                      }
-                      return true;
-                    })
-                    .map((rev, idx) => (
+                <div className="space-y-4">
+                  <div className="space-y-4 divide-y divide-zinc-850">
+                    {paginatedReviews.map((rev, idx) => (
                       <div key={rev._id} className={`pt-4 flex justify-between items-start gap-4 ${idx === 0 ? "pt-0" : ""}`}>
                         <div className="space-y-2 flex-grow min-w-0">
                           <div className="flex flex-wrap items-center gap-2 text-xs">
@@ -1635,7 +1776,7 @@ const AdminDashboard = () => {
                               ))}
                             </div>
                             <span className="text-zinc-700">•</span>
-                            <span className="text-zinc-500">{new Date(rev.createdAt).toLocaleDateString()}</span>
+                            <span className="text-[11px] text-zinc-500">{new Date(rev.createdAt).toLocaleDateString()}</span>
                           </div>
 
                           <div>
@@ -1668,6 +1809,32 @@ const AdminDashboard = () => {
                         </button>
                       </div>
                     ))}
+                  </div>
+
+                  {/* Reviews Pagination Controls */}
+                  {reviewsTotalPages > 1 && (
+                    <div className="flex items-center justify-between border-t border-zinc-850 pt-5">
+                      <span className="text-xs text-zinc-500">
+                        Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {reviewsTotalPages} ({filteredReviews.length} total)
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          disabled={currentPage === 1}
+                          className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                        >
+                          <ChevronLeft size={14} />
+                        </button>
+                        <button
+                          onClick={() => setCurrentPage(prev => Math.min(reviewsTotalPages, prev + 1))}
+                          disabled={currentPage === reviewsTotalPages}
+                          className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                        >
+                          <ChevronRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -1688,95 +1855,109 @@ const AdminDashboard = () => {
                   <div className="py-12 text-center text-zinc-500">
                     Loading platform transactions...
                   </div>
-                ) : transactions.length === 0 ? (
+                ) : filteredTransactions.length === 0 ? (
                   <div className="py-12 text-center text-zinc-500">
                     No transactions found.
                   </div>
                 ) : (
-                  <table className="admin-table">
-                    <thead>
-                      <tr>
-                        <th>Order ID</th>
-                        <th>Buyer</th>
-                        <th>Book Title / Author</th>
-                        <th>Contact & Address</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                        <th>Amount</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {transactions
-                      .filter(txn => {
-                        if (searchQuery.trim()) {
-                          const q = searchQuery.toLowerCase();
-                          return (
-                            txn._id.toLowerCase().includes(q) ||
-                            txn.user?.name?.toLowerCase().includes(q) ||
-                            txn.book?.title?.toLowerCase().includes(q) ||
-                            txn.whatsapp?.includes(q)
-                          );
-                        }
-                        return true;
-                      })
-                      .map((txn) => (
-                        <tr key={txn._id}>
-                          <td><span className="font-mono text-xs text-zinc-450">{txn._id}</span></td>
-                          <td>
-                            <div className="text-left leading-none">
-                              <span className="font-semibold text-zinc-200 block text-xs">{txn.user?.name || "Deleted User"}</span>
-                              <span className="text-[10px] text-zinc-500 mt-1 block">{txn.user?.email || ""}</span>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="text-left leading-none">
-                              <span className="font-semibold text-zinc-200 block text-xs">{txn.book?.title || "Deleted Book"}</span>
-                              <span className="text-[10px] text-zinc-500 mt-1 block">Author: {txn.book?.author?.name || "N/A"}</span>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="text-left leading-none space-y-1 py-1 max-w-[200px]">
-                              <p className="text-xs"><strong>WA:</strong> <a href={`https://wa.me/${txn.whatsapp?.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="text-[#d87f4a] hover:underline font-semibold">{txn.whatsapp}</a></p>
-                              <p className="text-[10px] text-zinc-400 truncate" title={txn.address}><strong>Addr:</strong> {txn.address}</p>
-                              {txn.note && <p className="text-[10px] text-zinc-500 italic truncate" title={txn.note}><strong>Note:</strong> "{txn.note}"</p>}
-                            </div>
-                          </td>
-                          <td>
-                            <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                              txn.status === "paid"
-                                ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/30"
-                                : txn.status === "pending"
-                                ? "bg-amber-950/40 text-amber-400 border border-amber-900/30"
-                                : "bg-rose-950/40 text-rose-400 border border-rose-900/30"
-                            }`}>
-                              {txn.status}
-                            </span>
-                          </td>
-                          <td><span className="text-xs text-zinc-550">{new Date(txn.createdAt).toLocaleDateString()}</span></td>
-                          <td><span className="text-sm font-bold text-zinc-100 font-mono">₹{txn.amount}</span></td>
-                          <td>
-                            {txn.status === "pending" && (
-                              <div className="flex gap-1">
-                                <button
-                                  onClick={() => handleApproveTransaction(txn._id)}
-                                  className="px-2 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[10px] font-bold cursor-pointer transition"
-                                >
-                                  Approve
-                                </button>
-                                <button
-                                  onClick={() => handleDeclineTransaction(txn._id)}
-                                  className="px-2 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded text-[10px] font-bold cursor-pointer transition"
-                                >
-                                  Decline
-                                </button>
-                              </div>
-                            )}
-                          </td>
+                  <div>
+                    <table className="admin-table">
+                      <thead>
+                        <tr>
+                          <th>Order ID</th>
+                          <th>Buyer</th>
+                          <th>Book Title / Author</th>
+                          <th>Contact & Address</th>
+                          <th>Status</th>
+                          <th>Date</th>
+                          <th>Amount</th>
+                          <th>Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {paginatedTransactions.map((txn) => (
+                          <tr key={txn._id}>
+                            <td><span className="font-mono text-xs text-zinc-450">{txn._id}</span></td>
+                            <td>
+                              <div className="text-left leading-none">
+                                <span className="font-semibold text-zinc-200 block text-xs">{txn.user?.name || "Deleted User"}</span>
+                                <span className="text-[10px] text-zinc-500 mt-1 block">{txn.user?.email || ""}</span>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="text-left leading-none">
+                                <span className="font-semibold text-zinc-200 block text-xs">{txn.book?.title || "Deleted Book"}</span>
+                                <span className="text-[10px] text-zinc-500 mt-1 block">Author: {txn.book?.author?.name || "N/A"}</span>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="text-left leading-none space-y-1 py-1 max-w-[200px]">
+                                <p className="text-xs"><strong>WA:</strong> <a href={`https://wa.me/${txn.whatsapp?.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="text-[#d87f4a] hover:underline font-semibold">{txn.whatsapp}</a></p>
+                                <p className="text-[10px] text-zinc-400 truncate" title={txn.address}><strong>Addr:</strong> {txn.address}</p>
+                                {txn.note && <p className="text-[10px] text-zinc-500 italic truncate" title={txn.note}><strong>Note:</strong> "{txn.note}"</p>}
+                              </div>
+                            </td>
+                            <td>
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                                txn.status === "paid"
+                                  ? "bg-emerald-950/40 text-emerald-400 border border-emerald-900/30"
+                                  : txn.status === "pending"
+                                  ? "bg-amber-950/40 text-amber-400 border border-amber-900/30"
+                                  : "bg-rose-950/40 text-rose-400 border border-rose-900/30"
+                              }`}>
+                                {txn.status}
+                              </span>
+                            </td>
+                            <td><span className="text-xs text-zinc-550">{new Date(txn.createdAt).toLocaleDateString()}</span></td>
+                            <td><span className="text-sm font-bold text-zinc-100 font-mono">₹{txn.amount}</span></td>
+                            <td>
+                              {txn.status === "pending" && (
+                                <div className="flex gap-1">
+                                  <button
+                                    onClick={() => handleApproveTransaction(txn._id)}
+                                    className="px-2 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[10px] font-bold cursor-pointer transition"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeclineTransaction(txn._id)}
+                                    className="px-2 py-1 bg-rose-700 hover:bg-rose-800 text-white rounded text-[10px] font-bold cursor-pointer transition"
+                                  >
+                                    Decline
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Transactions Pagination Controls */}
+                    {transactionsTotalPages > 1 && (
+                      <div className="flex items-center justify-between border-t border-zinc-800 pt-5">
+                        <span className="text-xs text-zinc-500">
+                          Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {transactionsTotalPages} ({filteredTransactions.length} total)
+                        </span>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                          >
+                            <ChevronLeft size={14} />
+                          </button>
+                          <button
+                            onClick={() => setCurrentPage(prev => Math.min(transactionsTotalPages, prev + 1))}
+                            disabled={currentPage === transactionsTotalPages}
+                            className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                          >
+                            <ChevronRight size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
