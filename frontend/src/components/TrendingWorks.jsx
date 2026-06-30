@@ -62,13 +62,26 @@ const TrendingWorks = ({ limit = 4, showViewAll = false }) => {
   return (
     <section className="py-12 px-4 sm:px-6 lg:px-8 bg-transparent">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-10 sm:mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900">
-            Trending Works
-          </h2>
-          <p className="text-gray-600 mt-3 max-w-2xl mx-auto text-sm sm:text-base">
-            Discover stories, poems, and books gaining attention from readers.
-          </p>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12 pb-6 border-b border-slate-200/60 text-left gap-4">
+          <div>
+            <p className="text-amber-700 font-semibold uppercase tracking-[0.3em] text-xs sm:text-sm">
+              Curated Selection
+            </p>
+            <h2 className="font-serif mt-2.5 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              Trending Works
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm text-slate-600 sm:text-base font-medium font-sans">
+              Discover stories, poems, and books gaining attention from readers.
+            </p>
+          </div>
+          {showViewAll && (
+            <Link 
+              to="/books" 
+              className="inline-flex items-center gap-1.5 text-amber-800 font-bold hover:text-amber-900 transition-colors text-xs sm:text-sm uppercase tracking-wider shrink-0 hover:underline"
+            >
+              View All Books →
+            </Link>
+          )}
         </div>
 
         {error ? (
@@ -136,16 +149,7 @@ const TrendingWorks = ({ limit = 4, showViewAll = false }) => {
           </div>
         )}
 
-        {showViewAll && (
-          <div className="text-center mt-12">
-            <Link 
-              to="/books" 
-              className="inline-flex items-center gap-2 bg-amber-800 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-amber-900 transition duration-300 transform active:scale-[0.98]"
-            >
-              View All Books →
-            </Link>
-          </div>
-        )}
+
       </div>
     </section>
   );

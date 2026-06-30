@@ -31,16 +31,26 @@ const FeaturedAuthors = ({ limit }) => {
   return (
     <section className="bg-transparent py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <p className="text-amber-700 font-semibold uppercase tracking-[0.3em] text-sm">
-            Featured Authors
-          </p>
-          <h2 className="font-serif mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-            Discover Remarkable Writers
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base">
-            Explore talented authors, poets, storytellers, and creators sharing meaningful work with readers.
-          </p>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12 pb-6 border-b border-slate-200/60 text-left gap-4">
+          <div>
+            <p className="text-amber-700 font-semibold uppercase tracking-[0.3em] text-xs sm:text-sm">
+              Featured Authors
+            </p>
+            <h2 className="font-serif mt-2.5 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              Discover Remarkable Writers
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm text-slate-600 sm:text-base font-medium">
+              Explore talented authors, poets, storytellers, and creators sharing meaningful work with readers.
+            </p>
+          </div>
+          {limit && authors.length > limit && (
+            <Link 
+              to="/authors" 
+              className="inline-flex items-center gap-1.5 text-amber-800 font-bold hover:text-amber-900 transition-colors text-xs sm:text-sm uppercase tracking-wider shrink-0 hover:underline"
+            >
+              View All Authors →
+            </Link>
+          )}
         </div>
 
         {loading ? (
@@ -73,17 +83,6 @@ const FeaturedAuthors = ({ limit }) => {
                 />
               ))}
             </div>
-
-            {limit && authors.length > limit && (
-              <div className="text-center mt-12">
-                <Link 
-                  to="/authors" 
-                  className="inline-flex items-center gap-2 bg-amber-800 text-white px-8 py-3.5 rounded-full font-bold shadow-md hover:bg-amber-900 transition duration-300 transform active:scale-[0.98]"
-                >
-                  View All Authors →
-                </Link>
-              </div>
-            )}
           </>
         )}
       </div>
