@@ -300,6 +300,14 @@ const Navbar = () => {
                       <span>Write a Book</span>
                     </Link>
                     <Link
+                      to="/dashboard/my-collection"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
+                    >
+                      <BookOpen size={16} className="text-slate-400" />
+                      <span>My Collection</span>
+                    </Link>
+                    <Link
                       to="/dashboard/author-profile"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
@@ -507,6 +515,20 @@ const Navbar = () => {
                     >
                       <PenTool size={18} />
                       <span>Write a Book</span>
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/my-collection"
+                      onClick={() => setMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                          isActive 
+                            ? "bg-amber-800 text-white shadow-sm" 
+                            : "text-slate-700 hover:bg-slate-100"
+                        }`
+                      }
+                    >
+                      <BookOpen size={18} />
+                      <span>My Collection</span>
                     </NavLink>
                     <NavLink
                       to="/dashboard/author-profile"

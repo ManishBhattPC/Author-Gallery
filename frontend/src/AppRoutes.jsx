@@ -22,6 +22,7 @@ import AuthorDetails from "./pages/AuthorDetails.jsx"
 import BookDetails from "./components/BookComponents/BookDetails.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx"
 import AdminDashboard from "./pages/AdminDashboard.jsx"
+import MyCollectionPage from "./pages/MyCollectionPage.jsx"
 
 const AppRoutes = () => {
   return (
@@ -81,6 +82,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <WriteBook />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="dashboard/my-collection"
+          element={
+            <ProtectedRoute>
+              <MyCollectionPage />
             </ProtectedRoute>
           }
         />

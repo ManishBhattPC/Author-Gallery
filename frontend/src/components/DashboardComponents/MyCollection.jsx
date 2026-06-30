@@ -8,6 +8,7 @@ const MyCollection = ({
   loading: providedLoading,
   error: providedError,
   skipFetch = false,
+  isDashboard = false,
 }) => {
   const [books, setBooks] = useState(providedBooks || []);
   const [loading, setLoading] = useState(providedLoading ?? !skipFetch);
@@ -122,6 +123,14 @@ const MyCollection = ({
           </h2>
           <p className="text-xs text-slate-700 mt-1 font-semibold">Manage and track your published literary works.</p>
         </div>
+        {isDashboard && books.length > 0 && (
+          <Link 
+            to="/dashboard/my-collection" 
+            className="text-xs font-bold text-amber-850 hover:text-amber-955 transition-colors uppercase tracking-wider flex items-center gap-1.5 shrink-0 hover:underline"
+          >
+            View All →
+          </Link>
+        )}
       </div>
 
       {books.length > 0 ? (

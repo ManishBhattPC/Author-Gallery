@@ -111,10 +111,11 @@ const Dashboard = () => {
 
             {/* My Collection */}
             <MyCollection
-              books={dashboard.books}
+              books={dashboard.books.slice(0, 4)}
               loading={loading}
               error={error}
               skipFetch={true}
+              isDashboard={true}
             />
           </div>
 
