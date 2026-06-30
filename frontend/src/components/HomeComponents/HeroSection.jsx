@@ -197,7 +197,7 @@ const HeroSection = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-20 pointer-events-none" />
 
             {/* Top Card */}
-            <div className="absolute top-6 right-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-md px-4 py-3 z-30 transition-transform duration-300 group-hover:-translate-y-1">
+            <div className="absolute top-6 right-6 bg-white/95 dark:bg-[#171412]/95 backdrop-blur-sm rounded-2xl shadow-md border border-slate-200/50 dark:border-slate-800 px-4 py-3 z-30 transition-transform duration-300 group-hover:-translate-y-1">
               <p className="text-[9px] uppercase font-bold tracking-widest text-amber-800">
                 New trending
               </p>
@@ -207,7 +207,7 @@ const HeroSection = () => {
             </div>
 
             {/* Bottom Card */}
-            <div className="absolute bottom-6 left-6 bg-white/95 backdrop-blur-sm rounded-2xl shadow-md px-4 py-3 z-30 transition-transform duration-300 group-hover:translate-y-1">
+            <div className="absolute bottom-6 left-6 bg-white/95 dark:bg-[#171412]/95 backdrop-blur-sm rounded-2xl shadow-md border border-slate-200/50 dark:border-slate-800 px-4 py-3 z-30 transition-transform duration-300 group-hover:translate-y-1">
               <h4 className="font-bold text-slate-800 text-xs">
                 Daily Read
               </h4>
