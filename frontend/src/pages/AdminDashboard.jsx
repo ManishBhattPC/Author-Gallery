@@ -50,7 +50,7 @@ import gsap from "gsap";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   
   // Platform & API States
   const [data, setData] = useState({ books: [], authors: [], reports: [], reviews: [] });
