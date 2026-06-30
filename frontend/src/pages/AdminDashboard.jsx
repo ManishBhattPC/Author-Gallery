@@ -144,8 +144,12 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       setError("");
-      const res = await getAdminDashboardData();
+      const [res, txs] = await Promise.all([
+        getAdminDashboardData(),
+        getAdminTransactions().catch(() => [])
+      ]);
       setData(res);
+      setTransactions(txs || []);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load dashboard data.");
     } finally {
@@ -271,21 +275,34 @@ const AdminDashboard = () => {
     const publishedBooks = data.books?.length || 0;
     const pendingReports = data.reports?.filter(r => r.status === "pending").length || 0;
     
-    // Calculated mock finance values
-    const mockRevenue = publishedBooks * 850 + totalUsers * 120;
-    const mockMonthlySales = Math.floor(publishedBooks * 1.5 + totalUsers * 0.4);
+    // Paid revenue
+    const totalPaidRevenue = transactions
+      .filter(txn => txn.status === "paid")
+      .reduce((sum, txn) => sum + (Number(txn.amount) || 0), 0);
+
+    // Sales and registrations in the last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const monthlySalesCount = transactions.filter(txn => txn.status === "paid" && new Date(txn.createdAt) >= thirtyDaysAgo).length;
+    const newRegistrationsCount = data.authors?.filter(u => new Date(u.createdAt) >= thirtyDaysAgo).length || 0;
+
+    const prevUsersCount = Math.max(totalUsers - newRegistrationsCount, 1);
+    const platformGrowthPct = ((newRegistrationsCount / prevUsersCount) * 100).toFixed(1);
+
+    const growthTrend = parseFloat(platformGrowthPct) >= 0 ? "up" : "down";
 
     return [
-      { id: "users", label: "Total Users", value: totalUsers + 120, change: "+14.3%", trend: "up", icon: <Users className="w-5 h-5 text-blue-400" /> },
-      { id: "authors", label: "Active Authors", value: authorsCount + 15, change: "+8.7%", trend: "up", icon: <UserCheck className="w-5 h-5 text-emerald-400" /> },
-      { id: "books", label: "Published Books", value: publishedBooks, change: `+${publishedBooks > 0 ? 1 : 0} today`, trend: "up", icon: <BookOpen className="w-5 h-5 text-amber-400" /> },
-      { id: "reports", label: "Pending Reports", value: pendingReports, change: pendingReports > 0 ? "Needs Review" : "Healthy", trend: pendingReports > 0 ? "down" : "up", icon: <AlertTriangle className="w-5 h-5 text-red-400" /> },
-      { id: "revenue", label: "Total Revenue", value: `₹${mockRevenue}`, change: "+22.4%", trend: "up", icon: <DollarSign className="w-5 h-5 text-emerald-400" /> },
-      { id: "sales", label: "Monthly Sales", value: `${mockMonthlySales} Books`, change: "+14.1%", trend: "up", icon: <ShoppingBag className="w-5 h-5 text-indigo-400" /> },
-      { id: "newReg", label: "New Registrations", value: 38, change: "+5.3%", trend: "up", icon: <Activity className="w-5 h-5 text-cyan-400" /> },
-      { id: "growth", label: "Platform Growth", value: "+18.4%", change: "Steady", trend: "up", icon: <TrendingUp className="w-5 h-5 text-amber-400" /> },
+      { id: "users", label: "Total Users", value: totalUsers, change: `+${newRegistrationsCount} new`, trend: "up", icon: <Users className="w-5 h-5 text-blue-400" /> },
+      { id: "authors", label: "Active Authors", value: authorsCount, change: `${((authorsCount / Math.max(totalUsers, 1)) * 100).toFixed(0)}% of users`, trend: "up", icon: <UserCheck className="w-5 h-5 text-emerald-400" /> },
+      { id: "books", label: "Published Books", value: publishedBooks, change: `${publishedBooks} total`, trend: "up", icon: <BookOpen className="w-5 h-5 text-amber-400" /> },
+      { id: "reports", label: "Pending Reports", value: pendingReports, change: pendingReports > 0 ? "Action Required" : "Healthy", trend: pendingReports > 0 ? "down" : "up", icon: <AlertTriangle className="w-5 h-5 text-red-400" /> },
+      { id: "revenue", label: "Total Revenue", value: `₹${totalPaidRevenue}`, change: `Approved orders`, trend: "up", icon: <DollarSign className="w-5 h-5 text-emerald-400" /> },
+      { id: "sales", label: "Monthly Sales", value: `${monthlySalesCount} Books`, change: "Last 30 days", trend: "up", icon: <ShoppingBag className="w-5 h-5 text-indigo-400" /> },
+      { id: "newReg", label: "New Registrations", value: newRegistrationsCount, change: "Last 30 days", trend: "up", icon: <Activity className="w-5 h-5 text-cyan-400" /> },
+      { id: "growth", label: "Platform Growth", value: `+${platformGrowthPct}%`, change: "30 day user trend", trend: growthTrend, icon: <TrendingUp className="w-5 h-5 text-amber-400" /> },
     ];
-  }, [data]);
+  }, [data, transactions]);
 
   // Filters / Sorting logic
   const handleSort = (field) => {
