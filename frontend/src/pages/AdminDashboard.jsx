@@ -1720,10 +1720,10 @@ const AdminDashboard = () => {
                   <div className="space-y-6">
                     <div className="flex items-center gap-4 border-b border-zinc-800 pb-4">
                       <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 to-rose-700 flex items-center justify-center text-xl font-serif font-black text-white shadow-lg shadow-amber-900/10">
-                        SA
+                        {user?.name ? user.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) : "SA"}
                       </div>
                       <div>
-                        <h3 className="text-lg font-serif font-bold text-white">Super Admin</h3>
+                        <h3 className="text-lg font-serif font-bold text-white">{user?.name || "Super Admin"}</h3>
                         <span className="text-xs text-[#d87f4a] font-semibold flex items-center gap-1">
                           <Shield size={12} className="shrink-0" /> Root Administrator (Tier 3)
                         </span>
@@ -1733,7 +1733,7 @@ const AdminDashboard = () => {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-zinc-500 font-semibold">Registered Email</span>
-                        <span className="text-zinc-200 font-mono">admin@authorgallery.com</span>
+                        <span className="text-zinc-200 font-mono">{user?.email || "admin@authorgallery.com"}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
                         <span className="text-zinc-500 font-semibold">Account Authority</span>
