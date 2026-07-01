@@ -12,11 +12,13 @@ Designed with a warm parchment aesthetic (`#FAF6F0`) and smooth, hardware-accele
 * **Distraction-Free Notepad**: Write and publish books chapter-by-chapter directly inside the dashboard.
 * **eBook PDF Upload**: Instantly publish complete eBooks by uploading PDF files.
 * **Collection Manager**: Edit details (title, cover art, descriptions, price, and genres) or delete books directly from your collection.
+* **Engagement Tracking**: View real-time **reads/views** and **PDF downloads** metrics on individual books in your collection.
 * **Author Metrics**: Monitor your profile analytics including followers, total works, writing genres, and catalog value.
 
 ### 📖 For Readers & Visitors
 * **Curated Library**: Search and filter books by title, author, price, or genre.
 * **Tactile Reviews & Ratings**: Submit star-based reviews and read critiques from other members.
+* **Public Engagement Statistics**: View total book views and downloads counts directly on the details page.
 * **Content Reports**: Flag copyright infringement, bugs, or inappropriate materials directly to the administration team.
 * **Contact & Support Inquiry**: Submit inquiries through the public Contact page or file formal support tickets through the Helpdesk (requires account).
 
@@ -85,6 +87,10 @@ CLOUDINARY_API_SECRET=your-api-secret
 
 # Google OAuth Client
 GOOGLE_CLIENT_ID=your-google-oauth-client-id
+
+# Admin Credentials (Used to seed the Super Admin on startup)
+ADMIN_EMAIL=your-super-admin-email@gmail.com
+ADMIN_PASSWORD=your-super-admin-password
 
 # SMTP Configuration (Optional - fallback prints to console)
 SMTP_HOST=smtp.gmail.com
