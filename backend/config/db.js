@@ -6,8 +6,14 @@ import bcrypt from "bcryptjs"
 
 const seedAdmin = async () => {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@gmail.com";
-    const adminPassword = process.env.ADMIN_PASSWORD || "Bhatt@2006";
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminEmail || !adminPassword) {
+      console.log("[Startup] Skipping Super Admin seeding: ADMIN_EMAIL or ADMIN_PASSWORD not set in env variables.");
+      return;
+    }
+
     const existingAdmin = await User.findOne({ email: adminEmail });
     if (!existingAdmin) {
       const hashedPassword = await bcrypt.hash(adminPassword, 10);
