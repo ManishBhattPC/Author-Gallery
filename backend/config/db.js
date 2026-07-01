@@ -6,10 +6,11 @@ import bcrypt from "bcryptjs"
 
 const seedAdmin = async () => {
   try {
-    const adminEmail = "admin@gmail.com";
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@gmail.com";
+    const adminPassword = process.env.ADMIN_PASSWORD || "Bhatt@2006";
     const existingAdmin = await User.findOne({ email: adminEmail });
     if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash("Bhatt@2006", 10);
+      const hashedPassword = await bcrypt.hash(adminPassword, 10);
       await User.create({
         name: "Super Admin",
         email: adminEmail,
