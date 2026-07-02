@@ -192,21 +192,6 @@ const MySpacePage = () => {
           </div>
 
           <div 
-            onClick={() => { setActiveTab("authors"); setSelectedLibrary(null); }}
-            className={`bg-[#E8F3EE] border p-5 rounded-2xl shadow-sm text-left flex items-center gap-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none ${
-              activeTab === "authors" ? "border-emerald-700/50 ring-2 ring-emerald-700/20" : "border-[#D0E6DC]"
-            }`}
-          >
-            <div className="p-3 bg-[#D4EAE0] text-[#1E5E42] rounded-xl shrink-0">
-              <Users className="w-6 h-6" />
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-slate-900 leading-tight">{followedAuthors.length}</h3>
-              <p className="text-xs font-semibold text-[#1E5E42] mt-0.5">Followed Authors</p>
-            </div>
-          </div>
-
-          <div 
             onClick={() => { setActiveTab("libraries"); setSelectedLibrary(null); }}
             className={`bg-[#FCF4E7] border p-5 rounded-2xl shadow-sm text-left flex items-center gap-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none ${
               activeTab === "libraries" ? "border-amber-600/50 ring-2 ring-amber-600/20" : "border-[#F4E3C8]"
@@ -218,6 +203,21 @@ const MySpacePage = () => {
             <div>
               <h3 className="text-2xl font-bold text-slate-900 leading-tight">{libraries.length}</h3>
               <p className="text-xs font-semibold text-[#A2621C] mt-0.5">Custom Libraries</p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => { setActiveTab("authors"); setSelectedLibrary(null); }}
+            className={`bg-[#E8F3EE] border p-5 rounded-2xl shadow-sm text-left flex items-center gap-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none ${
+              activeTab === "authors" ? "border-emerald-700/50 ring-2 ring-emerald-700/20" : "border-[#D0E6DC]"
+            }`}
+          >
+            <div className="p-3 bg-[#D4EAE0] text-[#1E5E42] rounded-xl shrink-0">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900 leading-tight">{followedAuthors.length}</h3>
+              <p className="text-xs font-semibold text-[#1E5E42] mt-0.5">Followed Authors</p>
             </div>
           </div>
         </div>
