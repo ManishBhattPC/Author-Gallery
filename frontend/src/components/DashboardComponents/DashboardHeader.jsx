@@ -90,18 +90,21 @@ const DashboardHeader = ({ stats, loading = false }) => {
           </div>
         </Link>
 
-        <div className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2">
+        <Link
+          to="/dashboard/my-collection"
+          className="flex items-center gap-2 sm:gap-3 hover:bg-slate-200/50 p-1.5 sm:p-2 rounded-xl transition-all duration-200 cursor-pointer text-left group min-w-0"
+        >
           <div 
-            className="p-2 sm:p-3 bg-[#E8F3EE] rounded-xl shrink-0"
+            className="p-2 sm:p-3 bg-[#E8F3EE] rounded-xl shrink-0 group-hover:scale-105 transition-transform"
             style={{ color: "#1E5E42" }}
           >
             <BookOpen className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
           </div>
           <div className="text-left min-w-0">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-none">{statValue(stats?.published)}</h3>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-none group-hover:text-[#1E5E42] transition-colors">{statValue(stats?.published)}</h3>
             <p className="text-[10px] sm:text-xs text-slate-700 mt-1 font-semibold truncate">Published</p>
           </div>
-        </div>
+        </Link>
       </div>
     </div>
   );

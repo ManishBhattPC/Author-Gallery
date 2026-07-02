@@ -80,6 +80,21 @@ const AdminDashboard = () => {
   const [sortField, setSortField] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
 
+  // Helper to render pagination page numbers
+  const getPageNumbers = (totalPages, curPage) => {
+    const maxButtons = 5;
+    let startPage = Math.max(1, curPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    if (endPage - startPage < maxButtons - 1) {
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+    const pageNums = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pageNums.push(i);
+    }
+    return pageNums;
+  };
+
   const [transactions, setTransactions] = useState([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
   const [contacts, setContacts] = useState([]);
@@ -1313,18 +1328,31 @@ const AdminDashboard = () => {
                   <span className="text-xs text-zinc-500">
                     Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {totalPages} ({filteredAuthors.length} total)
                   </span>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 items-center">
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
-                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                     >
                       <ChevronLeft size={14} />
                     </button>
+                    {getPageNumbers(totalPages, currentPage).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1.5 text-xs font-semibold rounded-xl cursor-pointer transition ${
+                          currentPage === pageNum
+                            ? "bg-[#d87f4a] text-white border border-[#d87f4a] shadow-sm shadow-[#d87f4a]/20"
+                            : "border border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
                     <button
                       onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                       disabled={currentPage === totalPages}
-                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                     >
                       <ChevronRight size={14} />
                     </button>
@@ -1426,18 +1454,31 @@ const AdminDashboard = () => {
                   <span className="text-xs text-zinc-500">
                     Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {booksTotalPages} ({filteredBooks.length} total)
                   </span>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 items-center">
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
-                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                     >
                       <ChevronLeft size={14} />
                     </button>
+                    {getPageNumbers(booksTotalPages, currentPage).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1.5 text-xs font-semibold rounded-xl cursor-pointer transition ${
+                          currentPage === pageNum
+                            ? "bg-[#d87f4a] text-white border border-[#d87f4a] shadow-sm shadow-[#d87f4a]/20"
+                            : "border border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
                     <button
                       onClick={() => setCurrentPage(prev => Math.min(booksTotalPages, prev + 1))}
                       disabled={currentPage === booksTotalPages}
-                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                     >
                       <ChevronRight size={14} />
                     </button>
@@ -1602,18 +1643,31 @@ const AdminDashboard = () => {
                   <span className="text-xs text-zinc-500">
                     Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {reportsTotalPages} ({filteredReports.length} total)
                   </span>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 items-center">
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
-                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                     >
                       <ChevronLeft size={14} />
                     </button>
+                    {getPageNumbers(reportsTotalPages, currentPage).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1.5 text-xs font-semibold rounded-xl cursor-pointer transition ${
+                          currentPage === pageNum
+                            ? "bg-[#d87f4a] text-white border border-[#d87f4a] shadow-sm shadow-[#d87f4a]/20"
+                            : "border border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
                     <button
                       onClick={() => setCurrentPage(prev => Math.min(reportsTotalPages, prev + 1))}
                       disabled={currentPage === reportsTotalPages}
-                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                     >
                       <ChevronRight size={14} />
                     </button>
@@ -1739,18 +1793,31 @@ const AdminDashboard = () => {
                   <span className="text-xs text-zinc-500">
                     Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {contactsTotalPages} ({filteredContacts.length} total)
                   </span>
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 items-center">
                     <button
                       onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={currentPage === 1}
-                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                     >
                       <ChevronLeft size={14} />
                     </button>
+                    {getPageNumbers(contactsTotalPages, currentPage).map((pageNum) => (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`px-3 py-1.5 text-xs font-semibold rounded-xl cursor-pointer transition ${
+                          currentPage === pageNum
+                            ? "bg-[#d87f4a] text-white border border-[#d87f4a] shadow-sm shadow-[#d87f4a]/20"
+                            : "border border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    ))}
                     <button
                       onClick={() => setCurrentPage(prev => Math.min(contactsTotalPages, prev + 1))}
                       disabled={currentPage === contactsTotalPages}
-                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                      className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                     >
                       <ChevronRight size={14} />
                     </button>
@@ -1829,18 +1896,31 @@ const AdminDashboard = () => {
                       <span className="text-xs text-zinc-500">
                         Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {reviewsTotalPages} ({filteredReviews.length} total)
                       </span>
-                      <div className="flex gap-1">
+                      <div className="flex gap-1 items-center">
                         <button
                           onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                           disabled={currentPage === 1}
-                          className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                          className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                         >
                           <ChevronLeft size={14} />
                         </button>
+                        {getPageNumbers(reviewsTotalPages, currentPage).map((pageNum) => (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`px-3 py-1.5 text-xs font-semibold rounded-xl cursor-pointer transition ${
+                              currentPage === pageNum
+                                ? "bg-[#d87f4a] text-white border border-[#d87f4a] shadow-sm shadow-[#d87f4a]/20"
+                                : "border border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        ))}
                         <button
                           onClick={() => setCurrentPage(prev => Math.min(reviewsTotalPages, prev + 1))}
                           disabled={currentPage === reviewsTotalPages}
-                          className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                          className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                         >
                           <ChevronRight size={14} />
                         </button>
@@ -1951,18 +2031,31 @@ const AdminDashboard = () => {
                         <span className="text-xs text-zinc-500">
                           Showing page <span className="font-bold text-zinc-300">{currentPage}</span> of {transactionsTotalPages} ({filteredTransactions.length} total)
                         </span>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 items-center">
                           <button
                             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                             disabled={currentPage === 1}
-                            className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                            className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                           >
                             <ChevronLeft size={14} />
                           </button>
+                          {getPageNumbers(transactionsTotalPages, currentPage).map((pageNum) => (
+                            <button
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`px-3 py-1.5 text-xs font-semibold rounded-xl cursor-pointer transition ${
+                                currentPage === pageNum
+                                  ? "bg-[#d87f4a] text-white border border-[#d87f4a] shadow-sm shadow-[#d87f4a]/20"
+                                  : "border border-zinc-800 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-100"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          ))}
                           <button
                             onClick={() => setCurrentPage(prev => Math.min(transactionsTotalPages, prev + 1))}
                             disabled={currentPage === transactionsTotalPages}
-                            className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition"
+                            className="p-2 border border-zinc-800 rounded-xl text-zinc-400 disabled:opacity-30 cursor-pointer hover:bg-zinc-900 transition flex items-center justify-center"
                           >
                             <ChevronRight size={14} />
                           </button>
