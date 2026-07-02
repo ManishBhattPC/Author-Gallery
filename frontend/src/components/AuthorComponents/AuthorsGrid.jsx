@@ -1,24 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AuthorCard from "./AuthorCard";
 import { fetchAuthors } from "../../services/authorService.js";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const AuthorsGrid = ({ search = "" }) => {
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Initial load when search changes
+  // If search query changes, reset page to 1
+  const prevSearchRef = useRef(search);
+  if (prevSearchRef.current !== search) {
+    prevSearchRef.current = search;
+    setPage(1);
+  }
+
   useEffect(() => {
-    const loadInitialAuthors = async () => {
+    const loadAuthors = async () => {
       setLoading(true);
       setError(null);
-      setPage(1);
 
       try {
-        const params = { page: 1, limit: 8 };
+        const params = { page, limit: 8 };
         if (search.trim()) params.search = search.trim();
 
         const data = await fetchAuthors(params);
@@ -31,28 +36,22 @@ const AuthorsGrid = ({ search = "" }) => {
       }
     };
 
-    loadInitialAuthors();
-  }, [search]);
+    loadAuthors();
+  }, [search, page]);
 
-  // Load next page
-  const loadMoreAuthors = async () => {
-    if (loadingMore || page >= totalPages) return;
-    setLoadingMore(true);
-    const nextPage = page + 1;
-
-    try {
-      const params = { page: nextPage, limit: 8 };
-      if (search.trim()) params.search = search.trim();
-
-      const data = await fetchAuthors(params);
-      setAuthors((prev) => [...prev, ...(data.authors || [])]);
-      setPage(nextPage);
-      setTotalPages(data.totalPages || 1);
-    } catch (err) {
-      console.error("Error loading more authors:", err);
-    } finally {
-      setLoadingMore(false);
+  // Helper to render pagination page numbers
+  const getPageNumbers = () => {
+    const maxButtons = 5;
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    if (endPage - startPage < maxButtons - 1) {
+      startPage = Math.max(1, endPage - maxButtons + 1);
     }
+    const pageNums = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pageNums.push(i);
+    }
+    return pageNums;
   };
 
   return (
@@ -90,24 +89,41 @@ const AuthorsGrid = ({ search = "" }) => {
             ))}
           </div>
 
-          {/* Load More Button */}
-          {authors.length > 0 && page < totalPages && (
-            <div className="mt-12 flex justify-center py-4">
-              <button
-                type="button"
-                onClick={loadMoreAuthors}
-                disabled={loadingMore}
-                className="px-6 py-2.5 rounded-full border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-sm font-semibold transition cursor-pointer disabled:opacity-50 flex items-center gap-2"
-              >
-                {loadingMore ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
-                    <span>Loading more...</span>
-                  </>
-                ) : (
-                  <span>Load More Authors</span>
-                )}
-              </button>
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
+              <span className="text-sm text-slate-500">
+                Showing page <span className="font-semibold text-slate-800">{page}</span> of {totalPages}
+              </span>
+              <div className="flex gap-1.5 items-center">
+                <button
+                  onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                  disabled={page === 1}
+                  className="p-2 border border-slate-350 bg-white rounded-xl text-slate-600 disabled:opacity-40 cursor-pointer hover:bg-slate-50 transition flex items-center justify-center shadow-sm"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                {getPageNumbers().map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={`px-3.5 py-1.5 text-xs font-bold rounded-xl cursor-pointer transition ${
+                      page === pageNum
+                        ? "bg-amber-700 text-white border border-amber-700 shadow-sm shadow-amber-900/10"
+                        : "border border-slate-350 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={page === totalPages}
+                  className="p-2 border border-slate-350 bg-white rounded-xl text-slate-600 disabled:opacity-40 cursor-pointer hover:bg-slate-50 transition flex items-center justify-center shadow-sm"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
             </div>
           )}
         </>

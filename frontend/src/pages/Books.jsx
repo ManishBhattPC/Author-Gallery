@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import SearchBar from "../components/SearchBar";
 import BookCard from "../components/BookComponents/BookCard";
 import { getBooks } from "../services/bookService.js";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Books = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -12,81 +13,43 @@ const Books = () => {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState(searchParam || genreParam || "");
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const loadInitialBooks = async () => {
-    setLoading(true);
-    setError(null);
+  // If search query parameters change, reset page to 1 immediately
+  const prevParamsRef = useRef({ searchParam, genreParam });
+  if (
+    prevParamsRef.current.searchParam !== searchParam ||
+    prevParamsRef.current.genreParam !== genreParam
+  ) {
+    prevParamsRef.current = { searchParam, genreParam };
     setPage(1);
-
-    try {
-      const params = { page: 1, limit: 8 }; // Smaller page sizes for faster initial paints
-      if (searchParam.trim()) params.search = searchParam.trim();
-      if (genreParam.trim()) params.genre = genreParam.trim();
-
-      const data = await getBooks(params);
-      setBooks(data.books || []);
-      setHasMore(data.currentPage < data.totalPages);
-    } catch (err) {
-      setError(err.message || "Unable to load books.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadMoreBooks = async (nextPage) => {
-    if (loadingMore) return;
-    setLoadingMore(true);
-
-    try {
-      const params = { page: nextPage, limit: 8 };
-      if (searchParam.trim()) params.search = searchParam.trim();
-      if (genreParam.trim()) params.genre = genreParam.trim();
-
-      const data = await getBooks(params);
-      setBooks((prev) => [...prev, ...(data.books || [])]);
-      setHasMore(data.currentPage < data.totalPages);
-    } catch (err) {
-      console.error("Error loading more books:", err);
-    } finally {
-      setLoadingMore(false);
-    }
-  };
+  }
 
   useEffect(() => {
-    loadInitialBooks();
-  }, [searchParam, genreParam]);
+    const loadBooksData = async () => {
+      setLoading(true);
+      setError(null);
 
-  useEffect(() => {
-    if (page > 1) {
-      loadMoreBooks(page);
-    }
-  }, [page]);
+      try {
+        const params = { page, limit: 8 };
+        if (searchParam.trim()) params.search = searchParam.trim();
+        if (genreParam.trim()) params.genre = genreParam.trim();
 
-  // Set up IntersectionObserver for automated infinite scroll
-  useEffect(() => {
-    if (loading || !hasMore || loadingMore) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setPage((prev) => prev + 1);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const sentinel = document.getElementById("infinite-scroll-sentinel");
-    if (sentinel) observer.observe(sentinel);
-
-    return () => {
-      if (sentinel) observer.unobserve(sentinel);
+        const data = await getBooks(params);
+        setBooks(data.books || []);
+        setTotalPages(data.totalPages || 1);
+      } catch (err) {
+        setError(err.message || "Unable to load books.");
+      } finally {
+        setLoading(false);
+      }
     };
-  }, [loading, hasMore, loadingMore]);
+
+    loadBooksData();
+  }, [searchParam, genreParam, page]);
 
   useEffect(() => {
     setSearch(searchParam || genreParam || "");
@@ -105,6 +68,21 @@ const Books = () => {
     } else {
       setSearchParams({});
     }
+  };
+
+  // Helper to render pagination page numbers
+  const getPageNumbers = () => {
+    const maxButtons = 5;
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+    if (endPage - startPage < maxButtons - 1) {
+      startPage = Math.max(1, endPage - maxButtons + 1);
+    }
+    const pageNums = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pageNums.push(i);
+    }
+    return pageNums;
   };
 
   return (
@@ -154,24 +132,41 @@ const Books = () => {
               )}
             </div>
 
-            {/* Infinite scroll sentinel & manual Load More button */}
-            {books.length > 0 && hasMore && (
-              <div id="infinite-scroll-sentinel" className="mt-12 flex justify-center py-4">
-                <button
-                  type="button"
-                  onClick={() => setPage((prev) => prev + 1)}
-                  disabled={loadingMore}
-                  className="px-6 py-2.5 rounded-full border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-sm font-semibold transition cursor-pointer disabled:opacity-50 flex items-center gap-2"
-                >
-                  {loadingMore ? (
-                    <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
-                      <span>Loading more...</span>
-                    </>
-                  ) : (
-                    <span>Load More Books</span>
-                  )}
-                </button>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200 pt-6">
+                <span className="text-sm text-slate-500">
+                  Showing page <span className="font-semibold text-slate-800">{page}</span> of {totalPages}
+                </span>
+                <div className="flex gap-1.5 items-center">
+                  <button
+                    onClick={() => setPage(prev => Math.max(1, prev - 1))}
+                    disabled={page === 1}
+                    className="p-2 border border-slate-350 bg-white rounded-xl text-slate-600 disabled:opacity-40 cursor-pointer hover:bg-slate-50 transition flex items-center justify-center shadow-sm"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+                  {getPageNumbers().map((pageNum) => (
+                    <button
+                      key={pageNum}
+                      onClick={() => setPage(pageNum)}
+                      className={`px-3.5 py-1.5 text-xs font-bold rounded-xl cursor-pointer transition ${
+                        page === pageNum
+                          ? "bg-amber-700 text-white border border-amber-700 shadow-sm shadow-amber-900/10"
+                          : "border border-slate-350 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 shadow-sm"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={page === totalPages}
+                    className="p-2 border border-slate-350 bg-white rounded-xl text-slate-600 disabled:opacity-40 cursor-pointer hover:bg-slate-50 transition flex items-center justify-center shadow-sm"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
               </div>
             )}
           </>
