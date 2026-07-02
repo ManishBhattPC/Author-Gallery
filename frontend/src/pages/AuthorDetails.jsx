@@ -19,6 +19,7 @@ const AuthorDetails = () => {
   const [followerCount, setFollowerCount] = useState(0);
   const [followLoading, setFollowLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [visibleBooksCount, setVisibleBooksCount] = useState(6);
 
   const showToast = (message, type = "success") => {
     setToast({ message, type });
@@ -206,7 +207,7 @@ const AuthorDetails = () => {
             <h3 className="text-xl font-semibold text-slate-900 mb-6">Author Books</h3>
             <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
               {Array.isArray(author.books) && author.books.length > 0 ? (
-                author.books.map((book) => (
+                author.books.slice(0, visibleBooksCount).map((book) => (
                   <BookCard
                     key={book._id || book.id}
                     book={{
@@ -222,6 +223,18 @@ const AuthorDetails = () => {
                 <p className="col-span-full text-sm text-slate-500">No books found for this author.</p>
               )}
             </div>
+
+            {Array.isArray(author.books) && author.books.length > visibleBooksCount && (
+              <div className="mt-6 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleBooksCount((prev) => prev + 6)}
+                  className="px-5 py-2.5 rounded-full border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition cursor-pointer"
+                >
+                  Show More Books
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Reviews Section */}

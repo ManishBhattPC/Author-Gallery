@@ -5,17 +5,25 @@ import { fetchAuthors } from "../../services/authorService.js";
 const AuthorsGrid = ({ search = "" }) => {
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
+  // Initial load when search changes
   useEffect(() => {
-    const loadAuthors = async () => {
+    const loadInitialAuthors = async () => {
       setLoading(true);
       setError(null);
+      setPage(1);
 
       try {
-        const data = await fetchAuthors(search);
-        const list = Array.isArray(data.authors) ? data.authors : [];
-        setAuthors(list);
+        const params = { page: 1, limit: 8 };
+        if (search.trim()) params.search = search.trim();
+
+        const data = await fetchAuthors(params);
+        setAuthors(data.authors || []);
+        setTotalPages(data.totalPages || 1);
       } catch (err) {
         setError(err.message || "Unable to load authors.");
       } finally {
@@ -23,8 +31,29 @@ const AuthorsGrid = ({ search = "" }) => {
       }
     };
 
-    loadAuthors();
+    loadInitialAuthors();
   }, [search]);
+
+  // Load next page
+  const loadMoreAuthors = async () => {
+    if (loadingMore || page >= totalPages) return;
+    setLoadingMore(true);
+    const nextPage = page + 1;
+
+    try {
+      const params = { page: nextPage, limit: 8 };
+      if (search.trim()) params.search = search.trim();
+
+      const data = await fetchAuthors(params);
+      setAuthors((prev) => [...prev, ...(data.authors || [])]);
+      setPage(nextPage);
+      setTotalPages(data.totalPages || 1);
+    } catch (err) {
+      console.error("Error loading more authors:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <section className="max-w-7xl mx-auto px-6 py-14">
@@ -43,22 +72,45 @@ const AuthorsGrid = ({ search = "" }) => {
           No authors found for "{search}".
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {authors.map((author) => (
-            <AuthorCard
-              key={author._id || author.id}
-              id={author._id || author.id}
-              image={author.profileImage || author.image || "/default-avatar.png"}
-              name={author.name}
-              genre={
-                Array.isArray(author.genres) && author.genres.length > 0
-                  ? author.genres.join(", ")
-                  : (author.role || author.genre || "Author")
-              }
-              works={author.works ?? 0}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {authors.map((author) => (
+              <AuthorCard
+                key={author._id || author.id}
+                id={author._id || author.id}
+                image={author.profileImage || author.image || "/default-avatar.png"}
+                name={author.name}
+                genre={
+                  Array.isArray(author.genres) && author.genres.length > 0
+                    ? author.genres.join(", ")
+                    : (author.role || author.genre || "Author")
+                }
+                works={author.works ?? 0}
+              />
+            ))}
+          </div>
+
+          {/* Load More Button */}
+          {authors.length > 0 && page < totalPages && (
+            <div className="mt-12 flex justify-center py-4">
+              <button
+                type="button"
+                onClick={loadMoreAuthors}
+                disabled={loadingMore}
+                className="px-6 py-2.5 rounded-full border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-sm font-semibold transition cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {loadingMore ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-amber-600 border-t-transparent" />
+                    <span>Loading more...</span>
+                  </>
+                ) : (
+                  <span>Load More Authors</span>
+                )}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

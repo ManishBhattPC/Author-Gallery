@@ -14,18 +14,14 @@ export const fetchTopAuthors = async () => {
   return response.data;
 };
 
-export const fetchAuthors = async (search = "") => {
-  const cacheKey = `authors:list:${search.trim()}`;
+export const fetchAuthors = async (params = {}) => {
+  const queryParams = typeof params === "string" ? { search: params } : params;
+  const cacheKey = `authors:list:${JSON.stringify(queryParams)}`;
   const cachedData = apiCache.get(cacheKey);
   if (cachedData) return cachedData;
 
-  const params = {};
-  if (search?.trim()) {
-    params.search = search.trim();
-  }
-
   const response = await apiClient.get("/api/authors", {
-    params,
+    params: queryParams,
   });
 
   apiCache.set(cacheKey, response.data, 30);
@@ -60,12 +56,12 @@ export const checkFollowStatus = async (id) => {
   return response.data;
 };
 
-export const fetchMyFollowers = async () => {
-  const response = await apiClient.get("/api/authors/dashboard/followers");
+export const fetchMyFollowers = async (params = {}) => {
+  const response = await apiClient.get("/api/authors/dashboard/followers", { params });
   return response.data;
 };
 
-export const fetchMyFollowing = async () => {
-  const response = await apiClient.get("/api/authors/dashboard/following");
+export const fetchMyFollowing = async (params = {}) => {
+  const response = await apiClient.get("/api/authors/dashboard/following", { params });
   return response.data;
 };

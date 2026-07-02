@@ -74,16 +74,34 @@ export const getAuthors = async (req, res) => {
       },
     });
 
+    // Extract pagination parameters
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 8;
+    const skip = (page - 1) * limit;
+
+    // Run count pipeline first to get total matching authors
+    const countPipeline = [...pipeline];
+    countPipeline.push({ $count: "total" });
+    const countResult = await User.aggregate(countPipeline);
+    const totalAuthors = countResult[0]?.total || 0;
+
     // If featured query param is true, get top 5 authors by followers count
     if (featured === "true") {
       pipeline.push({ $sort: { followersCount: -1, works: -1, name: 1 } }) // Sort by followers count descending
       pipeline.push({ $limit: 5 }) // Limit to 5 authors
     } else {
       pipeline.push({ $sort: { name: 1 } }) // Standard sort alphabetically
+      pipeline.push({ $skip: skip })
+      pipeline.push({ $limit: limit })
     }
 
     const authors = await User.aggregate(pipeline)
-    res.status(200).json({ authors })
+    res.status(200).json({
+      authors,
+      currentPage: page,
+      totalPages: Math.ceil(totalAuthors / limit),
+      totalAuthors
+    })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -282,14 +300,21 @@ export const checkFollowStatus = async (req, res) => {
 export const getMyFollowers = async (req, res) => {
   try {
     const userId = req.user._id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const skip = (page - 1) * limit;
+
     const user = await User.findById(userId).populate({
       path: "followers",
       select: "name email profileImage"
     });
 
+    const totalFollowers = user.followers.length;
+    const paginatedFollowers = user.followers.slice(skip, skip + limit);
+
     // Populate resolved values from AuthorProfile
     const followersList = await Promise.all(
-      user.followers.map(async (follower) => {
+      paginatedFollowers.map(async (follower) => {
         const profile = await AuthorProfile.findOne({ user: follower._id });
         return {
           _id: follower._id,
@@ -302,7 +327,12 @@ export const getMyFollowers = async (req, res) => {
       })
     );
 
-    res.status(200).json({ followers: followersList });
+    res.status(200).json({
+      followers: followersList,
+      currentPage: page,
+      totalPages: Math.ceil(totalFollowers / limit),
+      totalFollowers
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -312,10 +342,17 @@ export const getMyFollowers = async (req, res) => {
 export const getMyFollowing = async (req, res) => {
   try {
     const userId = req.user._id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    const skip = (page - 1) * limit;
+
     const user = await User.findById(userId);
 
+    const totalFollowing = user.following.length;
+    const paginatedFollowing = user.following.slice(skip, skip + limit);
+
     const followingList = await Promise.all(
-      user.following.map(async (followingId) => {
+      paginatedFollowing.map(async (followingId) => {
         const followingUser = await User.findById(followingId).select("name email profileImage");
         if (!followingUser) return null;
         const profile = await AuthorProfile.findOne({ user: followingId });
@@ -330,7 +367,12 @@ export const getMyFollowing = async (req, res) => {
       })
     );
 
-    res.status(200).json({ following: followingList.filter(Boolean) });
+    res.status(200).json({
+      following: followingList.filter(Boolean),
+      currentPage: page,
+      totalPages: Math.ceil(totalFollowing / limit),
+      totalFollowing
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
