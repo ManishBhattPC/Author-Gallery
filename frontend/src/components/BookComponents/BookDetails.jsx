@@ -47,6 +47,20 @@ const BookDetails = () => {
   const [newLibDesc, setNewLibDesc] = useState("");
   const [showNewLibForm, setShowNewLibForm] = useState(false);
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(
+        window.innerWidth <= 768 || 
+        /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+      );
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const handleOpenLibraryModal = () => {
     const loaded = JSON.parse(localStorage.getItem("my_libraries") || "[]");
     setLibraries(loaded);
@@ -1476,7 +1490,10 @@ const BookDetails = () => {
                     
                     {/* Styled e-Reader Iframe */}
                     <iframe
-                      src={`${book?.pdfFile}#toolbar=0`}
+                      src={isMobile 
+                        ? `https://docs.google.com/viewer?url=${encodeURIComponent(book?.pdfFile)}&embedded=true`
+                        : `${book?.pdfFile}#toolbar=0`
+                      }
                       title={book?.title}
                       className="w-full h-full rounded-lg md:rounded-2xl bg-white border border-[#DFD5C6] shadow-[inset_0_2px_8px_rgba(0,0,0,0.12)] z-0"
                     />
