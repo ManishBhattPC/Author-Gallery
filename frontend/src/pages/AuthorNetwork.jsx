@@ -152,7 +152,7 @@ const AuthorNetwork = () => {
           <h1 className="text-3xl font-bold font-serif text-slate-900 flex items-center gap-2">
             <Users className="text-amber-800" size={28} /> Your Network
           </h1>
-          <p className="text-xs font-medium text-slate-550">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-600">
             Build and manage your author connections, co-authors, and readers.
           </p>
         </div>
@@ -165,10 +165,10 @@ const AuthorNetwork = () => {
             className={`pb-3 text-sm font-bold tracking-wide transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
               activeTab === "followers"
                 ? "border-amber-800 text-amber-800 dark:border-amber-600 dark:text-amber-500"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-600 hover:dark:text-slate-400"
             }`}
           >
-            Followers <span className="px-2 py-0.5 text-[10px] bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-355 rounded-full">{followersTotal}</span>
+            Followers <span className="px-2 py-0.5 text-[10px] bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-full">{followersTotal}</span>
           </button>
           <button
             type="button"
@@ -176,10 +176,10 @@ const AuthorNetwork = () => {
             className={`pb-3 text-sm font-bold tracking-wide transition-all border-b-2 cursor-pointer flex items-center gap-1.5 ${
               activeTab === "following"
                 ? "border-amber-800 text-amber-800 dark:border-amber-600 dark:text-amber-500"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-600 hover:dark:text-slate-400"
             }`}
           >
-            Following <span className="px-2 py-0.5 text-[10px] bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-355 rounded-full">{followingTotal}</span>
+            Following <span className="px-2 py-0.5 text-[10px] bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-full">{followingTotal}</span>
           </button>
         </div>
 
@@ -193,7 +193,7 @@ const AuthorNetwork = () => {
             placeholder={activeTab === "followers" ? "Search followers..." : "Search followed authors..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-650 transition-all dark:bg-slate-900 dark:border-slate-800"
+            className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm text-slate-900 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-650 transition-all dark:bg-slate-900 dark:border-slate-800 dark:text-slate-900"
           />
         </div>
 
@@ -241,9 +241,9 @@ const AuthorNetwork = () => {
                               <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition-colors truncate">
                                 {follower.name}
                               </h3>
-                              <p className="text-xs text-slate-550 truncate">{follower.email}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-600 truncate">{follower.email}</p>
                               {follower.bio && (
-                                <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-1 line-clamp-1 italic">
+                                <p className="text-[10px] text-slate-600 dark:text-slate-600 mt-1 line-clamp-1 italic">
                                   "{follower.bio}"
                                 </p>
                               )}
@@ -256,8 +256,8 @@ const AuthorNetwork = () => {
                             onClick={() => handleFollowAction(follower._id, followsBack)}
                             className={`px-3 py-1.5 rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer shrink-0 flex items-center gap-1 ${
                               followsBack
-                                ? "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-750 dark:text-slate-350 dark:border-slate-700"
-                                : "bg-amber-800 hover:bg-amber-900 text-white dark:bg-amber-700 dark:hover:bg-amber-600"
+                                ? "bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700"
+                                : "bg-amber-800 hover:bg-amber-900 text-white dark:bg-amber-700 dark:hover:bg-amber-600 dark:text-slate-200"
                             }`}
                           >
                             {actionLoadingId === follower._id ? (
@@ -302,7 +302,7 @@ const AuthorNetwork = () => {
                     <Users size={20} />
                   </div>
                   <h3 className="text-base font-bold text-slate-900">No followers found</h3>
-                  <p className="text-xs text-slate-550 mt-1 max-w-sm mx-auto">
+                  <p className="text-xs text-slate-500 dark:text-slate-600 mt-1 max-w-sm mx-auto">
                     {searchQuery ? "Try refining your search terms." : "Publish great stories and books online to attract loyal followers!"}
                   </p>
                 </div>
@@ -337,9 +337,9 @@ const AuthorNetwork = () => {
                             <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-800 transition-colors truncate">
                               {followed.name}
                             </h3>
-                            <p className="text-xs text-slate-550 truncate">{followed.email}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-600 truncate">{followed.email}</p>
                             {followed.bio && (
-                              <p className="text-[10px] text-slate-600 dark:text-slate-400 mt-1 line-clamp-1 italic">
+                              <p className="text-[10px] text-slate-600 dark:text-slate-600 mt-1 line-clamp-1 italic">
                                 "{followed.bio}"
                               </p>
                             )}
@@ -350,7 +350,7 @@ const AuthorNetwork = () => {
                           type="button"
                           disabled={actionLoadingId === followed._id}
                           onClick={() => handleFollowAction(followed._id, true)}
-                          className="px-3 py-1.5 rounded-xl font-bold text-xs border border-rose-200 hover:border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/30 dark:hover:bg-rose-900/40 dark:text-rose-450 cursor-pointer shrink-0 flex items-center gap-1 shadow-sm transition-all"
+                          className="px-3 py-1.5 rounded-xl font-bold text-xs border border-rose-200 hover:border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/20 dark:border-rose-900/30 dark:hover:bg-rose-900/40 dark:text-rose-350 cursor-pointer shrink-0 flex items-center gap-1 shadow-sm transition-all"
                         >
                           {actionLoadingId === followed._id ? (
                             <span className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
