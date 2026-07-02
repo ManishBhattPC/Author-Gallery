@@ -53,7 +53,25 @@ const BookDetails = () => {
     setLibraryModalOpen(true);
   };
 
+  const handleOverlayWheel = (e) => {
+    // Check if the scroll target is inside a scrollable container in the modal
+    const isScrollable = (el) => {
+      if (!el || el === document.body) return false;
+      const style = window.getComputedStyle(el);
+      const overflowY = style.overflowY;
+      if ((overflowY === "auto" || overflowY === "scroll") && el.scrollHeight > el.clientHeight) {
+        return true;
+      }
+      return isScrollable(el.parentElement);
+    };
+
+    if (!isScrollable(e.target)) {
+      window.scrollBy(0, e.deltaY);
+    }
+  };
+
   const toggleBookInLibrary = (libId) => {
+    let message = "";
     const updated = libraries.map((lib) => {
       if (lib.id === libId) {
         const hasBook = lib.bookIds.includes(book._id);
@@ -62,6 +80,7 @@ const BookDetails = () => {
         if (hasBook) {
           nextBookIds = lib.bookIds.filter((bid) => bid !== book._id);
           nextBooks = (lib.books || []).filter((b) => b._id !== book._id);
+          message = `Removed from library "${lib.name}"`;
         } else {
           nextBookIds = [...lib.bookIds, book._id];
           nextBooks = [...(lib.books || []), {
@@ -72,6 +91,7 @@ const BookDetails = () => {
             price: book.price,
             rating: book.rating || book.averageRating
           }];
+          message = `Saved to library "${lib.name}"`;
         }
         return { ...lib, bookIds: nextBookIds, books: nextBooks };
       }
@@ -79,6 +99,14 @@ const BookDetails = () => {
     });
     localStorage.setItem("my_libraries", JSON.stringify(updated));
     setLibraries(updated);
+    if (message) {
+      showToast(message, "success");
+    }
+    
+    // Smoothly go back / close modal after a short delay
+    setTimeout(() => {
+      setLibraryModalOpen(false);
+    }, 450);
   };
 
   const handleCreateLibraryInModal = (e) => {
@@ -1463,7 +1491,10 @@ const BookDetails = () => {
       )}
       {/* Library Selection Modal */}
       {libraryModalOpen && createPortal(
-        <div className="fixed inset-0 z-[200000] flex items-center justify-center bg-black/60 p-4 animate-fade-in backdrop-blur-sm text-slate-800 font-sans">
+        <div 
+          onWheel={handleOverlayWheel}
+          className="fixed inset-0 z-[200000] flex items-center justify-center bg-black/60 p-4 animate-fade-in backdrop-blur-sm text-slate-800 font-sans"
+        >
           <div className="bg-[#FAF6F0] border border-[#DFD5C6] rounded-2xl p-6 w-full max-w-sm shadow-2xl animate-scale-up text-left">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold text-slate-900 font-serif">Save to library</h3>

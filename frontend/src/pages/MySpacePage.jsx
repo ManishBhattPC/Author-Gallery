@@ -176,7 +176,12 @@ const MySpacePage = () => {
 
         {/* YouTube-style Metrics / Stats Summary Banner */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="bg-[#FAF1E6] border border-[#ECD9C6] p-5 rounded-2xl shadow-sm text-left flex items-center gap-4 hover:shadow-md transition-shadow duration-200">
+          <div 
+            onClick={() => { setActiveTab("history"); setSelectedLibrary(null); }}
+            className={`bg-[#FAF1E6] border p-5 rounded-2xl shadow-sm text-left flex items-center gap-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none ${
+              activeTab === "history" ? "border-amber-700/50 ring-2 ring-amber-700/20" : "border-[#ECD9C6]"
+            }`}
+          >
             <div className="p-3 bg-[#EEDCC7] text-[#8C4E35] rounded-xl shrink-0">
               <Clock className="w-6 h-6" />
             </div>
@@ -186,7 +191,12 @@ const MySpacePage = () => {
             </div>
           </div>
 
-          <div className="bg-[#E8F3EE] border border-[#D0E6DC] p-5 rounded-2xl shadow-sm text-left flex items-center gap-4 hover:shadow-md transition-shadow duration-200">
+          <div 
+            onClick={() => { setActiveTab("authors"); setSelectedLibrary(null); }}
+            className={`bg-[#E8F3EE] border p-5 rounded-2xl shadow-sm text-left flex items-center gap-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none ${
+              activeTab === "authors" ? "border-emerald-700/50 ring-2 ring-emerald-700/20" : "border-[#D0E6DC]"
+            }`}
+          >
             <div className="p-3 bg-[#D4EAE0] text-[#1E5E42] rounded-xl shrink-0">
               <Users className="w-6 h-6" />
             </div>
@@ -196,7 +206,12 @@ const MySpacePage = () => {
             </div>
           </div>
 
-          <div className="bg-[#FCF4E7] border border-[#F4E3C8] p-5 rounded-2xl shadow-sm text-left flex items-center gap-4 hover:shadow-md transition-shadow duration-200">
+          <div 
+            onClick={() => { setActiveTab("libraries"); setSelectedLibrary(null); }}
+            className={`bg-[#FCF4E7] border p-5 rounded-2xl shadow-sm text-left flex items-center gap-4 hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none ${
+              activeTab === "libraries" ? "border-amber-600/50 ring-2 ring-amber-600/20" : "border-[#F4E3C8]"
+            }`}
+          >
             <div className="p-3 bg-[#F6ECC0]/80 text-[#A2621C] rounded-xl shrink-0">
               <Library className="w-6 h-6" />
             </div>
