@@ -23,6 +23,7 @@ import BookDetails from "./components/BookComponents/BookDetails.jsx"
 import ProtectedRoute from "./ProtectedRoute.jsx"
 import AdminDashboard from "./pages/AdminDashboard.jsx"
 import MyCollectionPage from "./pages/MyCollectionPage.jsx"
+import MySpacePage from "./pages/MySpacePage.jsx"
 
 const AppRoutes = () => {
   return (
@@ -91,6 +92,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <MyCollectionPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="dashboard/my-space"
+          element={
+            <ProtectedRoute>
+              <MySpacePage />
             </ProtectedRoute>
           }
         />

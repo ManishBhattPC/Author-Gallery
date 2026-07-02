@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchBookById, incrementBookDownloads } from "../../services/bookService.js";
 import { useAuth } from "../../AuthContext.jsx";
 import { createPortal } from "react-dom";
-import { Flag, Info } from "lucide-react";
+import { Flag, Info, Plus } from "lucide-react";
 import ReviewSection from "../ReviewSection.jsx";
 import ReportModal from "../ReportModal.jsx";
 import { requestOfflinePayment, createPaymentOrder, verifyPaymentSignature } from "../../services/paymentService.js";
@@ -38,6 +38,76 @@ const BookDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
+
+  const [libraryModalOpen, setLibraryModalOpen] = useState(false);
+  const [libraries, setLibraries] = useState(() => {
+    return JSON.parse(localStorage.getItem("my_libraries") || "[]");
+  });
+  const [newLibName, setNewLibName] = useState("");
+  const [newLibDesc, setNewLibDesc] = useState("");
+  const [showNewLibForm, setShowNewLibForm] = useState(false);
+
+  const handleOpenLibraryModal = () => {
+    const loaded = JSON.parse(localStorage.getItem("my_libraries") || "[]");
+    setLibraries(loaded);
+    setLibraryModalOpen(true);
+  };
+
+  const toggleBookInLibrary = (libId) => {
+    const updated = libraries.map((lib) => {
+      if (lib.id === libId) {
+        const hasBook = lib.bookIds.includes(book._id);
+        let nextBookIds;
+        let nextBooks;
+        if (hasBook) {
+          nextBookIds = lib.bookIds.filter((bid) => bid !== book._id);
+          nextBooks = (lib.books || []).filter((b) => b._id !== book._id);
+        } else {
+          nextBookIds = [...lib.bookIds, book._id];
+          nextBooks = [...(lib.books || []), {
+            _id: book._id,
+            title: book.title,
+            coverImage: book.coverImage,
+            author: book.author,
+            price: book.price,
+            rating: book.rating || book.averageRating
+          }];
+        }
+        return { ...lib, bookIds: nextBookIds, books: nextBooks };
+      }
+      return lib;
+    });
+    localStorage.setItem("my_libraries", JSON.stringify(updated));
+    setLibraries(updated);
+  };
+
+  const handleCreateLibraryInModal = (e) => {
+    e.preventDefault();
+    if (!newLibName.trim()) return;
+
+    const newLib = {
+      id: Date.now().toString(),
+      name: newLibName.trim(),
+      description: newLibDesc.trim(),
+      bookIds: [book._id],
+      books: [{
+        _id: book._id,
+        title: book.title,
+        coverImage: book.coverImage,
+        author: book.author,
+        price: book.price,
+        rating: book.rating || book.averageRating
+      }]
+    };
+
+    const updated = [...libraries, newLib];
+    localStorage.setItem("my_libraries", JSON.stringify(updated));
+    setLibraries(updated);
+    setNewLibName("");
+    setNewLibDesc("");
+    setShowNewLibForm(false);
+    showToast(`Added to library "${newLib.name}"`, "success");
+  };
 
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -444,6 +514,21 @@ const BookDetails = () => {
         const data = await fetchBookById(id);
 
         setBook(data);
+
+        // Save to recently read books in localStorage
+        if (data) {
+          const recentBooks = JSON.parse(localStorage.getItem("recently_read_books") || "[]");
+          const filtered = recentBooks.filter((b) => b._id !== data._id);
+          const updated = [{
+            _id: data._id,
+            title: data.title,
+            coverImage: data.coverImage,
+            author: data.author,
+            price: data.price,
+            rating: data.rating || data.averageRating
+          }, ...filtered].slice(0, 10);
+          localStorage.setItem("recently_read_books", JSON.stringify(updated));
+        }
       } catch (err) {
         setError(err.message || "Unable to load book details.");
       } finally {
@@ -595,6 +680,17 @@ const BookDetails = () => {
                     </>
                   )}
                 </div>
+              )}
+              {/* Library Action Button */}
+              {user && (
+                <button
+                  type="button"
+                  onClick={handleOpenLibraryModal}
+                  className="w-full flex items-center justify-center gap-2 border border-slate-300 hover:border-slate-400 text-slate-700 bg-white hover:bg-slate-50 px-6 py-3.5 rounded-xl font-semibold transition duration-200 cursor-pointer shadow-sm mt-3.5"
+                >
+                  <FaBookmark className="text-amber-700" />
+                  Save to Library
+                </button>
               )}
             </div>
           </div>
@@ -1361,6 +1457,94 @@ const BookDetails = () => {
                 </main>
               </>
             )}
+          </div>
+        </div>,
+        document.body
+      )}
+      {/* Library Selection Modal */}
+      {libraryModalOpen && createPortal(
+        <div className="fixed inset-0 z-[200000] flex items-center justify-center bg-black/60 p-4 animate-fade-in backdrop-blur-sm text-slate-800 font-sans">
+          <div className="bg-[#FAF6F0] border border-[#DFD5C6] rounded-2xl p-6 w-full max-w-sm shadow-2xl animate-scale-up text-left">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-slate-900 font-serif">Save to library</h3>
+              <button
+                onClick={() => setLibraryModalOpen(false)}
+                className="p-1 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition cursor-pointer"
+              >
+                <FaTimes size={16} />
+              </button>
+            </div>
+
+            {/* List of libraries */}
+            <div className="space-y-3.5 max-h-56 overflow-y-auto pr-1">
+              {libraries.length > 0 ? (
+                libraries.map((lib) => {
+                  const isChecked = lib.bookIds.includes(book?._id);
+                  return (
+                    <label key={lib.id} className="flex items-center gap-3 text-sm text-slate-700 hover:text-slate-900 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleBookInLibrary(lib.id)}
+                        className="w-4.5 h-4.5 accent-amber-700 border-slate-350 rounded focus:ring-amber-500/20"
+                      />
+                      <span className="font-semibold">{lib.name}</span>
+                    </label>
+                  );
+                })
+              ) : (
+                <p className="text-xs text-slate-500 py-4 text-center">No libraries created yet.</p>
+              )}
+            </div>
+
+            {/* Create new library button / form */}
+            <div className="border-t border-slate-200 mt-4 pt-4">
+              {!showNewLibForm ? (
+                <button
+                  onClick={() => setShowNewLibForm(true)}
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold text-amber-800 hover:text-amber-900 hover:bg-amber-50 rounded-xl transition cursor-pointer border border-dashed border-slate-300"
+                >
+                  <Plus size={14} className="text-amber-700" /> Create new library
+                </button>
+              ) : (
+                <form onSubmit={handleCreateLibraryInModal} className="space-y-3 animate-fade-in">
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Enter library name..."
+                      value={newLibName}
+                      onChange={(e) => setNewLibName(e.target.value)}
+                      required
+                      className="w-full px-3 py-2.5 text-xs border border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-700 outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="Description (optional)..."
+                      value={newLibDesc}
+                      onChange={(e) => setNewLibDesc(e.target.value)}
+                      className="w-full px-3 py-2.5 text-xs border border-slate-300 bg-white rounded-xl focus:ring-2 focus:ring-amber-500/20 focus:border-amber-700 outline-none transition"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowNewLibForm(false)}
+                      className="flex-1 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold rounded-lg border border-slate-200 transition cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 py-1.5 bg-amber-700 hover:bg-amber-800 text-white text-[10px] font-bold rounded-lg transition cursor-pointer shadow-sm"
+                    >
+                      Create
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>,
         document.body

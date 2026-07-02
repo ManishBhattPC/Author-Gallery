@@ -22,6 +22,7 @@ import {
   Bell,
   Check,
   Clock,
+  Library,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -369,6 +370,14 @@ const Navbar = () => {
                       <span>My Collection</span>
                     </Link>
                     <Link
+                      to="/dashboard/my-space"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
+                    >
+                      <Library size={16} className="text-slate-400" />
+                      <span>My Space</span>
+                    </Link>
+                    <Link
                       to="/dashboard/author-profile"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
@@ -592,6 +601,20 @@ const Navbar = () => {
                     >
                       <BookOpen size={18} />
                       <span>My Collection</span>
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/my-space"
+                      onClick={() => setMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                          isActive 
+                            ? "bg-amber-800 text-white shadow-sm" 
+                            : "text-slate-700 hover:bg-slate-100"
+                        }`
+                      }
+                    >
+                      <Library size={18} />
+                      <span>My Space</span>
                     </NavLink>
                     <NavLink
                       to="/dashboard/author-profile"
