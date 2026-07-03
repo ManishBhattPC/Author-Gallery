@@ -15,7 +15,7 @@ const MyCollection = ({
   const [error, setError] = useState(providedError || null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = isDashboard ? 3 : 6;
+  const itemsPerPage = isDashboard ? 2 : 3;
 
   // Modal & Action states
   const [editingBook, setEditingBook] = useState(null);

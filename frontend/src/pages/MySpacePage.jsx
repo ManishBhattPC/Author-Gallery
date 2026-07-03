@@ -28,7 +28,7 @@ const MySpacePage = () => {
   const [selectedLibraryPage, setSelectedLibraryPage] = useState(1);
   const [authorsPage, setAuthorsPage] = useState(1);
   
-  const itemsPerPage = 4;
+  const itemsPerPage = 2;
 
   useEffect(() => {
     setHistoryPage(1);
