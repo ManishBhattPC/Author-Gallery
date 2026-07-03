@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { BookOpen, Users, Bookmark, Trash2, Library, Clock, ArrowRight, Heart, Plus, BookMarked, User } from "lucide-react";
+import { BookOpen, Users, Bookmark, Trash2, Library, Clock, ArrowRight, Heart, Plus, BookMarked, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { fetchMyFollowing } from "../services/authorService.js";
 
 const MySpacePage = () => {
@@ -21,6 +21,21 @@ const MySpacePage = () => {
 
   // Library preview details state
   const [selectedLibrary, setSelectedLibrary] = useState(null);
+
+  // Pagination states
+  const [historyPage, setHistoryPage] = useState(1);
+  const [librariesPage, setLibrariesPage] = useState(1);
+  const [selectedLibraryPage, setSelectedLibraryPage] = useState(1);
+  const [authorsPage, setAuthorsPage] = useState(1);
+  
+  const itemsPerPage = 4;
+
+  useEffect(() => {
+    setHistoryPage(1);
+    setLibrariesPage(1);
+    setSelectedLibraryPage(1);
+    setAuthorsPage(1);
+  }, [activeTab, selectedLibrary]);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -100,6 +115,32 @@ const MySpacePage = () => {
       setSelectedLibrary(activeLib);
     }
   };
+
+  // Paginated Lists
+  const totalHistoryPages = Math.ceil(recentlyRead.length / itemsPerPage);
+  const currentHistoryItems = recentlyRead.slice(
+    (historyPage - 1) * itemsPerPage,
+    historyPage * itemsPerPage
+  );
+
+  const totalLibrariesPages = Math.ceil(libraries.length / itemsPerPage);
+  const currentLibrariesItems = libraries.slice(
+    (librariesPage - 1) * itemsPerPage,
+    librariesPage * itemsPerPage
+  );
+
+  const selectedLibBooks = selectedLibrary?.books || [];
+  const totalSelectedLibPages = Math.ceil(selectedLibBooks.length / itemsPerPage);
+  const currentSelectedLibItems = selectedLibBooks.slice(
+    (selectedLibraryPage - 1) * itemsPerPage,
+    selectedLibraryPage * itemsPerPage
+  );
+
+  const totalAuthorsPages = Math.ceil(followedAuthors.length / itemsPerPage);
+  const currentAuthorsItems = followedAuthors.slice(
+    (authorsPage - 1) * itemsPerPage,
+    authorsPage * itemsPerPage
+  );
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 py-10 px-4 sm:px-6 lg:px-8 font-sans">
@@ -269,7 +310,7 @@ const MySpacePage = () => {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {recentlyRead.map((book) => (
+                    {currentHistoryItems.map((book) => (
                       <div
                         key={book._id}
                         onClick={() => navigate(`/books/${book._id}`)}
@@ -316,6 +357,41 @@ const MySpacePage = () => {
                       </div>
                     ))}
                   </div>
+
+                  {/* History Pagination */}
+                  {totalHistoryPages > 1 && (
+                    <div className="flex justify-center items-center gap-1.5 mt-8 border-t border-slate-200 pt-6">
+                      <button
+                        onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
+                        disabled={historyPage === 1}
+                        className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      
+                      {Array.from({ length: totalHistoryPages }, (_, i) => i + 1).map((pageNum) => (
+                        <button
+                          key={pageNum}
+                          onClick={() => setHistoryPage(pageNum)}
+                          className={`w-9 h-9 rounded-xl border text-sm font-semibold transition cursor-pointer ${
+                            historyPage === pageNum
+                              ? "bg-amber-800 border-amber-800 text-white shadow-sm"
+                              : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      ))}
+
+                      <button
+                        onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))}
+                        disabled={historyPage === totalHistoryPages}
+                        className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <div className="py-20 text-center border border-dashed border-slate-300 bg-white rounded-3xl p-6 shadow-sm">
@@ -370,58 +446,95 @@ const MySpacePage = () => {
                     </p>
                   )}
 
-                  {(selectedLibrary.books || []).length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {selectedLibrary.books.map((book) => (
-                        <div
-                          key={book._id}
-                          className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-full cursor-pointer"
-                          onClick={() => navigate(`/books/${book._id}`)}
-                        >
-                          <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden shrink-0">
-                            {book.coverImage ? (
-                              <img
-                                src={book.coverImage}
-                                alt={book.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                              />
-                            ) : (
-                              <div className="h-full flex items-center justify-center text-slate-350">
-                                <BookOpen size={40} />
-                              </div>
-                            )}
-                            {/* Remove button overlay */}
-                            <button
-                              onClick={(e) => handleRemoveFromLibrary(selectedLibrary.id, book._id, e)}
-                              className="absolute top-2 right-2 p-1.5 rounded-xl bg-black/60 hover:bg-rose-900 text-white hover:text-rose-100 opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer shadow-md"
-                              title="Remove from library"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                          <div className="p-4 flex flex-col justify-between flex-grow">
-                            <div>
-                              <h4 className="font-serif font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-amber-800 transition-colors">
-                                {book.title}
-                              </h4>
-                              <p className="text-xs text-slate-500 mt-1 truncate">
-                                By {book.author?.name || book.author || "Unknown"}
-                              </p>
-                            </div>
-                            <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-100 text-xs">
-                              <span className="font-bold text-[#8C4E35]">
-                                {book.price === 0 ? "Free" : `₹${book.price}`}
-                              </span>
-                              {book.rating > 0 && (
-                                <span className="flex items-center gap-0.5 text-amber-500 font-semibold">
-                                  ★ {Number(book.rating).toFixed(1)}
-                                </span>
+                  {currentSelectedLibItems.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {currentSelectedLibItems.map((book) => (
+                          <div
+                            key={book._id}
+                            className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-full cursor-pointer"
+                            onClick={() => navigate(`/books/${book._id}`)}
+                          >
+                            <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden shrink-0">
+                              {book.coverImage ? (
+                                <img
+                                  src={book.coverImage}
+                                  alt={book.title}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                              ) : (
+                                <div className="h-full flex items-center justify-center text-slate-350">
+                                  <BookOpen size={40} />
+                                </div>
                               )}
+                              {/* Remove button overlay */}
+                              <button
+                                onClick={(e) => handleRemoveFromLibrary(selectedLibrary.id, book._id, e)}
+                                className="absolute top-2 right-2 p-1.5 rounded-xl bg-black/60 hover:bg-rose-900 text-white hover:text-rose-100 opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer shadow-md"
+                                title="Remove from library"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                            <div className="p-4 flex flex-col justify-between flex-grow">
+                              <div>
+                                <h4 className="font-serif font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-amber-800 transition-colors">
+                                  {book.title}
+                                </h4>
+                                <p className="text-xs text-slate-500 mt-1 truncate">
+                                  By {book.author?.name || book.author || "Unknown"}
+                                </p>
+                              </div>
+                              <div className="flex justify-between items-center mt-3 pt-2 border-t border-slate-100 text-xs">
+                                <span className="font-bold text-[#8C4E35]">
+                                  {book.price === 0 ? "Free" : `₹${book.price}`}
+                                </span>
+                                {book.rating > 0 && (
+                                  <span className="flex items-center gap-0.5 text-amber-500 font-semibold">
+                                    ★ {Number(book.rating).toFixed(1)}
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
+                        ))}
+                      </div>
+
+                      {/* Selected Library Pagination */}
+                      {totalSelectedLibPages > 1 && (
+                        <div className="flex justify-center items-center gap-1.5 mt-8 border-t border-slate-200 pt-6">
+                          <button
+                            onClick={() => setSelectedLibraryPage((p) => Math.max(1, p - 1))}
+                            disabled={selectedLibraryPage === 1}
+                            className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+                          >
+                            <ChevronLeft size={16} />
+                          </button>
+                          
+                          {Array.from({ length: totalSelectedLibPages }, (_, i) => i + 1).map((pageNum) => (
+                            <button
+                              key={pageNum}
+                              onClick={() => setSelectedLibraryPage(pageNum)}
+                              className={`w-9 h-9 rounded-xl border text-sm font-semibold transition cursor-pointer ${
+                                selectedLibraryPage === pageNum
+                                  ? "bg-amber-800 border-amber-800 text-white shadow-sm"
+                                  : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          ))}
+
+                          <button
+                            onClick={() => setSelectedLibraryPage((p) => Math.min(totalSelectedLibPages, p + 1))}
+                            disabled={selectedLibraryPage === totalSelectedLibPages}
+                            className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+                          >
+                            <ChevronRight size={16} />
+                          </button>
                         </div>
-                      ))}
-                    </div>
+                      )}
+                    </>
                   ) : (
                     <div className="py-16 text-center bg-white rounded-3xl border border-slate-200 border-dashed p-6">
                       <BookOpen className="w-10 h-10 text-slate-400 mx-auto mb-3" />
@@ -443,64 +556,101 @@ const MySpacePage = () => {
                     <h3 className="text-lg font-bold text-slate-900 font-serif">Playlists / Libraries</h3>
                   </div>
 
-                  {libraries.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {libraries.map((lib) => {
-                        const booksInLib = lib.books || [];
-                        const firstBook = booksInLib[0];
-                        return (
-                          <div
-                            key={lib.id}
-                            onClick={() => setSelectedLibrary(lib)}
-                            className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col h-full"
-                          >
-                            {/* YouTube styled Playlist Cover overlay */}
-                            <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden shrink-0">
-                              {firstBook?.coverImage ? (
-                                <img
-                                  src={firstBook.coverImage}
-                                  alt={lib.name}
-                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                />
-                              ) : (
-                                <div className="h-full flex items-center justify-center bg-slate-100 text-slate-350">
-                                  <Library size={48} />
+                  {currentLibrariesItems.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {currentLibrariesItems.map((lib) => {
+                          const booksInLib = lib.books || [];
+                          const firstBook = booksInLib[0];
+                          return (
+                            <div
+                              key={lib.id}
+                              onClick={() => setSelectedLibrary(lib)}
+                              className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col h-full"
+                            >
+                              {/* YouTube styled Playlist Cover overlay */}
+                              <div className="relative aspect-[3/4] bg-slate-100 overflow-hidden shrink-0">
+                                {firstBook?.coverImage ? (
+                                  <img
+                                    src={firstBook.coverImage}
+                                    alt={lib.name}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                ) : (
+                                  <div className="h-full flex items-center justify-center bg-slate-100 text-slate-350">
+                                    <Library size={48} />
+                                  </div>
+                                )}
+                                {/* YouTube-like overlay showing number of books */}
+                                <div className="absolute inset-y-0 right-0 w-2/5 bg-slate-950/80 backdrop-blur-[2px] flex flex-col justify-center items-center text-white p-3 border-l border-slate-800/40">
+                                  <Library size={24} className="mb-2 text-amber-400" />
+                                  <span className="text-lg font-bold">{booksInLib.length}</span>
+                                  <span className="text-[10px] uppercase font-bold tracking-wider text-slate-300 mt-0.5">Books</span>
                                 </div>
-                              )}
-                              {/* YouTube-like overlay showing number of books */}
-                              <div className="absolute inset-y-0 right-0 w-2/5 bg-slate-950/80 backdrop-blur-[2px] flex flex-col justify-center items-center text-white p-3 border-l border-slate-800/40">
-                                <Library size={24} className="mb-2 text-amber-400" />
-                                <span className="text-lg font-bold">{booksInLib.length}</span>
-                                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-300 mt-0.5">Books</span>
+                              </div>
+                              
+                              <div className="p-4 flex flex-col justify-between flex-grow text-left">
+                                <div>
+                                  <h4 className="font-serif font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-amber-800 transition-colors">
+                                    {lib.name}
+                                  </h4>
+                                  <p className="text-xs text-slate-500 mt-1 line-clamp-2">
+                                    {lib.description || "Custom shelf collection."}
+                                  </p>
+                                </div>
+                                <div className="flex justify-between items-center mt-4 pt-2 border-t border-slate-100">
+                                  <span className="text-[10px] text-slate-400 font-semibold">
+                                    Created bookshelf
+                                  </span>
+                                  <button
+                                    onClick={(e) => handleDeleteLibrary(lib.id, e)}
+                                    className="p-1 rounded-lg text-slate-400 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer"
+                                    title="Delete library"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
                               </div>
                             </div>
-                            
-                            <div className="p-4 flex flex-col justify-between flex-grow text-left">
-                              <div>
-                                <h4 className="font-serif font-bold text-slate-900 text-sm line-clamp-1 group-hover:text-amber-800 transition-colors">
-                                  {lib.name}
-                                </h4>
-                                <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                                  {lib.description || "Custom shelf collection."}
-                                </p>
-                              </div>
-                              <div className="flex justify-between items-center mt-4 pt-2 border-t border-slate-100">
-                                <span className="text-[10px] text-slate-400 font-semibold">
-                                  Created bookshelf
-                                </span>
-                                <button
-                                  onClick={(e) => handleDeleteLibrary(lib.id, e)}
-                                  className="p-1 rounded-lg text-slate-400 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer"
-                                  title="Delete library"
-                                >
-                                  <Trash2 size={13} />
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Libraries Grid Pagination */}
+                      {totalLibrariesPages > 1 && (
+                        <div className="flex justify-center items-center gap-1.5 mt-8 border-t border-slate-200 pt-6">
+                          <button
+                            onClick={() => setLibrariesPage((p) => Math.max(1, p - 1))}
+                            disabled={librariesPage === 1}
+                            className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+                          >
+                            <ChevronLeft size={16} />
+                          </button>
+                          
+                          {Array.from({ length: totalLibrariesPages }, (_, i) => i + 1).map((pageNum) => (
+                            <button
+                              key={pageNum}
+                              onClick={() => setLibrariesPage(pageNum)}
+                              className={`w-9 h-9 rounded-xl border text-sm font-semibold transition cursor-pointer ${
+                                librariesPage === pageNum
+                                  ? "bg-amber-800 border-amber-800 text-white shadow-sm"
+                                  : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                              }`}
+                            >
+                              {pageNum}
+                            </button>
+                          ))}
+
+                          <button
+                            onClick={() => setLibrariesPage((p) => Math.min(totalLibrariesPages, p + 1))}
+                            disabled={librariesPage === totalLibrariesPages}
+                            className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+                          >
+                            <ChevronRight size={16} />
+                          </button>
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="py-20 text-center border border-dashed border-slate-300 bg-white rounded-3xl p-6 shadow-sm">
                       <Bookmark className="w-12 h-12 text-slate-400 mx-auto mb-4" />
@@ -528,44 +678,81 @@ const MySpacePage = () => {
               
               {loadingAuthors ? (
                 <div className="text-center py-10 text-slate-500">Loading authors...</div>
-              ) : followedAuthors.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {followedAuthors.map((author) => (
-                    <div
-                      key={author._id}
-                      onClick={() => navigate(`/authors/${author._id}`)}
-                      className="group relative bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col items-center text-center"
-                    >
-                      <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-slate-200 group-hover:border-amber-700/60 transition-colors shrink-0 mb-3 bg-slate-100">
-                        {author.profileImage ? (
-                          <img
-                            src={author.profileImage}
-                            alt={author.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-amber-700 font-bold bg-amber-50">
-                            {author.name?.charAt(0)}
-                          </div>
-                        )}
+              ) : currentAuthorsItems.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {currentAuthorsItems.map((author) => (
+                      <div
+                        key={author._id}
+                        onClick={() => navigate(`/authors/${author._id}`)}
+                        className="group relative bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer flex flex-col items-center text-center"
+                      >
+                        <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-slate-200 group-hover:border-amber-700/60 transition-colors shrink-0 mb-3 bg-slate-100">
+                          {author.profileImage ? (
+                            <img
+                              src={author.profileImage}
+                              alt={author.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-amber-700 font-bold bg-amber-50">
+                              {author.name?.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <h4 className="font-serif font-bold text-slate-900 text-sm group-hover:text-amber-800 transition-colors">
+                          {author.name}
+                        </h4>
+                        <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wide mt-1">
+                          {Array.isArray(author.genres) && author.genres.length > 0
+                            ? author.genres.join(", ")
+                            : "Writers & Authors"}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-2 line-clamp-2">
+                          {author.bio || "No biography available."}
+                        </p>
+                        <span className="mt-4 text-xs font-bold text-amber-700 hover:text-amber-850 flex items-center gap-0.5">
+                          View Author Space <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                        </span>
                       </div>
-                      <h4 className="font-serif font-bold text-slate-900 text-sm group-hover:text-amber-800 transition-colors">
-                        {author.name}
-                      </h4>
-                      <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wide mt-1">
-                        {Array.isArray(author.genres) && author.genres.length > 0
-                          ? author.genres.join(", ")
-                          : "Writers & Authors"}
-                      </p>
-                      <p className="text-xs text-slate-500 mt-2 line-clamp-2">
-                        {author.bio || "No biography available."}
-                      </p>
-                      <span className="mt-4 text-xs font-bold text-amber-700 hover:text-amber-850 flex items-center gap-0.5">
-                        View Author Space <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                      </span>
+                    ))}
+                  </div>
+
+                  {/* Followed Authors Pagination */}
+                  {totalAuthorsPages > 1 && (
+                    <div className="flex justify-center items-center gap-1.5 mt-8 border-t border-slate-200 pt-6">
+                      <button
+                        onClick={() => setAuthorsPage((p) => Math.max(1, p - 1))}
+                        disabled={authorsPage === 1}
+                        className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+                      >
+                        <ChevronLeft size={16} />
+                      </button>
+                      
+                      {Array.from({ length: totalAuthorsPages }, (_, i) => i + 1).map((pageNum) => (
+                        <button
+                          key={pageNum}
+                          onClick={() => setAuthorsPage(pageNum)}
+                          className={`w-9 h-9 rounded-xl border text-sm font-semibold transition cursor-pointer ${
+                            authorsPage === pageNum
+                              ? "bg-amber-800 border-amber-800 text-white shadow-sm"
+                              : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      ))}
+
+                      <button
+                        onClick={() => setAuthorsPage((p) => Math.min(totalAuthorsPages, p + 1))}
+                        disabled={authorsPage === totalAuthorsPages}
+                        className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               ) : (
                 <div className="py-20 text-center border border-dashed border-slate-300 bg-white rounded-3xl p-6 shadow-sm">
                   <Users className="w-12 h-12 text-slate-400 mx-auto mb-4" />

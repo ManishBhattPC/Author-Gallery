@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMyBooks, updateBook, deleteBook } from "../../services/bookService.js";
-import { Eye, Edit3, Trash2, BookOpen, AlertCircle, Loader, X, Download } from "lucide-react";
+import { Eye, Edit3, Trash2, BookOpen, AlertCircle, Loader, X, Download, ChevronLeft, ChevronRight } from "lucide-react";
 
 const MyCollection = ({
   books: providedBooks,
@@ -13,6 +13,9 @@ const MyCollection = ({
   const [books, setBooks] = useState(providedBooks || []);
   const [loading, setLoading] = useState(providedLoading ?? !skipFetch);
   const [error, setError] = useState(providedError || null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = isDashboard ? 3 : 6;
 
   // Modal & Action states
   const [editingBook, setEditingBook] = useState(null);
@@ -45,6 +48,13 @@ const MyCollection = ({
 
     loadBooks();
   }, [skipFetch, providedBooks, providedLoading, providedError]);
+
+  useEffect(() => {
+    const maxPage = Math.ceil(books.length / itemsPerPage) || 1;
+    if (currentPage > maxPage) {
+      setCurrentPage(maxPage);
+    }
+  }, [books.length, itemsPerPage, currentPage]);
 
   const handleEditClick = (book) => {
     setEditingBook(book);
@@ -93,6 +103,11 @@ const MyCollection = ({
     }
   };
 
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = books.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(books.length / itemsPerPage);
+
   if (loading) {
     return (
       <div className="bg-slate-50 border border-slate-300 p-6 rounded-2xl shadow-sm text-center py-12">
@@ -134,75 +149,112 @@ const MyCollection = ({
       </div>
 
       {books.length > 0 ? (
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {books.map((book) => (
-            <div key={book._id} className="group border border-slate-300/80 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-300 bg-white flex flex-col h-full text-left">
-              <div className="relative overflow-hidden aspect-[3/4] bg-slate-100">
-                <img
-                  src={book.coverImage}
-                  alt={book.title}
-                  onError={(e) => {
-                    e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
-                    e.currentTarget.onerror = null;
-                  }}
-                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {book.genres && (
-                  <span 
-                    style={{ color: "#8C4E35" }}
-                    className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-wider bg-white/95 backdrop-blur-sm border border-slate-300/45 px-2.5 py-1 rounded-full shadow-sm"
-                  >
-                    {Array.isArray(book.genres) ? book.genres.join(", ") : book.genres}
-                  </span>
-                )}
-              </div>
+        <>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {currentItems.map((book) => (
+              <div key={book._id} className="group border border-slate-300/80 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-300 bg-white flex flex-col h-full text-left">
+                <div className="relative overflow-hidden aspect-[3/4] bg-slate-100">
+                  <img
+                    src={book.coverImage}
+                    alt={book.title}
+                    onError={(e) => {
+                      e.currentTarget.src = "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60";
+                      e.currentTarget.onerror = null;
+                    }}
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  {book.genres && (
+                    <span 
+                      style={{ color: "#8C4E35" }}
+                      className="absolute top-3 left-3 text-[9px] font-bold uppercase tracking-wider bg-white/95 backdrop-blur-sm border border-slate-300/45 px-2.5 py-1 rounded-full shadow-sm"
+                    >
+                      {Array.isArray(book.genres) ? book.genres.join(", ") : book.genres}
+                    </span>
+                  )}
+                </div>
 
-              <div className="p-4 flex flex-col flex-grow justify-between">
-                <div>
-                  <h3 className="font-bold font-serif text-slate-900 line-clamp-1">{book.title}</h3>
-                  <p className="text-sm font-bold text-amber-800 mt-1">₹{Number(book.price).toFixed(2)}</p>
-                  
-                  {/* Views & Downloads Stats */}
-                  <div className="flex items-center gap-4 mt-2.5 text-slate-600 text-xs font-semibold select-none">
-                    <span className="flex items-center gap-1" title="Reads / Views">
-                      <Eye className="w-3.5 h-3.5 text-slate-400" />
-                      {book.views ?? 0}
-                    </span>
-                    <span className="flex items-center gap-1" title="PDF Downloads">
-                      <Download className="w-3.5 h-3.5 text-slate-400" />
-                      {book.downloads ?? 0}
-                    </span>
+                <div className="p-4 flex flex-col flex-grow justify-between">
+                  <div>
+                    <h3 className="font-bold font-serif text-slate-900 line-clamp-1">{book.title}</h3>
+                    <p className="text-sm font-bold text-amber-800 mt-1">₹{Number(book.price).toFixed(2)}</p>
+                    
+                    {/* Views & Downloads Stats */}
+                    <div className="flex items-center gap-4 mt-2.5 text-slate-600 text-xs font-semibold select-none">
+                      <span className="flex items-center gap-1" title="Reads / Views">
+                        <Eye className="w-3.5 h-3.5 text-slate-400" />
+                        {book.views ?? 0}
+                      </span>
+                      <span className="flex items-center gap-1" title="PDF Downloads">
+                        <Download className="w-3.5 h-3.5 text-slate-400" />
+                        {book.downloads ?? 0}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-300/60 text-xs font-bold text-slate-800">
+                    <Link 
+                      to={`/books/${book._id}`} 
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-slate-300 hover:bg-slate-100 rounded-lg transition-colors active:scale-[0.97]"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      View
+                    </Link>
+
+                    <button 
+                      onClick={() => handleEditClick(book)}
+                      className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-slate-300 hover:bg-amber-100/60 hover:text-amber-900 rounded-lg transition-colors cursor-pointer active:scale-[0.97]"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      Edit
+                    </button>
+
+                    <button 
+                      onClick={() => handleDeleteClick(book)}
+                      className="p-2 border border-slate-300 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors cursor-pointer active:scale-[0.97]"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-300/60 text-xs font-bold text-slate-800">
-                  <Link 
-                    to={`/books/${book._id}`} 
-                    className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-slate-300 hover:bg-slate-100 rounded-lg transition-colors active:scale-[0.97]"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    View
-                  </Link>
-
-                  <button 
-                    onClick={() => handleEditClick(book)}
-                    className="flex-1 flex items-center justify-center gap-1 py-1.5 border border-slate-300 hover:bg-amber-100/60 hover:text-amber-900 rounded-lg transition-colors cursor-pointer active:scale-[0.97]"
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                    Edit
-                  </button>
-
-                  <button 
-                    onClick={() => handleDeleteClick(book)}
-                    className="p-2 border border-slate-300 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors cursor-pointer active:scale-[0.97]"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
               </div>
+            ))}
+          </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-1.5 mt-8 border-t border-slate-300/60 pt-6">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`w-9 h-9 rounded-xl border text-sm font-semibold transition cursor-pointer ${
+                    currentPage === pageNum
+                      ? "bg-amber-800 border-amber-800 text-white shadow-sm"
+                      : "border-slate-300 hover:bg-slate-100 text-slate-700"
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-xl border border-slate-300 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent text-slate-700 transition cursor-pointer"
+              >
+                <ChevronRight size={16} />
+              </button>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       ) : (
         <div className="text-center py-12 border border-dashed border-slate-300 rounded-xl bg-white shadow-sm">
           <BookOpen className="w-8 h-8 text-slate-700 mx-auto mb-3 opacity-60" />
