@@ -92,7 +92,7 @@ const Dashboard = () => {
                   ✨ NEW FEATURE
                 </span>
                 <h2 className="text-xl sm:text-2xl font-serif font-bold text-white">Write Your Masterpiece Online</h2>
-                <p className="text-slate-200 text-xs sm:text-sm max-w-xl">
+                <p className="text-amber-100/90 text-xs sm:text-sm max-w-xl">
                   Use our premium Book Notepad to draft your thoughts, select stunning Canvas cover templates with official Author Gallery attributions, and publish instantly as a formatted PDF!
                 </p>
               </div>

@@ -309,7 +309,7 @@ const MySpacePage = () => {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
                     {currentHistoryItems.map((book) => (
                       <div
                         key={book._id}
@@ -448,7 +448,7 @@ const MySpacePage = () => {
 
                   {currentSelectedLibItems.length > 0 ? (
                     <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
                         {currentSelectedLibItems.map((book) => (
                           <div
                             key={book._id}
@@ -558,7 +558,7 @@ const MySpacePage = () => {
 
                   {currentLibrariesItems.length > 0 ? (
                     <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
                         {currentLibrariesItems.map((lib) => {
                           const booksInLib = lib.books || [];
                           const firstBook = booksInLib[0];
@@ -680,7 +680,7 @@ const MySpacePage = () => {
                 <div className="text-center py-10 text-slate-500">Loading authors...</div>
               ) : currentAuthorsItems.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
                     {currentAuthorsItems.map((author) => (
                       <div
                         key={author._id}

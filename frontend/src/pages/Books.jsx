@@ -117,7 +117,7 @@ const Books = () => {
           </div>
         ) : (
           <>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
               {books.length > 0 ? (
                 books.map((book) => (
                   <BookCard

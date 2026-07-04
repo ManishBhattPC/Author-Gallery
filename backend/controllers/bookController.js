@@ -171,6 +171,14 @@ export const createBook = async (req, res) => {
     console.log("BODY:", req.body); // Debug
     console.log("FILES:", req.files); // Debug
 
+    // Enforce free plan limit: max 10 books per author
+    const bookCount = await Book.countDocuments({ author: req.user._id });
+    if (bookCount >= 10) {
+      return res.status(400).json({
+        message: "Free plan limit reached: You can create a maximum of 10 books.",
+      });
+    }
+
     const { title, description, genres, price, publishDate, content } = req.body;
 
     let coverBuffer = req.files?.coverImage?.[0]?.buffer;
@@ -194,6 +202,12 @@ export const createBook = async (req, res) => {
     if (pdfFile) {
       // Flow 1: Quick Upload - PDF File was provided
       pdfBuffer = pdfFile.buffer;
+      const MAX_PDF_SIZE = 10 * 1024 * 1024; // 10MB
+      if (pdfBuffer.length > MAX_PDF_SIZE) {
+        return res.status(400).json({
+          message: "PDF file size must not exceed 10MB.",
+        });
+      }
     } else if (content && content.trim()) {
       // Flow 2: Create Work - Write directly, generate PDF buffer from text
       const cleanTitle = cleanTextForPDF(title || "Untitled Masterpiece");

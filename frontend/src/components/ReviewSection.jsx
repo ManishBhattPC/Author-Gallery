@@ -101,7 +101,7 @@ const ReviewSection = ({ bookId, authorId }) => {
             <MessageSquare className="w-5 h-5 text-amber-700" />
             Reviews & Ratings
           </h3>
-          <p className="text-xs text-slate-500 mt-1">Read reviews or share your thoughts.</p>
+          <p className="text-xs text-slate-600 mt-1">Read reviews or share your thoughts.</p>
         </div>
         {avgRating && (
           <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100/50">
@@ -145,7 +145,7 @@ const ReviewSection = ({ bookId, authorId }) => {
         </form>
       ) : (
         <div className="text-center py-6 border border-dashed border-slate-200 rounded-2xl bg-slate-50/30">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-600">
             Please <Link to="/login" className="text-amber-800 font-bold hover:underline">Log in</Link> to share a review or rate this.
           </p>
         </div>

@@ -371,6 +371,14 @@ const BookDetails = () => {
     }
   }, [readerOpen, id]);
 
+  const getDownloadUrl = (url) => {
+    if (!url) return "";
+    if (url.includes("cloudinary.com") && url.includes("/upload/")) {
+      return url.replace("/upload/", "/upload/fl_attachment/");
+    }
+    return url;
+  };
+
   const handleDownloadClick = async () => {
     try {
       if (book) {
@@ -678,7 +686,8 @@ const BookDetails = () => {
 
                   {book?.pdfFile && (
                     <a
-                      href={book.pdfFile}
+                      href={getDownloadUrl(book.pdfFile)}
+                      download={book.title ? `${book.title}.pdf` : "book.pdf"}
                       target="_blank"
                       rel="noreferrer"
                       onClick={handleDownloadClick}
@@ -1486,8 +1495,23 @@ const BookDetails = () => {
                 <main className="flex-1 bg-gradient-to-br from-[#1C1512] via-[#120F0D] to-[#0A0706] p-2 sm:p-6 md:p-8 flex items-center justify-center overflow-hidden relative">
                   
                   {/* Outer Hardcover leather binder mockup - Responsive */}
-                  <div className="w-full max-w-5xl h-full flex items-stretch bg-[#221713] border border-[#2C1F1B] md:border-4 md:border-[#2A1812] md:bg-[#38231B] md:shadow-[0_20px_50px_rgba(0,0,0,0.85)] rounded-xl md:rounded-[32px] p-1 sm:p-2 md:p-4 relative overflow-hidden">
+                  <div className="w-full max-w-5xl h-full flex flex-col items-stretch bg-[#221713] border border-[#2C1F1B] md:border-4 md:border-[#2A1812] md:bg-[#38231B] md:shadow-[0_20px_50px_rgba(0,0,0,0.85)] rounded-xl md:rounded-[32px] p-1 sm:p-2 md:p-4 relative overflow-hidden">
                     
+                    {/* Mobile helper notice banner */}
+                    {isMobile && (
+                      <div className="bg-[#FAF1E6] border-b border-[#ECD9C6] px-4 py-2 text-xs text-[#8C4E35] font-semibold text-center flex items-center justify-center gap-1.5 z-10 shrink-0 mb-1 rounded-t-lg">
+                        <span>💡 Blank page?</span>
+                        <a 
+                          href={book?.pdfFile} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="underline hover:text-[#703D28]"
+                        >
+                          Tap here to open full screen
+                        </a>
+                      </div>
+                    )}
+
                     {/* Styled e-Reader Iframe */}
                     <iframe
                       src={isMobile 
@@ -1495,7 +1519,7 @@ const BookDetails = () => {
                         : `${book?.pdfFile}#toolbar=0`
                       }
                       title={book?.title}
-                      className="w-full h-full rounded-lg md:rounded-2xl bg-white border border-[#DFD5C6] shadow-[inset_0_2px_8px_rgba(0,0,0,0.12)] z-0"
+                      className="w-full flex-grow rounded-lg md:rounded-2xl bg-white border border-[#DFD5C6] shadow-[inset_0_2px_8px_rgba(0,0,0,0.12)] z-0"
                     />
                   </div>
 

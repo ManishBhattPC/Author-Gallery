@@ -182,7 +182,7 @@ const Login = () => {
             : "Secure your new account created via Google."}
         </p>
 
-        {step === "login" ? (
+        <div style={{ display: step === "login" ? "block" : "none" }}>
           <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="block text-sm font-medium text-slate-700">Email</label>
@@ -252,7 +252,9 @@ const Login = () => {
               </Link>
             </p>
           </form>
-        ) : (
+        </div>
+
+        {step !== "login" && (
           <form className="mt-8 space-y-5" onSubmit={handleGooglePasswordSubmit}>
             <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4">
               <p className="text-sm text-amber-900 leading-relaxed">

@@ -44,6 +44,13 @@ const QuickUpload = ({ onPublished }) => {
         };
         reader.readAsDataURL(file);
       } else {
+        // Enforce 10MB PDF size limit (10 * 1024 * 1024 bytes)
+        const MAX_PDF_SIZE = 10 * 1024 * 1024;
+        if (file.size > MAX_PDF_SIZE) {
+          setMessage({ text: "PDF size must be less than 10MB", type: "error" });
+          e.target.value = "";
+          return;
+        }
         setFiles({ ...files, [name]: file });
         setFileNames({
           ...fileNames,

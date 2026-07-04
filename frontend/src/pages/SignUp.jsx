@@ -250,8 +250,8 @@ const Signup = () => {
           {step === "otp" && `We've sent a 6-digit verification code to ${form.email.toLowerCase().trim()}.`}
         </p>
 
-        {step === "details" && (
-          isRegistrationClosed ? (
+        <div style={{ display: step === "details" ? "block" : "none" }}>
+          {isRegistrationClosed ? (
             <div className="mt-8 p-6 bg-amber-50/50 border border-amber-200/60 rounded-3xl text-center space-y-4 animate-fade-in">
               <div className="w-12 h-12 bg-amber-700/10 rounded-full flex items-center justify-center text-amber-800 mx-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -348,7 +348,8 @@ const Signup = () => {
               </p>
             </form>
           )
-        )}
+        }
+        </div>
 
         {step === "google-password" && (
           <form className="mt-8 space-y-5" onSubmit={handleGooglePasswordSubmit}>

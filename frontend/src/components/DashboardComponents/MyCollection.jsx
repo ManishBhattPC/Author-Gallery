@@ -150,7 +150,7 @@ const MyCollection = ({
 
       {books.length > 0 ? (
         <>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3">
             {currentItems.map((book) => (
               <div key={book._id} className="group border border-slate-300/80 rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.01] hover:-translate-y-0.5 transition-all duration-300 bg-white flex flex-col h-full text-left">
                 <div className="relative overflow-hidden aspect-[3/4] bg-slate-100">
