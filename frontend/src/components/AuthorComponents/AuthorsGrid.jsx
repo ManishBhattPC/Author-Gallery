@@ -23,7 +23,7 @@ const AuthorsGrid = ({ search = "" }) => {
       setError(null);
 
       try {
-        const params = { page, limit: 8 };
+        const params = { page, limit: 4 };
         if (search.trim()) params.search = search.trim();
 
         const data = await fetchAuthors(params);
@@ -72,7 +72,7 @@ const AuthorsGrid = ({ search = "" }) => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             {authors.map((author) => (
               <AuthorCard
                 key={author._id || author.id}

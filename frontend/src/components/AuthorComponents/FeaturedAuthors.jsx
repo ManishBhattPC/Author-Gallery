@@ -67,7 +67,7 @@ const FeaturedAuthors = ({ limit }) => {
           </div>
         ) : (
           <>
-            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 xl:grid-cols-3">
               {(limit ? authors.slice(0, limit) : authors).map((author) => (
                 <AuthorCard
                   key={author._id || author.id}

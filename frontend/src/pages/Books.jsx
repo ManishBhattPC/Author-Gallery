@@ -34,7 +34,7 @@ const Books = () => {
       setError(null);
 
       try {
-        const params = { page, limit: 8 };
+        const params = { page, limit: 4 };
         if (searchParam.trim()) params.search = searchParam.trim();
         if (genreParam.trim()) params.genre = genreParam.trim();
 

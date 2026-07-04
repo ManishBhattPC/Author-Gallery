@@ -14,25 +14,25 @@ const AuthorCard = ({ id, image, name, genre, works }) => {
       <img
         src={avatarUrl}
         alt={name}
-        className="w-full h-64 object-cover"
+        className="w-full aspect-square sm:h-64 object-cover"
       />
 
-      <div className="p-5">
-        <h3 className="text-xl font-serif font-bold text-slate-900">{name}</h3>
+      <div className="p-4 sm:p-5">
+        <h3 className="text-base sm:text-xl font-serif font-bold text-slate-900 line-clamp-1">{name}</h3>
 
-        <p className="text-slate-500 mt-1.5 text-xs font-semibold uppercase tracking-wider">{genre}</p>
+        <p className="text-slate-500 mt-1 sm:mt-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider line-clamp-1">{genre}</p>
 
-        <p className="text-sm text-slate-600 mt-3 font-medium">{works} Published Works</p>
+        <p className="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 font-medium">{works} Published Works</p>
 
         {id ? (
           <Link
             to={`/authors/${id}`}
-            className="mt-4 inline-block text-amber-700 font-bold hover:text-amber-900 transition-colors text-sm"
+            className="mt-3 sm:mt-4 inline-block text-amber-700 font-bold hover:text-amber-900 transition-colors text-xs sm:text-sm"
           >
             View Profile →
           </Link>
         ) : (
-          <span className="mt-4 inline-block text-amber-700 font-bold text-sm">
+          <span className="mt-3 sm:mt-4 inline-block text-amber-700 font-bold text-xs sm:text-sm">
             View Profile →
           </span>
         )}
