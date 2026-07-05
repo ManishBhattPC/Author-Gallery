@@ -168,59 +168,33 @@ const NotificationsPage = () => {
             {activeTab === "system" && (
               <div className="space-y-6">
                 
-                {/* System Servers Health status */}
-                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-4">
-                  <h3 className="text-lg font-serif font-bold text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-3">
-                    <Server className="text-amber-800 w-5 h-5" />
-                    System Infrastructure Status
-                  </h3>
-                  
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    {/* Backend API Server */}
-                    <div className="border border-slate-200 rounded-2xl p-4 flex items-center gap-3.5 bg-slate-50/50">
-                      <div className={`w-3.5 h-3.5 rounded-full ${
-                        serverStatus === "online" ? "bg-emerald-500 shadow-sm animate-pulse" : "bg-rose-500"
-                      }`} />
-                      <div>
-                        <h4 className="font-bold text-slate-950 text-sm">API Gateway</h4>
-                        <p className="text-[11px] text-slate-600 font-semibold uppercase mt-0.5">
-                          {serverStatus === "online" ? "Online / Healthy" : "Connection Failure"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Database instance */}
-                    <div className="border border-slate-200 rounded-2xl p-4 flex items-center gap-3.5 bg-slate-50/50">
-                      <div className={`w-3.5 h-3.5 rounded-full ${
-                        serverStatus === "online" ? "bg-emerald-500 shadow-sm animate-pulse" : "bg-rose-500"
-                      }`} />
-                      <div>
-                        <h4 className="font-bold text-slate-950 text-sm">Database Instance</h4>
-                        <p className="text-[11px] text-slate-600 font-semibold uppercase mt-0.5">
-                          {serverStatus === "online" ? "Online / Verified" : "Offline"}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Cloudinary CDN */}
-                    <div className="border border-slate-200 rounded-2xl p-4 flex items-center gap-3.5 bg-slate-50/50">
-                      <div className="w-3.5 h-3.5 rounded-full bg-emerald-500 shadow-sm animate-pulse" />
-                      <div>
-                        <h4 className="font-bold text-slate-950 text-sm">Cloudinary CDN</h4>
-                        <p className="text-[11px] text-slate-600 font-semibold uppercase mt-0.5">Active / Ready</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {serverStatus === "offline" && (
-                    <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-2xl flex items-start gap-2 text-xs font-semibold">
-                      <AlertCircle size={16} className="shrink-0 mt-0.5" />
-                      <p>
-                        <strong>Server Connection Failure Alert:</strong> The API backend server seems to be unreachable. Uploading, buying, and profile editing features are temporarily down. Please check your internet or retry shortly.
+                {/* Maintenance / Health Status Notification */}
+                {(serverStatus === "offline" || localStorage.getItem("admin_setting_maintenanceMode") === "true") ? (
+                  <div className="bg-amber-50 border border-amber-200 p-6 rounded-3xl shadow-sm space-y-3.5">
+                    <h3 className="text-lg font-serif font-bold text-amber-900 flex items-center gap-2">
+                      <ShieldAlert className="text-amber-800 w-5.5 h-5.5 shrink-0" />
+                      Active Maintenance Mode
+                    </h3>
+                    <p className="text-xs text-amber-800 leading-relaxed font-semibold">
+                      Notice: The platform is currently undergoing system maintenance. Uploading files, purchasing premium books, and making account profile adjustments are temporarily disabled. We appreciate your patience.
+                    </p>
+                    {localStorage.getItem("admin_setting_announcementText") && (
+                      <p className="text-[11px] text-amber-900/80 italic font-medium bg-amber-100/50 p-2.5 rounded-xl border border-amber-200/10">
+                        Message: "{localStorage.getItem("admin_setting_announcementText")}"
                       </p>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="bg-emerald-50/60 border border-emerald-200/60 p-6 rounded-3xl shadow-sm space-y-2">
+                    <h3 className="text-lg font-serif font-bold text-emerald-900 flex items-center gap-2">
+                      <CheckCircle2 className="text-emerald-700 w-5.5 h-5.5 shrink-0" />
+                      System Status: Operational
+                    </h3>
+                    <p className="text-xs text-emerald-800 font-semibold leading-relaxed">
+                      All systems are active and functional. No maintenance alerts or down schedules are currently reported on your profile.
+                    </p>
+                  </div>
+                )}
 
                 {/* Account Limits */}
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm space-y-5">
