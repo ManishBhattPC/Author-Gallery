@@ -380,10 +380,17 @@ const Navbar = () => {
                     <Link
                       to="/dashboard/notifications"
                       onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
+                      className="flex items-center justify-between px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition w-full"
                     >
-                      <Bell size={16} className="text-slate-400" />
-                      <span>Notifications</span>
+                      <div className="flex items-center gap-2.5">
+                        <Bell size={16} className="text-slate-400" />
+                        <span>Notifications</span>
+                      </div>
+                      {requests.length > 0 && (
+                        <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
+                          {requests.length}
+                        </span>
+                      )}
                     </Link>
                     <Link
                       to="/dashboard/author-profile"
@@ -393,78 +400,6 @@ const Navbar = () => {
                       <User size={16} className="text-slate-400" />
                       <span>Edit Profile</span>
                     </Link>
-
-                    {/* Collapsible Purchase Requests for Authors */}
-                    <div className="border-t border-slate-100/70 border-b border-slate-100/70 my-1 py-0.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setRequestsOpen(!requestsOpen);
-                          if (!requestsOpen) {
-                            loadPendingRequests();
-                          }
-                        }}
-                        className="w-full flex items-center justify-between px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition text-left cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Bell size={16} className="text-slate-400" />
-                          <span>Purchase Requests</span>
-                        </div>
-                        {requests.length > 0 && (
-                          <span className="bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                            {requests.length}
-                          </span>
-                        )}
-                      </button>
-
-                      {requestsOpen && (
-                        <div className="px-4 py-2 bg-slate-50 border-t border-slate-100 max-h-48 overflow-y-auto">
-                          {loadingRequests ? (
-                            <p className="text-xs text-slate-400 text-center py-2">Loading requests...</p>
-                          ) : requests.length === 0 ? (
-                            <p className="text-xs text-slate-400 text-center py-2">No pending requests</p>
-                          ) : (
-                            <div className="space-y-3.5 py-1">
-                              {requests.map((req) => (
-                                <div key={req._id} className="text-xs border-b border-slate-200 pb-2 last:border-0 last:pb-0">
-                                  <p className="font-bold text-slate-800 truncate">{req.book?.title}</p>
-                                  <div className="flex items-center justify-between mt-1 text-[10px] text-slate-500">
-                                    <span>From: {req.user?.name}</span>
-                                    <span className="font-semibold text-slate-700">₹{req.book?.price}</span>
-                                  </div>
-                                  
-                                  {/* Buyer Contact details */}
-                                  <div className="mt-1.5 p-1.5 bg-slate-100 rounded-md text-[10px] text-slate-600 space-y-0.5">
-                                    <p><strong>WA:</strong> <a href={`https://wa.me/${req.whatsapp?.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="text-amber-800 hover:underline font-semibold">{req.whatsapp}</a></p>
-                                    <p className="line-clamp-2"><strong>Addr:</strong> {req.address}</p>
-                                    {req.note && <p className="italic line-clamp-1"><strong>Note:</strong> "{req.note}"</p>}
-                                  </div>
-
-                                  <div className="flex gap-1.5 mt-2 justify-end">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDecline(req._id)}
-                                      className="px-2 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md font-bold transition flex items-center gap-0.5 text-[10px] cursor-pointer"
-                                    >
-                                      <X size={10} />
-                                      Decline
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleApprove(req._id)}
-                                      className="px-2 py-1 bg-amber-700 hover:bg-amber-800 text-white rounded-md font-bold transition flex items-center gap-0.5 text-[10px] cursor-pointer"
-                                    >
-                                      <Check size={10} />
-                                      Approve
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
                     <button
                       type="button"
                       onClick={toggleTheme}
@@ -628,15 +563,22 @@ const Navbar = () => {
                       to="/dashboard/notifications"
                       onClick={() => setMenuOpen(false)}
                       className={({ isActive }) =>
-                        `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
+                        `flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition ${
                           isActive 
                             ? "bg-amber-800 text-white shadow-sm" 
                             : "text-slate-700 hover:bg-slate-100"
                         }`
                       }
                     >
-                      <Bell size={18} />
-                      <span>Notifications</span>
+                      <div className="flex items-center gap-3">
+                        <Bell size={18} />
+                        <span>Notifications</span>
+                      </div>
+                      {requests.length > 0 && (
+                        <span className="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
+                          {requests.length}
+                        </span>
+                      )}
                     </NavLink>
                     <NavLink
                       to="/dashboard/author-profile"
@@ -652,77 +594,6 @@ const Navbar = () => {
                       <Settings size={18} />
                       <span>Profile Settings</span>
                     </NavLink>
-
-                    {/* Collapsible Purchase Requests (Mobile) */}
-                    <div className="border-t border-slate-200/50 mt-2 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setMobileRequestsOpen(!mobileRequestsOpen);
-                          if (!mobileRequestsOpen) {
-                            loadPendingRequests();
-                          }
-                        }}
-                        className="w-full flex items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition text-left cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <Bell size={18} className="text-slate-505" />
-                          <span>Purchase Requests</span>
-                        </div>
-                        {requests.length > 0 && (
-                          <span className="bg-rose-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
-                            {requests.length}
-                          </span>
-                        )}
-                      </button>
-
-                      {mobileRequestsOpen && (
-                        <div className="mt-2 ml-4 pl-3 border-l-2 border-amber-800/20 space-y-3.5 max-h-48 overflow-y-auto pr-1">
-                          {loadingRequests ? (
-                            <p className="text-xs text-slate-400 py-1">Loading requests...</p>
-                          ) : requests.length === 0 ? (
-                            <p className="text-xs text-slate-400 py-1 font-medium">No pending requests</p>
-                          ) : (
-                            requests.map((req) => (
-                              <div key={req._id} className="text-xs border-b border-slate-100 pb-2 last:border-0 last:pb-0 space-y-1">
-                                <p className="font-bold text-slate-800 truncate">{req.book?.title}</p>
-                                <div className="flex items-center justify-between text-[10px] text-slate-505">
-                                  <span>From: {req.user?.name}</span>
-                                  <span className="font-semibold text-slate-705">₹{req.book?.price}</span>
-                                </div>
-                                <div className="p-1.5 bg-slate-50 border border-slate-200/60 rounded-md text-[10px] text-slate-600 space-y-0.5">
-                                  <p><strong>WA:</strong> <a href={`https://wa.me/${req.whatsapp?.replace(/[^0-9]/g, "")}`} target="_blank" rel="noreferrer" className="text-amber-800 hover:underline font-semibold">{req.whatsapp}</a></p>
-                                  <p className="line-clamp-2"><strong>Addr:</strong> {req.address}</p>
-                                  {req.note && <p className="italic line-clamp-1"><strong>Note:</strong> "{req.note}"</p>}
-                                </div>
-                                <div className="flex gap-1.5 mt-2 justify-end">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      handleDecline(req._id);
-                                    }}
-                                    className="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-md font-bold transition flex items-center gap-0.5 text-[10px] cursor-pointer"
-                                  >
-                                    <X size={10} />
-                                    Decline
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      handleApprove(req._id);
-                                    }}
-                                    className="px-2.5 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-md font-bold transition flex items-center gap-0.5 text-[10px] cursor-pointer"
-                                  >
-                                    <Check size={10} />
-                                    Approve
-                                  </button>
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
-                      )}
-                    </div>
                   </>
                 )}
               </div>
