@@ -7,6 +7,7 @@ import {
   declineRequest,
   createOrder,
   verifyPayment,
+  getBuyerOrders,
 } from "../controllers/paymentController.js";
 
 const router = express.Router();
@@ -14,6 +15,7 @@ const router = express.Router();
 // --- Direct Offline Payments (Primary Options) ---
 router.post("/request", protect, requestDirectPayment);
 router.get("/requests/author", protect, getAuthorRequests);
+router.get("/orders/buyer", protect, getBuyerOrders);
 router.post("/requests/:id/approve", protect, approveRequest);
 router.post("/requests/:id/decline", protect, declineRequest);
 

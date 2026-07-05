@@ -24,6 +24,7 @@ import ProtectedRoute from "./ProtectedRoute.jsx"
 import AdminDashboard from "./pages/AdminDashboard.jsx"
 import MyCollectionPage from "./pages/MyCollectionPage.jsx"
 import MySpacePage from "./pages/MySpacePage.jsx"
+import NotificationsPage from "./pages/NotificationsPage.jsx"
 
 const AppRoutes = () => {
   return (
@@ -101,6 +102,15 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <MySpacePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="dashboard/notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationsPage />
             </ProtectedRoute>
           }
         />

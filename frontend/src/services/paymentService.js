@@ -58,3 +58,12 @@ export const verifyPaymentSignature = async (paymentData) => {
   const response = await apiClient.post("/api/payments/verify", paymentData);
   return response.data;
 };
+
+/**
+ * Fetch orders purchased by the logged-in user (as a buyer)
+ * @returns {Promise<array>} Array of orders
+ */
+export const fetchMyOrders = async () => {
+  const response = await apiClient.get("/api/payments/orders/buyer");
+  return response.data;
+};

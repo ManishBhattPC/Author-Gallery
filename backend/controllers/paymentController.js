@@ -324,3 +324,21 @@ export const verifyPayment = async (req, res) => {
     res.status(500).json({ message: error.message || "Payment verification encountered an internal error" });
   }
 };
+
+/**
+ * Get orders purchased by the logged-in user (as a buyer)
+ * @route GET /api/payments/orders/buyer
+ * @access Private
+ */
+export const getBuyerOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id })
+      .populate("book", "title price coverImage author")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    console.error("Error fetching buyer orders:", error);
+    res.status(500).json({ message: error.message || "Failed to fetch orders" });
+  }
+};

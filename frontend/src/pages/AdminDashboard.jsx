@@ -233,6 +233,12 @@ const AdminDashboard = () => {
     setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3500);
   };
 
+  const handleReplyEmail = (email) => {
+    navigator.clipboard.writeText(email);
+    triggerToast("Email copied to clipboard! Opening mail client...", "success");
+    window.location.href = `mailto:${email}?subject=Re: Author Gallery Inquiry`;
+  };
+
   // Moderator CRUD Functions
   const handleDeleteBook = (bookId) => {
     setConfirmModal({
@@ -1764,13 +1770,13 @@ const AdminDashboard = () => {
 
                         {/* Action buttons */}
                         <div className="flex md:flex-col gap-2 w-full md:w-auto shrink-0 border-t md:border-t-0 border-zinc-900 pt-4 md:pt-0">
-                          <a 
-                            href={`mailto:${msg.email}?subject=Re: Author Gallery Inquiry`}
+                          <button 
+                            onClick={() => handleReplyEmail(msg.email)}
                             className="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-[#d87f4a] to-[#a05a3a] hover:from-[#c26e3d] hover:to-[#8c4e35] text-white rounded-xl text-xs font-bold transition shadow-md hover:scale-[1.01] cursor-pointer text-center"
                           >
                             <Mail size={13} className="shrink-0" />
                             Reply via Email
-                          </a>
+                          </button>
 
                           <button
                             onClick={() => handleDeleteContact(msg._id)}

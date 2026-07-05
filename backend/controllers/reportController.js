@@ -44,3 +44,18 @@ export const submitReport = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Get reports submitted by the logged-in user
+export const getMyReports = async (req, res) => {
+  try {
+    const reports = await Report.find({ reporter: req.user._id })
+      .populate("book", "title")
+      .populate("author", "name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(reports);
+  } catch (error) {
+    console.error("Error fetching user reports:", error);
+    res.status(500).json({ message: error.message || "Failed to fetch reports" });
+  }
+};
