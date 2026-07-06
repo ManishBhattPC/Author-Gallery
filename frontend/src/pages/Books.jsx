@@ -119,8 +119,8 @@ const Books = () => {
                   <div key={n} className="animate-pulse bg-white rounded-2xl p-4 border border-slate-200/50 space-y-4 shadow-sm">
                     <div className="aspect-[3/4] w-full bg-slate-100 rounded-xl" />
                     <div className="space-y-2">
-                      <div className="h-4 bg-slate-105 rounded w-3/4" />
-                      <div className="h-3 bg-slate-105 rounded w-1/2" />
+                      <div className="h-4 bg-slate-200 rounded w-3/4" />
+                      <div className="h-3 bg-slate-200 rounded w-1/2" />
                     </div>
                   </div>
                 ))

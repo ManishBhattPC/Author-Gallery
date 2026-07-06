@@ -68,10 +68,10 @@ const AuthorsGrid = ({ search = "" }) => {
             {loading ? (
               [1, 2, 3, 4].map((n) => (
                 <div key={n} className="animate-pulse bg-white rounded-2xl p-4 border border-slate-200/50 space-y-4 shadow-sm">
-                  <div className="aspect-square w-full bg-slate-105 rounded-xl animate-pulse" />
+                  <div className="aspect-square w-full bg-slate-200 rounded-xl animate-pulse" />
                   <div className="space-y-2">
-                    <div className="h-4 bg-slate-105 rounded w-3/4" />
-                    <div className="h-3 bg-slate-105 rounded w-1/2" />
+                    <div className="h-4 bg-slate-200 rounded w-3/4" />
+                    <div className="h-3 bg-slate-200 rounded w-1/2" />
                   </div>
                 </div>
               ))
