@@ -64,14 +64,16 @@ const AuthorsGrid = ({ search = "" }) => {
         </div>
       ) : (
         <div className="min-h-[400px] flex flex-col justify-between">
-          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+          <div key={`${page}-${loading}`} className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 animate-fade-in">
             {loading ? (
               [1, 2, 3, 4].map((n) => (
-                <div key={n} className="animate-pulse bg-white rounded-2xl p-4 border border-slate-200/50 space-y-4 shadow-sm">
-                  <div className="aspect-square w-full bg-slate-200 rounded-xl animate-pulse" />
-                  <div className="space-y-2">
-                    <div className="h-4 bg-slate-200 rounded w-3/4" />
-                    <div className="h-3 bg-slate-200 rounded w-1/2" />
+                <div key={n} className="border border-slate-200/50 bg-white rounded-2xl shadow-md overflow-hidden animate-pulse flex flex-col">
+                  <div className="aspect-square bg-slate-100 w-full" />
+                  <div className="p-4 sm:p-5 space-y-3 flex-grow">
+                    <div className="h-5 bg-slate-200 rounded w-2/3" />
+                    <div className="h-3 bg-slate-200 rounded w-1/3" />
+                    <div className="h-3.5 bg-slate-200 rounded w-1/2" />
+                    <div className="h-4 bg-slate-200 rounded w-1/4 pt-1" />
                   </div>
                 </div>
               ))
