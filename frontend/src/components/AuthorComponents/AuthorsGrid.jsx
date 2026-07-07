@@ -17,13 +17,15 @@ const AuthorsGrid = ({ search = "" }) => {
     setPage(1);
   }
 
+  const limit = window.innerWidth < 640 ? 4 : 8;
+
   useEffect(() => {
     const loadAuthors = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const params = { page, limit: 4 };
+        const params = { page, limit };
         if (search.trim()) params.search = search.trim();
 
         const data = await fetchAuthors(params);
@@ -66,7 +68,7 @@ const AuthorsGrid = ({ search = "" }) => {
         <div className="min-h-[400px] flex flex-col justify-between">
           <div key={`${page}-${loading}`} className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 animate-fade-in">
             {loading ? (
-              [1, 2, 3, 4].map((n) => (
+              [...Array(limit).keys()].map((n) => (
                 <div key={n} className="border border-slate-200/50 bg-white rounded-2xl shadow-md overflow-hidden animate-pulse flex flex-col">
                   <div className="aspect-square bg-slate-100 w-full" />
                   <div className="p-4 sm:p-5 space-y-3 flex-grow">
