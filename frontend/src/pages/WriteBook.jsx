@@ -407,6 +407,14 @@ const WriteBook = () => {
       return;
     }
 
+    const selectedDate = new Date(activeDraft.publishDate);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    if (selectedDate > today) {
+      setMessage({ type: "error", text: "Publish date cannot be in the future." });
+      return;
+    }
+
     setPublishing(true);
     setMessage(null);
 
@@ -764,6 +772,7 @@ const WriteBook = () => {
                       type="date"
                       value={activeDraft.publishDate}
                       onChange={(e) => handleUpdateActiveDraft("publishDate", e.target.value)}
+                      max={new Date().toISOString().split("T")[0]}
                       required
                       className="w-full px-3 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-255/30 focus:border-amber-700 rounded-lg text-slate-500 focus:text-slate-900 outline-none transition-all font-normal"
                     />

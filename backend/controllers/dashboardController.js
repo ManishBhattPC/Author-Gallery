@@ -24,6 +24,8 @@ export const getAuthorDashboardStats = async (req, res) => {
         title: book.title,
         coverImage: book.coverImage,
         createdAt: book.createdAt,
+        publishDate: book.publishDate,
+        genres: book.genres,
       }))
 
     // Get author follower/following counts

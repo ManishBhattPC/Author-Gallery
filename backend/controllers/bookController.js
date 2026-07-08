@@ -181,6 +181,17 @@ export const createBook = async (req, res) => {
 
     const { title, description, genres, price, publishDate, content } = req.body;
 
+    if (publishDate) {
+      const selectedDate = new Date(publishDate);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (selectedDate > today) {
+        return res.status(400).json({
+          message: "Publish date cannot be in the future.",
+        });
+      }
+    }
+
     let coverBuffer = req.files?.coverImage?.[0]?.buffer;
 
     // Support base64 cover image if sent as string from client-side canvas
@@ -339,6 +350,17 @@ export const updateBook = async (req, res) => {
       return res.status(404).json({
         message: "Book not found or unauthorized",
       })
+    }
+
+    if (req.body.publishDate) {
+      const selectedDate = new Date(req.body.publishDate);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (selectedDate > today) {
+        return res.status(400).json({
+          message: "Publish date cannot be in the future.",
+        });
+      }
     }
 
     const updatedBook = await Book.findByIdAndUpdate(

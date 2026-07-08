@@ -79,6 +79,15 @@ const QuickUpload = ({ onPublished }) => {
         return;
       }
 
+      const selectedDate = new Date(formData.publishDate);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      if (selectedDate > today) {
+        setMessage({ text: "Publish date cannot be in the future", type: "error" });
+        setUploading(false);
+        return;
+      }
+
       if (!files.coverImage || !files.pdfFile) {
         setMessage({ text: "Please upload both cover image and PDF file", type: "error" });
         setUploading(false);
@@ -211,6 +220,7 @@ const QuickUpload = ({ onPublished }) => {
             name="publishDate"
             value={formData.publishDate}
             onChange={handleInputChange}
+            max={new Date().toISOString().split("T")[0]}
             className="w-full px-4 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-100/30 focus:border-amber-700 rounded-xl text-slate-500 focus:text-slate-900 outline-none text-sm transition-all font-normal"
             required
           />
