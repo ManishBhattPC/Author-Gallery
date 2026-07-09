@@ -194,9 +194,9 @@ const Books = () => {
                                           [shelf.title]: pIndex
                                         }));
                                       }}
-                                      className={`w-5 h-5 flex items-center justify-center text-[10px] font-bold rounded-full transition cursor-pointer ${
+                                      className={`w-6 h-6 flex items-center justify-center text-[11px] font-sans font-bold rounded-full transition cursor-pointer ${
                                         shelfPage === pIndex
-                                          ? "bg-amber-800 text-white"
+                                          ? "bg-amber-800 text-white shadow-sm"
                                           : "text-slate-500 hover:bg-slate-100"
                                       }`}
                                     >
@@ -280,9 +280,9 @@ const Books = () => {
                                           "General Shelf": pIndex
                                         }));
                                       }}
-                                      className={`w-5 h-5 flex items-center justify-center text-[10px] font-bold rounded-full transition cursor-pointer ${
+                                      className={`w-6 h-6 flex items-center justify-center text-[11px] font-sans font-bold rounded-full transition cursor-pointer ${
                                         shelfPage === pIndex
-                                          ? "bg-amber-800 text-white"
+                                          ? "bg-amber-800 text-white shadow-sm"
                                           : "text-slate-500 hover:bg-slate-100"
                                       }`}
                                     >
