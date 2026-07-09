@@ -92,6 +92,24 @@ const Books = () => {
     return pageNums;
   };
 
+  // Sliding window helper for shelf pagination (returns at most 3 page indexes)
+  const getShelfVisiblePages = (shelfPage, totalShelfPages) => {
+    const maxButtons = 3;
+    if (totalShelfPages <= maxButtons) {
+      return [...Array(totalShelfPages).keys()];
+    }
+    let start = Math.max(0, shelfPage - 1);
+    let end = Math.min(totalShelfPages - 1, start + maxButtons - 1);
+    if (end - start < maxButtons - 1) {
+      start = Math.max(0, end - maxButtons + 1);
+    }
+    const pages = [];
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 py-12">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -170,7 +188,7 @@ const Books = () => {
                             <div className="flex items-center gap-2">
                               {/* Direct Page Selectors (1 to N) inside Header */}
                               {totalShelfPages > 1 && (
-                                <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-full px-2 py-0.5 shadow-sm mr-2 select-none">
+                                <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 rounded-full px-2 py-0.5 shadow-sm mr-2 select-none">
                                   <button
                                     onClick={() => {
                                       setShelfPages(prev => ({
@@ -185,7 +203,7 @@ const Books = () => {
                                     <ChevronLeft size={12} />
                                   </button>
 
-                                  {[...Array(totalShelfPages).keys()].map((pIndex) => (
+                                  {getShelfVisiblePages(shelfPage, totalShelfPages).map((pIndex) => (
                                     <button
                                       key={pIndex}
                                       onClick={() => {
@@ -194,10 +212,10 @@ const Books = () => {
                                           [shelf.title]: pIndex
                                         }));
                                       }}
-                                      className={`w-6 h-6 flex items-center justify-center text-[11px] font-sans font-bold rounded-full transition cursor-pointer ${
+                                      className={`px-1.5 py-0.5 text-xs font-sans font-bold transition cursor-pointer ${
                                         shelfPage === pIndex
-                                          ? "bg-amber-800 text-white shadow-sm"
-                                          : "text-slate-500 hover:bg-slate-100"
+                                          ? "text-amber-800 font-extrabold"
+                                          : "text-slate-400 hover:text-amber-800"
                                       }`}
                                     >
                                       {pIndex + 1}
@@ -256,7 +274,7 @@ const Books = () => {
                             <div className="flex items-center gap-2">
                               {/* Direct Page Selectors (1 to N) inside Header */}
                               {totalShelfPages > 1 && (
-                                <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-full px-2 py-0.5 shadow-sm mr-2 select-none">
+                                <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 rounded-full px-2 py-0.5 shadow-sm mr-2 select-none">
                                   <button
                                     onClick={() => {
                                       setShelfPages(prev => ({
@@ -271,7 +289,7 @@ const Books = () => {
                                     <ChevronLeft size={12} />
                                   </button>
 
-                                  {[...Array(totalShelfPages).keys()].map((pIndex) => (
+                                  {getShelfVisiblePages(shelfPage, totalShelfPages).map((pIndex) => (
                                     <button
                                       key={pIndex}
                                       onClick={() => {
@@ -280,10 +298,10 @@ const Books = () => {
                                           "General Shelf": pIndex
                                         }));
                                       }}
-                                      className={`w-6 h-6 flex items-center justify-center text-[11px] font-sans font-bold rounded-full transition cursor-pointer ${
+                                      className={`px-1.5 py-0.5 text-xs font-sans font-bold transition cursor-pointer ${
                                         shelfPage === pIndex
-                                          ? "bg-amber-800 text-white shadow-sm"
-                                          : "text-slate-500 hover:bg-slate-100"
+                                          ? "text-amber-800 font-extrabold"
+                                          : "text-slate-400 hover:text-amber-800"
                                       }`}
                                     >
                                       {pIndex + 1}
