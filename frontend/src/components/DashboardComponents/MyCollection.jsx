@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMyBooks, updateBook, deleteBook } from "../../services/bookService.js";
 import { Eye, Edit3, Trash2, BookOpen, AlertCircle, Loader, X, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import { GENRES } from "../../utils/constants.js";
 
 const MyCollection = ({
   books: providedBooks,
@@ -317,7 +318,7 @@ const MyCollection = ({
                   }}
                   className="w-full rounded-2xl border border-slate-300 bg-white focus:bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-amber-700 focus:ring-4 focus:ring-amber-200/30 min-h-[120px] text-xs font-semibold"
                 >
-                  {["Novel", "Fiction", "Non-Fiction", "Romance", "Thriller", "Mystery", "Fantasy", "Science Fiction", "Biography", "History", "Poetry", "Spiritual", "Self-Help", "Education", "Business", "Technology", "Children", "Other"].map((genre) => (
+                  {GENRES.map((genre) => (
                     <option key={genre} value={genre}>{genre}</option>
                   ))}
                 </select>

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../AuthContext.jsx";
 import apiClient from "../services/apiClient.js";
+import { GENRES } from "../utils/constants.js";
 
 const TEMPLATES = [
   { id: "royal_indigo", name: "Royal Indigo & Gold", desc: "Dark elegant navy with classic gold accents" },
@@ -729,24 +730,9 @@ const WriteBook = () => {
                       className="w-full px-3 py-2.5 bg-white border border-slate-300 focus:bg-white focus:ring-4 focus:ring-amber-250/30 focus:border-amber-700 rounded-lg text-slate-900 outline-none transition-all text-xs font-normal"
                     >
                       <option value="">Select Genre</option>
-                      <option value="Novel">Novel</option>
-                      <option value="Fiction">Fiction</option>
-                      <option value="Non-Fiction">Non-Fiction</option>
-                      <option value="Romance">Romance</option>
-                      <option value="Thriller">Thriller</option>
-                      <option value="Mystery">Mystery</option>
-                      <option value="Fantasy">Fantasy</option>
-                      <option value="Science Fiction">Science Fiction</option>
-                      <option value="Biography">Biography</option>
-                      <option value="History">History</option>
-                      <option value="Poetry">Poetry</option>
-                      <option value="Spiritual">Spiritual</option>
-                      <option value="Self-Help">Self-Help</option>
-                      <option value="Education">Education</option>
-                      <option value="Business">Business</option>
-                      <option value="Technology">Technology</option>
-                      <option value="Children">Children</option>
-                      <option value="Other">Other</option>
+                      {GENRES.map((genre) => (
+                        <option key={genre} value={genre}>{genre}</option>
+                      ))}
                     </select>
                   </div>
 
