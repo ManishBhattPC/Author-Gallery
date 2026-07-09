@@ -18,6 +18,7 @@ const Books = () => {
   
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [shelfPages, setShelfPages] = useState({});
 
   // If search query parameters change, reset page to 1 immediately
   const prevParamsRef = useRef({ searchParam, genreParam });
@@ -153,22 +154,66 @@ const Books = () => {
                     ].map((shelf) => {
                       const shelfBooks = books.filter(book => 
                         book.genres && book.genres.some(g => shelf.genres.includes(g))
-                      ).slice(0, 4);
+                      );
 
                       if (shelfBooks.length === 0) return null;
 
+                      const shelfItemsCapacity = window.innerWidth < 640 ? 2 : 4;
+                      const totalShelfPages = Math.ceil(shelfBooks.length / shelfItemsCapacity);
+                      const shelfPage = shelfPages[shelf.title] || 0;
+                      const visibleBooks = shelfBooks.slice(shelfPage * shelfItemsCapacity, (shelfPage + 1) * shelfItemsCapacity);
+
                       return (
-                        <div key={shelf.title} className="space-y-4 text-left">
+                        <div key={shelf.title} className="space-y-4 text-left relative group/shelf">
                           <h3 className="font-serif text-2xl font-bold text-slate-800 border-b border-slate-200/80 pb-2 flex items-center justify-between">
                             <span>{shelf.title}</span>
-                            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-250/20 px-3 py-1 rounded-full uppercase tracking-wider">
-                              {shelfBooks.length} Standing
-                            </span>
+                            <div className="flex items-center gap-2">
+                              {totalShelfPages > 1 && (
+                                <span className="text-[10px] font-bold text-slate-500 mr-2">
+                                  Shelf {shelfPage + 1} of {totalShelfPages}
+                                </span>
+                              )}
+                              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-250/20 px-3 py-1 rounded-full uppercase tracking-wider">
+                                {shelfBooks.length} Total
+                              </span>
+                            </div>
                           </h3>
-                          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-                            {shelfBooks.map((book) => (
-                              <BookCard key={book._id} book={book} />
-                            ))}
+                          <div className="relative flex items-center">
+                            {totalShelfPages > 1 && (
+                              <button
+                                onClick={() => {
+                                  setShelfPages(prev => ({
+                                    ...prev,
+                                    [shelf.title]: Math.max(0, shelfPage - 1)
+                                  }));
+                                }}
+                                disabled={shelfPage === 0}
+                                className="absolute -left-4 z-30 p-2 bg-white/90 hover:bg-white border border-slate-200 rounded-full shadow-md text-slate-700 disabled:opacity-0 transition-all duration-200 cursor-pointer"
+                              >
+                                <ChevronLeft size={16} />
+                              </button>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 w-full">
+                              {visibleBooks.map((book) => (
+                                <BookCard key={book._id} book={book} />
+                              ))}
+                            </div>
+
+                            {totalShelfPages > 1 && (
+                              <button
+                                onClick={() => {
+                                  setShelfPages(prev => ({
+                                    ...prev,
+                                    [shelf.title]: Math.min(totalShelfPages - 1, shelfPage + 1)
+                                  }));
+                                }}
+                                disabled={(shelfPage + 1) >= totalShelfPages}
+                                className="absolute -right-4 z-30 p-2 bg-white/90 hover:bg-white border border-slate-200 rounded-full shadow-md text-slate-700 disabled:opacity-0 transition-all duration-200 cursor-pointer"
+                              >
+                                <ChevronRight size={16} />
+                              </button>
+                            )}
                           </div>
                         </div>
                       );
@@ -178,22 +223,66 @@ const Books = () => {
                     {(() => {
                       const generalBooks = books.filter(book => 
                         !book.genres || !book.genres.some(g => ["Novel", "Fiction", "Romance", "Thriller", "Mystery", "Poetry", "Shayari"].includes(g))
-                      ).slice(0, 4);
+                      );
 
                       if (generalBooks.length === 0) return null;
 
+                      const shelfItemsCapacity = window.innerWidth < 640 ? 2 : 4;
+                      const totalShelfPages = Math.ceil(generalBooks.length / shelfItemsCapacity);
+                      const shelfPage = shelfPages["General Shelf"] || 0;
+                      const visibleBooks = generalBooks.slice(shelfPage * shelfItemsCapacity, (shelfPage + 1) * shelfItemsCapacity);
+
                       return (
-                        <div className="space-y-4 text-left">
+                        <div className="space-y-4 text-left relative group/shelf">
                           <h3 className="font-serif text-2xl font-bold text-slate-800 border-b border-slate-200/80 pb-2 flex items-center justify-between">
                             <span>General Shelf</span>
-                            <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-250/20 px-3 py-1 rounded-full uppercase tracking-wider">
-                              {generalBooks.length} Standing
-                            </span>
+                            <div className="flex items-center gap-2">
+                              {totalShelfPages > 1 && (
+                                <span className="text-[10px] font-bold text-slate-500 mr-2">
+                                  Shelf {shelfPage + 1} of {totalShelfPages}
+                                </span>
+                              )}
+                              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-250/20 px-3 py-1 rounded-full uppercase tracking-wider">
+                                {generalBooks.length} Total
+                              </span>
+                            </div>
                           </h3>
-                          <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-                            {generalBooks.map((book) => (
-                              <BookCard key={book._id} book={book} />
-                            ))}
+                          <div className="relative flex items-center">
+                            {totalShelfPages > 1 && (
+                              <button
+                                onClick={() => {
+                                  setShelfPages(prev => ({
+                                    ...prev,
+                                    "General Shelf": Math.max(0, shelfPage - 1)
+                                  }));
+                                }}
+                                disabled={shelfPage === 0}
+                                className="absolute -left-4 z-30 p-2 bg-white/90 hover:bg-white border border-slate-200 rounded-full shadow-md text-slate-700 disabled:opacity-0 transition-all duration-200 cursor-pointer"
+                              >
+                                <ChevronLeft size={16} />
+                              </button>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 w-full">
+                              {visibleBooks.map((book) => (
+                                <BookCard key={book._id} book={book} />
+                              ))}
+                            </div>
+
+                            {totalShelfPages > 1 && (
+                              <button
+                                onClick={() => {
+                                  setShelfPages(prev => ({
+                                    ...prev,
+                                    "General Shelf": Math.min(totalShelfPages - 1, shelfPage + 1)
+                                  }));
+                                }}
+                                disabled={(shelfPage + 1) >= totalShelfPages}
+                                className="absolute -right-4 z-30 p-2 bg-white/90 hover:bg-white border border-slate-200 rounded-full shadow-md text-slate-700 disabled:opacity-0 transition-all duration-200 cursor-pointer"
+                              >
+                                <ChevronRight size={16} />
+                              </button>
+                            )}
                           </div>
                         </div>
                       );

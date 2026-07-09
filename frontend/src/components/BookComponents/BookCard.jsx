@@ -98,8 +98,8 @@ const BookCard = ({ book }) => {
         </div>
       </div>
 
-      {/* 3D Wooden Shelf Ledge Base */}
-      <div className="w-full h-3 bg-gradient-to-b from-[#8C5E3C] via-[#704625] to-[#543015] rounded-b-lg shadow-[0_4px_6px_rgba(0,0,0,0.15)] border-t border-white/10" />
+      {/* 3D Terracotta Shelf Ledge Base */}
+      <div className="w-full h-3 bg-gradient-to-b from-[#9E5A3F] via-[#8C4E35] to-[#6E3520] rounded-b-lg shadow-[0_4px_6px_rgba(0,0,0,0.15)] border-t border-white/15" />
       
       {/* Soft shelf drop-shadow cast onto elements below */}
       <div className="w-full h-1 bg-black/10 blur-[1px] -mt-0.5 rounded-full mx-auto w-[98%]" />
