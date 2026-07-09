@@ -164,56 +164,73 @@ const Books = () => {
                       const visibleBooks = shelfBooks.slice(shelfPage * shelfItemsCapacity, (shelfPage + 1) * shelfItemsCapacity);
 
                       return (
-                        <div key={shelf.title} className="space-y-4 text-left relative group/shelf">
+                        <div key={shelf.title} className="space-y-4 text-left relative">
                           <h3 className="font-serif text-2xl font-bold text-slate-800 border-b border-slate-200/80 pb-2 flex items-center justify-between">
                             <span>{shelf.title}</span>
                             <div className="flex items-center gap-2">
+                              {/* Direct Page Selectors (1 to N) inside Header */}
                               {totalShelfPages > 1 && (
-                                <span className="text-[10px] font-bold text-slate-500 mr-2">
-                                  Shelf {shelfPage + 1} of {totalShelfPages}
-                                </span>
+                                <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-full px-2 py-0.5 shadow-sm mr-2 select-none">
+                                  <button
+                                    onClick={() => {
+                                      setShelfPages(prev => ({
+                                        ...prev,
+                                        [shelf.title]: Math.max(0, shelfPage - 1)
+                                      }));
+                                    }}
+                                    disabled={shelfPage === 0}
+                                    className="p-1 text-slate-400 hover:text-amber-800 disabled:opacity-30 disabled:hover:text-slate-400 transition cursor-pointer"
+                                    title="Previous Page"
+                                  >
+                                    <ChevronLeft size={12} />
+                                  </button>
+
+                                  {[...Array(totalShelfPages).keys()].map((pIndex) => (
+                                    <button
+                                      key={pIndex}
+                                      onClick={() => {
+                                        setShelfPages(prev => ({
+                                          ...prev,
+                                          [shelf.title]: pIndex
+                                        }));
+                                      }}
+                                      className={`w-5 h-5 flex items-center justify-center text-[10px] font-bold rounded-full transition cursor-pointer ${
+                                        shelfPage === pIndex
+                                          ? "bg-amber-800 text-white"
+                                          : "text-slate-500 hover:bg-slate-100"
+                                      }`}
+                                    >
+                                      {pIndex + 1}
+                                    </button>
+                                  ))}
+
+                                  <button
+                                    onClick={() => {
+                                      setShelfPages(prev => ({
+                                        ...prev,
+                                        [shelf.title]: Math.min(totalShelfPages - 1, shelfPage + 1)
+                                      }));
+                                    }}
+                                    disabled={(shelfPage + 1) >= totalShelfPages}
+                                    className="p-1 text-slate-400 hover:text-amber-800 disabled:opacity-30 disabled:hover:text-slate-400 transition cursor-pointer"
+                                    title="Next Page"
+                                  >
+                                    <ChevronRight size={12} />
+                                  </button>
+                                </div>
                               )}
                               <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-250/20 px-3 py-1 rounded-full uppercase tracking-wider">
                                 {shelfBooks.length} Total
                               </span>
                             </div>
                           </h3>
-                          <div className="relative flex items-center">
-                            {totalShelfPages > 1 && (
-                              <button
-                                onClick={() => {
-                                  setShelfPages(prev => ({
-                                    ...prev,
-                                    [shelf.title]: Math.max(0, shelfPage - 1)
-                                  }));
-                                }}
-                                disabled={shelfPage === 0}
-                                className="absolute -left-4 z-30 p-2 bg-white/90 hover:bg-white border border-slate-200 rounded-full shadow-md text-slate-700 disabled:opacity-0 transition-all duration-200 cursor-pointer"
-                              >
-                                <ChevronLeft size={16} />
-                              </button>
-                            )}
-
+                          
+                          <div className="relative">
                             <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 w-full">
                               {visibleBooks.map((book) => (
                                 <BookCard key={book._id} book={book} />
                               ))}
                             </div>
-
-                            {totalShelfPages > 1 && (
-                              <button
-                                onClick={() => {
-                                  setShelfPages(prev => ({
-                                    ...prev,
-                                    [shelf.title]: Math.min(totalShelfPages - 1, shelfPage + 1)
-                                  }));
-                                }}
-                                disabled={(shelfPage + 1) >= totalShelfPages}
-                                className="absolute -right-4 z-30 p-2 bg-white/90 hover:bg-white border border-slate-200 rounded-full shadow-md text-slate-700 disabled:opacity-0 transition-all duration-200 cursor-pointer"
-                              >
-                                <ChevronRight size={16} />
-                              </button>
-                            )}
                           </div>
                         </div>
                       );
@@ -233,56 +250,73 @@ const Books = () => {
                       const visibleBooks = generalBooks.slice(shelfPage * shelfItemsCapacity, (shelfPage + 1) * shelfItemsCapacity);
 
                       return (
-                        <div className="space-y-4 text-left relative group/shelf">
+                        <div className="space-y-4 text-left relative">
                           <h3 className="font-serif text-2xl font-bold text-slate-800 border-b border-slate-200/80 pb-2 flex items-center justify-between">
                             <span>General Shelf</span>
                             <div className="flex items-center gap-2">
+                              {/* Direct Page Selectors (1 to N) inside Header */}
                               {totalShelfPages > 1 && (
-                                <span className="text-[10px] font-bold text-slate-500 mr-2">
-                                  Shelf {shelfPage + 1} of {totalShelfPages}
-                                </span>
+                                <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-full px-2 py-0.5 shadow-sm mr-2 select-none">
+                                  <button
+                                    onClick={() => {
+                                      setShelfPages(prev => ({
+                                        ...prev,
+                                        "General Shelf": Math.max(0, shelfPage - 1)
+                                      }));
+                                    }}
+                                    disabled={shelfPage === 0}
+                                    className="p-1 text-slate-400 hover:text-amber-800 disabled:opacity-30 disabled:hover:text-slate-400 transition cursor-pointer"
+                                    title="Previous Page"
+                                  >
+                                    <ChevronLeft size={12} />
+                                  </button>
+
+                                  {[...Array(totalShelfPages).keys()].map((pIndex) => (
+                                    <button
+                                      key={pIndex}
+                                      onClick={() => {
+                                        setShelfPages(prev => ({
+                                          ...prev,
+                                          "General Shelf": pIndex
+                                        }));
+                                      }}
+                                      className={`w-5 h-5 flex items-center justify-center text-[10px] font-bold rounded-full transition cursor-pointer ${
+                                        shelfPage === pIndex
+                                          ? "bg-amber-800 text-white"
+                                          : "text-slate-500 hover:bg-slate-100"
+                                      }`}
+                                    >
+                                      {pIndex + 1}
+                                    </button>
+                                  ))}
+
+                                  <button
+                                    onClick={() => {
+                                      setShelfPages(prev => ({
+                                        ...prev,
+                                        "General Shelf": Math.min(totalShelfPages - 1, shelfPage + 1)
+                                      }));
+                                    }}
+                                    disabled={(shelfPage + 1) >= totalShelfPages}
+                                    className="p-1 text-slate-400 hover:text-amber-800 disabled:opacity-30 disabled:hover:text-slate-400 transition cursor-pointer"
+                                    title="Next Page"
+                                  >
+                                    <ChevronRight size={12} />
+                                  </button>
+                                </div>
                               )}
                               <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-250/20 px-3 py-1 rounded-full uppercase tracking-wider">
                                 {generalBooks.length} Total
                               </span>
                             </div>
                           </h3>
-                          <div className="relative flex items-center">
-                            {totalShelfPages > 1 && (
-                              <button
-                                onClick={() => {
-                                  setShelfPages(prev => ({
-                                    ...prev,
-                                    "General Shelf": Math.max(0, shelfPage - 1)
-                                  }));
-                                }}
-                                disabled={shelfPage === 0}
-                                className="absolute -left-4 z-30 p-2 bg-white/90 hover:bg-white border border-slate-200 rounded-full shadow-md text-slate-700 disabled:opacity-0 transition-all duration-200 cursor-pointer"
-                              >
-                                <ChevronLeft size={16} />
-                              </button>
-                            )}
-
+                          
+                          <div className="relative">
                             <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4 w-full">
                               {visibleBooks.map((book) => (
                                 <BookCard key={book._id} book={book} />
                               ))}
                             </div>
-
-                            {totalShelfPages > 1 && (
-                              <button
-                                onClick={() => {
-                                  setShelfPages(prev => ({
-                                    ...prev,
-                                    "General Shelf": Math.min(totalShelfPages - 1, shelfPage + 1)
-                                  }));
-                                }}
-                                disabled={(shelfPage + 1) >= totalShelfPages}
-                                className="absolute -right-4 z-30 p-2 bg-white/90 hover:bg-white border border-slate-200 rounded-full shadow-md text-slate-700 disabled:opacity-0 transition-all duration-200 cursor-pointer"
-                              >
-                                <ChevronRight size={16} />
-                              </button>
-                            )}
                           </div>
                         </div>
                       );
