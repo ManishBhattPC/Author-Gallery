@@ -168,8 +168,6 @@ const cleanTextForPDF = (text) => {
 
 export const createBook = async (req, res) => {
   try {
-    console.log("BODY:", req.body); // Debug
-    console.log("FILES:", req.files); // Debug
 
     // Enforce free plan limit: max 10 books per author
     const bookCount = await Book.countDocuments({ author: req.user._id });

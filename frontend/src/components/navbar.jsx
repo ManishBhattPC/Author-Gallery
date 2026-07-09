@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
 import { getMyAuthorProfile } from "../services/authorProfileService.js";
-import { fetchAuthorRequests, approvePurchaseRequest, declinePurchaseRequest } from "../services/paymentService.js";
+import { fetchAuthorRequests } from "../services/paymentService.js";
 import { 
   LayoutDashboard, 
   User, 
@@ -20,8 +20,6 @@ import {
   Sun,
   Moon,
   Bell,
-  Check,
-  Clock,
   Library,
 } from "lucide-react";
 
@@ -102,38 +100,14 @@ const Navbar = () => {
   }, [menuOpen]);
 
   const [requests, setRequests] = useState([]);
-  const [loadingRequests, setLoadingRequests] = useState(false);
-  const [requestsOpen, setRequestsOpen] = useState(false);
-  const [mobileRequestsOpen, setMobileRequestsOpen] = useState(false);
 
   const loadPendingRequests = async () => {
     if (!user) return;
     try {
-      setLoadingRequests(true);
       const data = await fetchAuthorRequests();
       setRequests(data || []);
     } catch (err) {
       console.error("Failed to load author requests:", err);
-    } finally {
-      setLoadingRequests(false);
-    }
-  };
-
-  const handleApprove = async (requestId) => {
-    try {
-      await approvePurchaseRequest(requestId);
-      setRequests((prev) => prev.filter((r) => r._id !== requestId));
-    } catch (err) {
-      console.error("Approval failed:", err);
-    }
-  };
-
-  const handleDecline = async (requestId) => {
-    try {
-      await declinePurchaseRequest(requestId);
-      setRequests((prev) => prev.filter((r) => r._id !== requestId));
-    } catch (err) {
-      console.error("Decline failed:", err);
     }
   };
 
