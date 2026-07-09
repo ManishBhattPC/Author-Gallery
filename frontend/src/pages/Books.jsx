@@ -88,15 +88,15 @@ const Books = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12">
+    <div className="min-h-screen bg-[#FAF7F2] py-12">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="space-y-4 text-center">
           <h1 className="font-serif text-4xl font-semibold text-slate-900">
-            Explore Books
+            The Library Gallery
           </h1>
 
           <p className="mx-auto max-w-2xl text-slate-600">
-            Discover books published by authors on Author Gallery.
+            Browse through published masterpieces and independent stories standing on our shelves.
           </p>
         </div>
 
@@ -118,15 +118,15 @@ const Books = () => {
             <div key={`${page}-${loading}`} className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4 animate-fade-in">
               {loading ? (
                 [...Array(limit).keys()].map((n) => (
-                  <div key={n} className="border border-slate-200/50 bg-white rounded-2xl shadow-md overflow-hidden flex flex-col animate-pulse">
-                    <div className="aspect-[3/4] bg-slate-100 w-full" />
-                    <div className="p-4 flex flex-col flex-1 space-y-3">
-                      <div className="h-3 bg-slate-200 rounded w-1/4" />
-                      <div className="h-5 bg-slate-200 rounded w-3/4" />
-                      <div className="h-3.5 bg-slate-200 rounded w-1/2" />
-                      <div className="h-4 bg-slate-200 rounded w-1/3" />
-                      <div className="h-8 bg-slate-100 rounded-xl w-full mt-auto" />
+                  <div key={n} className="flex flex-col justify-end pt-8 pb-3 animate-pulse">
+                    <div className="mx-auto w-[85%] sm:w-[88%] aspect-[3/4] bg-stone-200 rounded-r-md rounded-l-sm shadow-sm" />
+                    <div className="bg-stone-50/95 border border-stone-200/80 rounded-2xl p-4 flex flex-col min-h-[170px] mt-2 mx-1 space-y-3">
+                      <div className="h-3 bg-stone-200 rounded w-1/4" />
+                      <div className="h-5 bg-stone-200 rounded w-3/4" />
+                      <div className="h-3.5 bg-stone-200 rounded w-1/2" />
+                      <div className="h-8 bg-stone-200 rounded-xl w-full mt-auto" />
                     </div>
+                    <div className="w-full h-3 bg-gradient-to-b from-stone-300 via-stone-400 to-stone-500 rounded-b-lg border-t border-stone-200/20" />
                   </div>
                 ))
               ) : books.length > 0 ? (
