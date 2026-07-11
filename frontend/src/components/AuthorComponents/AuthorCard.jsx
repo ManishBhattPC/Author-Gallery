@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const AuthorCard = ({ id, image, name, genre, works }) => {
+const AuthorCard = ({ id, image, name, genre, works, averageRating = 0, ratingCount = 0 }) => {
   const avatarUrl =
     image && image !== "/default-avatar.png"
       ? image
@@ -21,6 +21,18 @@ const AuthorCard = ({ id, image, name, genre, works }) => {
         <h3 className="text-base sm:text-xl font-serif font-bold text-slate-900 line-clamp-1">{name}</h3>
 
         <p className="text-slate-500 mt-1 sm:mt-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider line-clamp-1">{genre}</p>
+
+        {/* Rating Section */}
+        <div className="flex items-center gap-1.5 mt-2 select-none">
+          <div className="flex text-amber-500 text-sm">
+            {[...Array(5)].map((_, i) => (
+              <span key={i}>{i < Math.round(averageRating) ? "★" : "☆"}</span>
+            ))}
+          </div>
+          <span className="text-xs text-slate-505 font-bold">
+            {ratingCount > 0 ? `${averageRating.toFixed(1)} (${ratingCount})` : "0.0 (0)"}
+          </span>
+        </div>
 
         <p className="text-xs sm:text-sm text-slate-600 mt-2 sm:mt-3 font-medium">{works} Published Works</p>
 

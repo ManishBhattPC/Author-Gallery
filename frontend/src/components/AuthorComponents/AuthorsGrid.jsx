@@ -96,6 +96,8 @@ const AuthorsGrid = ({ search = "" }) => {
                       : (author.role || author.genre || "Author")
                   }
                   works={author.works ?? 0}
+                  averageRating={author.averageRating}
+                  ratingCount={author.ratingCount}
                 />
               ))
             )}

@@ -2,11 +2,20 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AuthorCard from "./AuthorCard";
 import { fetchTopAuthors } from "../../services/authorService.js";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const FeaturedAuthors = ({ limit }) => {
   const [authors, setAuthors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const loadAuthors = async () => {
@@ -28,6 +37,18 @@ const FeaturedAuthors = ({ limit }) => {
     loadAuthors();
   }, []);
 
+  // Reset page if screen resize changes items capacity
+  const itemsPerPage = windowWidth < 640 ? 1 : (windowWidth < 1280 ? 2 : 3);
+  const totalPages = Math.ceil(authors.length / itemsPerPage);
+
+  useEffect(() => {
+    if (currentPage >= totalPages && totalPages > 0) {
+      setCurrentPage(totalPages - 1);
+    }
+  }, [totalPages, currentPage]);
+
+  const visibleAuthors = authors.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
+
   return (
     <section className="bg-transparent py-20">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -43,14 +64,53 @@ const FeaturedAuthors = ({ limit }) => {
               Explore talented authors, poets, storytellers, and creators sharing meaningful work with readers.
             </p>
           </div>
-          {limit && authors.length > limit && (
-            <Link 
-              to="/authors" 
-              className="inline-flex items-center gap-1.5 text-amber-800 font-bold hover:text-amber-900 transition-colors text-xs sm:text-sm uppercase tracking-wider shrink-0 hover:underline"
-            >
-              View All Authors →
-            </Link>
-          )}
+
+          <div className="flex items-center gap-3">
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1.5 bg-white border border-slate-200/80 rounded-full px-2 py-0.5 shadow-sm select-none">
+                <button
+                  onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                  disabled={currentPage === 0}
+                  className="p-1 text-slate-400 hover:text-amber-800 disabled:opacity-30 disabled:hover:text-slate-400 transition cursor-pointer"
+                  title="Previous Page"
+                >
+                  <ChevronLeft size={12} />
+                </button>
+
+                {[...Array(totalPages).keys()].map((pIndex) => (
+                  <button
+                    key={pIndex}
+                    onClick={() => setCurrentPage(pIndex)}
+                    className={`px-1.5 py-0.5 text-xs font-sans font-bold transition cursor-pointer ${
+                      currentPage === pIndex
+                        ? "text-amber-800 font-extrabold"
+                        : "text-slate-400 hover:text-amber-800"
+                    }`}
+                  >
+                    {pIndex + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+                  disabled={currentPage >= totalPages - 1}
+                  className="p-1 text-slate-400 hover:text-amber-800 disabled:opacity-30 disabled:hover:text-slate-400 transition cursor-pointer"
+                  title="Next Page"
+                >
+                  <ChevronRight size={12} />
+                </button>
+              </div>
+            )}
+
+            {limit && authors.length > limit && (
+              <Link 
+                to="/authors" 
+                className="inline-flex items-center gap-1.5 text-amber-800 font-bold hover:text-amber-900 transition-colors text-xs sm:text-sm uppercase tracking-wider shrink-0 hover:underline"
+              >
+                View All Authors →
+              </Link>
+            )}
+          </div>
         </div>
 
         {loading ? (
@@ -66,24 +126,24 @@ const FeaturedAuthors = ({ limit }) => {
             No featured authors found.
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-2 gap-4 sm:gap-6 xl:grid-cols-3">
-              {(limit ? authors.slice(0, limit) : authors).map((author) => (
-                <AuthorCard
-                  key={author._id || author.id}
-                  id={author._id || author.id}
-                  image={author.profileImage || author.image || "/default-avatar.png"}
-                  name={author.name}
-                  genre={
-                    Array.isArray(author.genres) && author.genres.length > 0
-                      ? author.genres.join(", ")
-                      : (author.role || author.genre || "Author")
-                  }
-                  works={author.works ?? 0}
-                />
-              ))}
-            </div>
-          </>
+          <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {visibleAuthors.map((author) => (
+              <AuthorCard
+                key={author._id || author.id}
+                id={author._id || author.id}
+                image={author.profileImage || author.image || "/default-avatar.png"}
+                name={author.name}
+                genre={
+                  Array.isArray(author.genres) && author.genres.length > 0
+                    ? author.genres.join(", ")
+                    : (author.role || author.genre || "Author")
+                }
+                works={author.works ?? 0}
+                averageRating={author.averageRating}
+                ratingCount={author.ratingCount}
+              />
+            ))}
+          </div>
         )}
       </div>
     </section>

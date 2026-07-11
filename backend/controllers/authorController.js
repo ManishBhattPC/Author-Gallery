@@ -41,6 +41,14 @@ export const getAuthors = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "reviews",
+          localField: "_id",
+          foreignField: "author",
+          as: "authorReviews"
+        }
+      },
+      {
         $addFields: {
           works: { $size: "$books" }, // Count total books per author
           followersCount: { $size: { $ifNull: ["$followers", []] } }, // Count total followers
@@ -59,6 +67,8 @@ export const getAuthors = async (req, res) => {
               }
             ]
           },
+          averageRating: { $ifNull: [{ $avg: "$authorReviews.rating" }, 0] },
+          ratingCount: { $size: "$authorReviews" }
         },
       },
     ]
@@ -87,6 +97,8 @@ export const getAuthors = async (req, res) => {
         bio: "$resolvedBio",
         works: 1,
         genres: "$resolvedGenres",
+        averageRating: 1,
+        ratingCount: 1,
       },
     });
 
@@ -101,10 +113,10 @@ export const getAuthors = async (req, res) => {
     const countResult = await User.aggregate(countPipeline);
     const totalAuthors = countResult[0]?.total || 0;
 
-    // If featured query param is true, get top 5 authors by followers count
+    // If featured query param is true, get top 12 authors sorted by average rating and followers count
     if (featured === "true") {
-      pipeline.push({ $sort: { followersCount: -1, works: -1, name: 1 } }) // Sort by followers count descending
-      pipeline.push({ $limit: 5 }) // Limit to 5 authors
+      pipeline.push({ $sort: { averageRating: -1, followersCount: -1, works: -1, name: 1 } })
+      pipeline.push({ $limit: 12 })
     } else {
       pipeline.push({ $sort: { name: 1 } }) // Standard sort alphabetically
       pipeline.push({ $skip: skip })

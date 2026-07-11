@@ -61,7 +61,7 @@ const BookCard = ({ book }) => {
           {title}
         </h2>
 
-        <p className="text-sm text-slate-500 mb-3 font-medium truncate">
+        <p className="text-sm text-slate-500 mb-2 font-medium truncate">
           {book?.author?._id ? (
             <Link to={`/authors/${book.author._id}`} className="hover:text-amber-800 hover:underline transition-colors duration-200">
               {authorName}
@@ -70,6 +70,18 @@ const BookCard = ({ book }) => {
             authorName
           )}
         </p>
+
+        {/* Rating Section */}
+        <div className="flex items-center gap-1.5 mb-4 select-none">
+          <div className="flex text-amber-500 text-xs">
+            {[...Array(5)].map((_, i) => (
+              <span key={i}>{i < Math.round(book?.averageRating || 0) ? "★" : "☆"}</span>
+            ))}
+          </div>
+          <span className="text-[11px] text-slate-500 font-semibold">
+            {book?.ratingCount > 0 ? `${(book.averageRating || 0).toFixed(1)} (${book.ratingCount})` : "0.0 (0)"}
+          </span>
+        </div>
 
         <div className="mb-4 mt-auto">
           <span className="font-bold text-emerald-800 text-sm">

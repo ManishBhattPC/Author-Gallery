@@ -59,7 +59,7 @@ const Authors = () => {
         </div>
       </section>
 
-      <FeaturedAuthors />
+      {!searchQuery && <FeaturedAuthors />}
       <AuthorsGrid search={searchQuery} />
     </div>
   );

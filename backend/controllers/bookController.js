@@ -53,11 +53,53 @@ export const getBooks = async (req, res) => {
     }
     sortOption.createdAt = -1; // Fallback
 
-    const books = await Book.find(query)
-      .populate("author", "name email") // Include author details
-      .sort(sortOption)
-      .skip((page - 1) * limit) // Pagination
-      .limit(Number(limit))
+    const pipeline = [
+      { $match: query },
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "authorDetails"
+        }
+      },
+      {
+        $unwind: {
+          path: "$authorDetails",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $lookup: {
+          from: "reviews",
+          localField: "_id",
+          foreignField: "book",
+          as: "reviews"
+        }
+      },
+      {
+        $addFields: {
+          author: {
+            _id: "$authorDetails._id",
+            name: "$authorDetails.name",
+            email: "$authorDetails.email"
+          },
+          averageRating: { $ifNull: [{ $avg: "$reviews.rating" }, 0] },
+          ratingCount: { $size: "$reviews" }
+        }
+      },
+      {
+        $project: {
+          authorDetails: 0,
+          reviews: 0
+        }
+      },
+      { $sort: sortOption },
+      { $skip: (page - 1) * Number(limit) },
+      { $limit: Number(limit) }
+    ];
+
+    const books = await Book.aggregate(pipeline);
 
     const totalBooks = await Book.countDocuments(query) // Total matching books
 
