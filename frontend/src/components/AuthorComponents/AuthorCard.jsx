@@ -23,13 +23,13 @@ const AuthorCard = ({ id, image, name, genre, works, averageRating = 0, ratingCo
         <p className="text-slate-500 mt-1 sm:mt-1.5 text-[10px] sm:text-xs font-semibold uppercase tracking-wider line-clamp-1">{genre}</p>
 
         {/* Rating Section */}
-        <div className="flex items-center gap-1.5 mt-2 select-none">
-          <div className="flex text-amber-500 text-sm">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mt-2 select-none">
+          <div className="flex text-amber-500 text-[11px]">
             {[...Array(5)].map((_, i) => (
               <span key={i}>{i < Math.round(averageRating) ? "★" : "☆"}</span>
             ))}
           </div>
-          <span className="text-xs text-slate-505 font-bold">
+          <span className="text-xs text-slate-500 font-bold">
             {ratingCount > 0 ? `${averageRating.toFixed(1)} (${ratingCount})` : "0.0 (0)"}
           </span>
         </div>

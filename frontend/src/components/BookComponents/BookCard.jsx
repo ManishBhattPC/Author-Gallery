@@ -72,8 +72,8 @@ const BookCard = ({ book }) => {
         </p>
 
         {/* Rating Section */}
-        <div className="flex items-center gap-1.5 mb-4 select-none">
-          <div className="flex text-amber-500 text-xs">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 mb-4 select-none">
+          <div className="flex text-amber-500 text-[11px]">
             {[...Array(5)].map((_, i) => (
               <span key={i}>{i < Math.round(book?.averageRating || 0) ? "★" : "☆"}</span>
             ))}
