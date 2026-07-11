@@ -47,7 +47,18 @@ export const getAuthors = async (req, res) => {
           resolvedName: { $ifNull: ["$profile.displayName", "$name"] },
           resolvedBio: { $ifNull: ["$profile.bio", { $ifNull: ["$bio", ""] }] },
           resolvedProfileImage: { $ifNull: ["$profile.profileImage", { $ifNull: ["$profileImage", ""] }] },
-          resolvedGenres: { $ifNull: ["$profile.genres", []] },
+          resolvedGenres: {
+            $setUnion: [
+              { $ifNull: ["$profile.genres", []] },
+              {
+                $reduce: {
+                  input: { $ifNull: ["$books.genres", []] },
+                  initialValue: [],
+                  in: { $setUnion: ["$$value", { $ifNull: ["$$this", []] }] }
+                }
+              }
+            ]
+          },
         },
       },
     ]
