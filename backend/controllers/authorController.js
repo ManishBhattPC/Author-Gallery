@@ -8,6 +8,10 @@ const authorMatch = {
   $or: [{ role: "author" }, { role: { $exists: false } }],
 }
 
+const escapeRegExp = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 export const getAuthors = async (req, res) => {
   try {
     const { featured, search } = req.query // featured=true returns top 5 authors
@@ -50,7 +54,8 @@ export const getAuthors = async (req, res) => {
 
     // If search exists, filter resolved name, bio, genres
     if (search && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), "i");
+      const escapedSearch = escapeRegExp(search.trim());
+      const searchRegex = new RegExp(escapedSearch, "i");
       pipeline.push({
         $match: {
           $or: [

@@ -5,6 +5,10 @@ import uploadToCloudinary from "../utils/uploadToCloudinary.js"
 import PDFDocument from "pdfkit"
 import jwt from "jsonwebtoken"
 import Order from "../models/Order.js"
+const escapeRegExp = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 export const getBooks = async (req, res) => {
   try {
     const { search, genre, sortBy, page = 1, limit = 10 } = req.query
@@ -12,7 +16,8 @@ export const getBooks = async (req, res) => {
     const query = {}
 
     if (search && search.trim()) {
-      const searchRegex = new RegExp(search.trim(), "i");
+      const escapedSearch = escapeRegExp(search.trim());
+      const searchRegex = new RegExp(escapedSearch, "i");
 
       // Find matching authors (users) by name
       const matchingUsers = await User.find({
