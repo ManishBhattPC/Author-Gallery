@@ -26,6 +26,15 @@ Designed with a warm parchment aesthetic (`#FAF6F0`) and smooth, hardware-accele
 * **Moderation Center**: A centralized Admin Dashboard (`/admin-dashboard`) to review active books, user accounts, and reviews.
 * **Ticket Resolution Queue**: View, dismiss, or action content reports and general support tickets.
 
+### 🌟 Recent Portal Enhancements
+* **Library-Inspired Genre Shelves**: Redesigned the Explore books layout into separate parchment shelves (`Fiction`, `Novel`, `Poetry & Shayari`, etc.) with compact header-aligned pagination.
+* **Dynamic Amazon-style Ratings**: Aggregated star ratings (`★★★★☆ 4.5 (18)`) dynamically across all platform listings on both Book and Author cards.
+* **Interactive Notifications Center**: Built a real-time notification feed for authors to receive instant feedback on follower growth and book reviews.
+* **Layout Overflow Protection**: Added a sliding window algorithm to pagination widgets to render a maximum of 3 page buttons at a time, ensuring safety for 100+ pages of catalog content.
+* **Security & Database Integrity Tools**:
+  * Patched input search routes with RegExp sanitization to prevent server-side crashes from special characters.
+  * Added a standalone Mongo database cleanup script (`node scripts/cleanupCovers.js`) to scan, verify, and resolve orphaned Cloudinary cover image links.
+
 ---
 
 ## 🛠️ Technology Stack
