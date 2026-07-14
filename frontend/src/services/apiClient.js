@@ -53,6 +53,15 @@ apiClient.interceptors.response.use(
       return apiClient(config);
     }
 
+    // Handle 401 Unauthorized errors (expired or invalid token)
+    if (error.response?.status === 401) {
+      const currentPath = window.location.pathname;
+      localStorage.removeItem("author_gallery_user");
+      if (!currentPath.includes("/login") && !currentPath.includes("/register")) {
+        window.location.href = "/login?expired=true";
+      }
+    }
+
     const message =
       error.response?.data?.message ||
       error.message ||

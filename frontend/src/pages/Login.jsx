@@ -12,6 +12,13 @@ const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("expired") === "true") {
+      setError("Your session has expired. Please log in again.");
+    }
+  }, []);
   const [googleRegistration, setGoogleRegistration] = useState(null); // { credential, email, name }
   const [googlePassword, setGooglePassword] = useState("");
   const [googleConfirmPassword, setGoogleConfirmPassword] = useState("");
