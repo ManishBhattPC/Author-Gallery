@@ -18,21 +18,23 @@ const Layout = () => {
   );
 
   useEffect(() => {
-    // Sync settings from backend
+    // Sync settings from backend silently
     const checkSettings = async () => {
       try {
         const data = await getPublicSettings();
-        setMaintenanceMode(!!data.maintenanceMode);
-        setAnnouncement(data.announcementText || "");
-        localStorage.setItem("admin_setting_maintenanceMode", String(!!data.maintenanceMode));
-        localStorage.setItem("admin_setting_announcementText", data.announcementText || "");
+        if (data) {
+          setMaintenanceMode(!!data.maintenanceMode);
+          setAnnouncement(data.announcementText || "");
+          localStorage.setItem("admin_setting_maintenanceMode", String(!!data.maintenanceMode));
+          localStorage.setItem("admin_setting_announcementText", data.announcementText || "");
+        }
       } catch (err) {
-        console.error("Failed to sync public settings:", err);
+        // Silent fallback to cached localStorage while Render server spins up
       }
     };
 
     checkSettings();
-    const interval = setInterval(checkSettings, 15000); // Poll every 15 seconds
+    const interval = setInterval(checkSettings, 45000); // Gentle 45s poll
     return () => clearInterval(interval);
   }, []);
 
