@@ -44,7 +44,8 @@ import {
   MoreVertical,
   SlidersHorizontal,
   ChevronUp,
-  Mail
+  Mail,
+  HelpCircle
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../AuthContext.jsx";
