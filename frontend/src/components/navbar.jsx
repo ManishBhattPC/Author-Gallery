@@ -215,49 +215,8 @@ const Navbar = () => {
 
   const userAvatar = user?.profileImage || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || "User")}&background=8C4E35&color=FAF6F0&bold=true&size=128`;
 
-  const announcementText = localStorage.getItem("admin_setting_announcementText");
-  const [isSpeaking, setIsSpeaking] = useState(false);
-
-  const handleSpeakAnnouncement = () => {
-    if (!announcementText || !("speechSynthesis" in window)) return;
-
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
-    } else {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(announcementText);
-      utterance.rate = 0.95;
-      utterance.pitch = 1.0;
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-      setIsSpeaking(true);
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
   return (
     <div className="w-full flex flex-col">
-      {announcementText && (
-        <div className="bg-amber-800 text-white py-2.5 px-4 text-center text-[11px] font-bold leading-relaxed border-b border-amber-900 shadow-sm flex items-center justify-center gap-2 select-none animate-fade-in">
-          <button
-            type="button"
-            onClick={handleSpeakAnnouncement}
-            title={isSpeaking ? "Stop Voice Announcement" : "Listen to Announcement (Click to read out loud)"}
-            className="p-1 rounded bg-amber-900/40 hover:bg-amber-900/70 transition cursor-pointer flex items-center gap-1.5 focus:outline-none border border-amber-700/50 active:scale-95 shrink-0"
-          >
-            {isSpeaking ? (
-              <VolumeX className="w-3.5 h-3.5 text-amber-200 animate-pulse" />
-            ) : (
-              <Volume2 className="w-3.5 h-3.5 text-amber-200" />
-            )}
-            <span className="text-[10px] text-amber-200 hidden sm:inline font-mono">
-              {isSpeaking ? "Stop Voice" : "Listen"}
-            </span>
-          </button>
-          <span>{announcementText}</span>
-        </div>
-      )}
       <header className="sticky top-0 z-40 bg-slate-50 border-b border-slate-200/50 shadow-sm">
       <div className="flex w-full items-center justify-between gap-4 px-4 py-3 sm:px-8 md:px-12">
         
