@@ -42,14 +42,7 @@ if (process.env.FRONTEND_URL) {
 }
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    const cleanedOrigin = origin.replace(/\/$/, "");
-    if (allowedOrigins.includes(cleanedOrigin) || cleanedOrigin.endsWith(".onrender.com")) {
-      return callback(null, true);
-    }
-    return callback(null, true);
-  },
+  origin: true,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
