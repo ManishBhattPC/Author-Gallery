@@ -391,6 +391,16 @@ const WriteBook = () => {
   // Publish active draft
   const handlePublish = async (e) => {
     e.preventDefault();
+
+    const isMaintenanceActive = localStorage.getItem("admin_setting_maintenanceMode") === "true";
+    if (isMaintenanceActive && user?.role !== "admin") {
+      setMessage({
+        type: "error",
+        text: "Maintenance Shield Active: Content uploads & book publishing are temporarily paused for storage server maintenance. Please try again later."
+      });
+      return;
+    }
+
     if (!activeDraft.title.trim()) {
       setMessage({ type: "error", text: "Please enter a title for your book." });
       return;
@@ -720,6 +730,19 @@ const WriteBook = () => {
 
                 <form onSubmit={handlePublish} className="space-y-4 text-xs font-semibold">
                   
+                  {/* Maintenance Shield Notice */}
+                  {localStorage.getItem("admin_setting_maintenanceMode") === "true" && user?.role !== "admin" && (
+                    <div className="bg-amber-50 border border-amber-200 p-3 rounded-xl text-[11px] text-amber-900 font-semibold space-y-1">
+                      <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                        <AlertTriangle size={14} className="text-amber-800 shrink-0" />
+                        <span>Maintenance Shield Active</span>
+                      </div>
+                      <p className="leading-snug text-amber-800/90 text-[10px]">
+                        Storage server maintenance is in progress. eBook publishing & file uploads are temporarily paused for non-admin users.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Genre */}
                   <div>
                     <label className="block text-xs font-bold text-slate-800 mb-1">Genre *</label>

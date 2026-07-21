@@ -11,10 +11,13 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
+import { checkMaintenance } from "../middleware/maintenanceMiddleware.js";
+
 // Create author profile
 router.post(
   "/",
   protect,
+  checkMaintenance,
   upload.single("profileImage"),
   createAuthorProfile
 );
@@ -30,6 +33,7 @@ router.get(
 router.put(
   "/me",
   protect,
+  checkMaintenance,
   upload.single("profileImage"),
   updateAuthorProfile
 );

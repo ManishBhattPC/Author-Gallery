@@ -1,7 +1,8 @@
 import React, { useState, useRef } from "react";
 import apiClient from "../../services/apiClient.js";
-import { UploadCloud, FileImage, FileText, CheckCircle2, AlertCircle } from "lucide-react";
+import { UploadCloud, FileImage, FileText, CheckCircle2, AlertCircle, ShieldAlert } from "lucide-react";
 import { GENRES } from "../../utils/constants.js";
+import { useAuth } from "../../AuthContext.jsx";
 
 const QuickUpload = ({ onPublished }) => {
   const [formData, setFormData] = useState({
@@ -68,8 +69,20 @@ const QuickUpload = ({ onPublished }) => {
     setCropModalOpen(false);
   };
 
+  const { user } = useAuth();
+
   const handlePublish = async (e) => {
     e.preventDefault();
+
+    const isMaintenanceActive = localStorage.getItem("admin_setting_maintenanceMode") === "true";
+    if (isMaintenanceActive && user?.role !== "admin") {
+      setMessage({
+        text: "Maintenance Shield Active: Data uploads & book publishing are temporarily paused for storage maintenance. Please try again later.",
+        type: "error"
+      });
+      return;
+    }
+
     setUploading(true);
     setMessage(null);
 
@@ -135,7 +148,15 @@ const QuickUpload = ({ onPublished }) => {
 
       <form onSubmit={handlePublish} className="space-y-4">
         
-        {/* Title */}
+        {/* Maintenance Shield Warning */}
+        {localStorage.getItem("admin_setting_maintenanceMode") === "true" && user?.role !== "admin" && (
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 font-semibold flex items-start gap-2.5 shadow-sm">
+            <ShieldAlert size={18} className="text-amber-800 shrink-0 mt-0.5" />
+            <div>
+              <strong className="font-bold">Maintenance Shield Active:</strong> Storage server maintenance is currently underway. Quick uploads & publishing are temporarily paused for non-admin accounts.
+            </div>
+          </div>
+        )}
         <div>
           <label className="block text-xs font-bold text-slate-800 mb-1">Book Title *</label>
           <input

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { FaUser, FaInstagram, FaTwitter, FaGlobe, FaSave, FaUserCheck } from "react-icons/fa";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, ShieldAlert } from "lucide-react";
 
 const genreOptions = [
   "Fiction",
@@ -140,6 +140,12 @@ const AuthorProfileDetails = ({ initialValues = {}, onSubmit }) => {
     setError("");
     setSuccess("");
 
+    const isMaintenanceActive = localStorage.getItem("admin_setting_maintenanceMode") === "true";
+    if (isMaintenanceActive && initialValues?.user?.role !== "admin") {
+      setError("Maintenance Shield Active: Profile media & details updates are temporarily paused for storage maintenance. Please try again later.");
+      return;
+    }
+
     if (!form.displayName.trim()) {
       setError("Display name is required.");
       return;
@@ -194,6 +200,17 @@ const AuthorProfileDetails = ({ initialValues = {}, onSubmit }) => {
       </div>
 
       <form className="space-y-6 text-sm" onSubmit={handleSubmit}>
+        
+        {/* Maintenance Shield Warning */}
+        {localStorage.getItem("admin_setting_maintenanceMode") === "true" && initialValues?.user?.role !== "admin" && (
+          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 font-semibold flex items-start gap-2.5 shadow-sm">
+            <ShieldAlert size={18} className="text-amber-800 shrink-0 mt-0.5" />
+            <div>
+              <strong className="font-bold">Maintenance Shield Active:</strong> Profile image uploads and account updates are temporarily paused for storage maintenance.
+            </div>
+          </div>
+        )}
+
         <div className="grid gap-6 sm:grid-cols-2">
           {/* Display Name */}
           <div>

@@ -132,6 +132,24 @@ const NotificationsPage = () => {
           </button>
         </div>
 
+        {/* Global Maintenance Alert Banner */}
+        {localStorage.getItem("admin_setting_maintenanceMode") === "true" && (
+          <div className="bg-amber-50 border border-amber-300 p-5 rounded-3xl shadow-sm text-left space-y-2">
+            <h3 className="text-base font-serif font-bold text-amber-900 flex items-center gap-2">
+              <ShieldAlert className="text-amber-800 w-5 h-5 shrink-0 animate-pulse" />
+              Platform Maintenance Active — Upload Shield Enabled
+            </h3>
+            <p className="text-xs text-amber-800 leading-relaxed font-semibold">
+              Notice: Our storage servers are currently undergoing essential maintenance & resource optimization. Data uploads, book creation/publishing, and profile media updates are temporarily paused for non-admin accounts. Site browsing remains fully operational. Thank you for your cooperation!
+            </p>
+            {localStorage.getItem("admin_setting_announcementText") && (
+              <p className="text-[11px] text-amber-900/80 italic font-medium bg-amber-100/60 p-2.5 rounded-xl border border-amber-200">
+                Message: "{localStorage.getItem("admin_setting_announcementText")}"
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Tab Selection */}
         <div className="flex border-b border-slate-200 gap-1 overflow-x-auto pb-px">
           {[

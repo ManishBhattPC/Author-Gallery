@@ -17,9 +17,13 @@ const router = express.Router();
 router.use(protect);
 router.use(admin);
 
+import { getAdminSettings, updateAdminSettings } from "../controllers/settingsController.js";
+
 router.get("/dashboard", getDashboardData);
 router.get("/transactions", getTransactions);
 router.get("/contacts", getContactMessages);
+router.get("/settings", getAdminSettings);
+router.put("/settings", updateAdminSettings);
 router.delete("/books/:id", deleteBook);
 router.delete("/authors/:id", deleteAuthor);
 router.delete("/reports/:id", dismissReport);

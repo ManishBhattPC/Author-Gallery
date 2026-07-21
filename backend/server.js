@@ -76,8 +76,11 @@ app.use(
   })
 )
 
+import settingsRoutes from "./routes/settingsRoutes.js";
+
 app.use(cookieParser())
 app.use(express.json())
+app.use("/api/settings", settingsRoutes)
 app.use("/api/books", bookRoutes)
 app.use("/api/dashboard", dashboardRoutes)
 app.use("/api/authors", authorRoutes)

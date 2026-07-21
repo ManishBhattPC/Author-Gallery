@@ -21,9 +21,12 @@ router.get("/:id", getBookById); // Public: Single book details
 
 router.post("/:id/download", incrementDownloads); // Increment downloads count
 
+import { checkMaintenance } from "../middleware/maintenanceMiddleware.js";
+
 router.post(
   "/",
   protect, // User must be logged in
+  checkMaintenance, // Enforce Maintenance Mode shield for uploads & creations
   upload.fields([
     { name: "coverImage", maxCount: 1 }, // Cover image file
     { name: "pdfFile", maxCount: 1 }, // PDF file
@@ -31,9 +34,9 @@ router.post(
   createBook
 );
 
-router.put("/:id", protect, updateBook); // Update own book
+router.put("/:id", protect, checkMaintenance, updateBook); // Update own book
 
-router.delete("/:id", protect, deleteBook); // Delete own book
+router.delete("/:id", protect, checkMaintenance, deleteBook); // Delete own book
 
 export default router;
 

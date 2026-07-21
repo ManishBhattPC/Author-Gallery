@@ -47,3 +47,21 @@ export const deleteContactByAdmin = async (contactId) => {
   const response = await apiClient.delete(`/api/admin/contacts/${contactId}`);
   return response.data;
 };
+
+// Fetch public settings for all users
+export const getPublicSettings = async () => {
+  const response = await apiClient.get("/api/settings/public");
+  return response.data;
+};
+
+// Fetch settings config for admin portal
+export const getAdminSettings = async () => {
+  const response = await apiClient.get("/api/admin/settings");
+  return response.data;
+};
+
+// Update settings config from admin portal
+export const updateAdminSettings = async (newSettings) => {
+  const response = await apiClient.put("/api/admin/settings", newSettings);
+  return response.data;
+};

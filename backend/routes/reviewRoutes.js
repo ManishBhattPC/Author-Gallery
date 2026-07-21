@@ -12,7 +12,9 @@ const router = express.Router();
 router.get("/book/:bookId", getBookReviews);
 router.get("/author/:authorId", getAuthorReviews);
 
+import { checkMaintenance } from "../middleware/maintenanceMiddleware.js";
+
 // Protected routes for writing reviews
-router.post("/", protect, addReview);
+router.post("/", protect, checkMaintenance, addReview);
 
 export default router;

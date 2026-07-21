@@ -7,7 +7,9 @@ import {
   deleteReviewByAdmin,
   getAdminTransactions,
   getAdminContacts,
-  deleteContactByAdmin
+  deleteContactByAdmin,
+  getAdminSettings,
+  updateAdminSettings
 } from "../services/adminService.js";
 import { approvePurchaseRequest, declinePurchaseRequest } from "../services/paymentService.js";
 import { 
@@ -210,14 +212,28 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       setError("");
-      const [res, txs, list] = await Promise.all([
+      const [res, txs, list, dbSettings] = await Promise.all([
         getAdminDashboardData(),
         getAdminTransactions().catch(() => []),
-        getAdminContacts().catch(() => [])
+        getAdminContacts().catch(() => []),
+        getAdminSettings().catch(() => null)
       ]);
       setData(res);
       setTransactions(txs || []);
       setContacts(list || []);
+
+      if (dbSettings) {
+        setSettingsConfig({
+          maintenanceMode: !!dbSettings.maintenanceMode,
+          autoModeration: dbSettings.autoModeration !== false,
+          allowRegistration: dbSettings.allowRegistration !== false,
+          stripeLiveMode: !!dbSettings.stripeLiveMode,
+          announcementText: dbSettings.announcementText || "System maintenance & server optimization in progress.",
+        });
+        localStorage.setItem("admin_setting_maintenanceMode", String(!!dbSettings.maintenanceMode));
+        localStorage.setItem("admin_setting_allowRegistration", String(dbSettings.allowRegistration !== false));
+        localStorage.setItem("admin_setting_announcementText", dbSettings.announcementText || "");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Failed to load dashboard data.");
     } finally {
@@ -322,15 +338,28 @@ const AdminDashboard = () => {
     });
   };
 
-  // Mock quick action toggles
-  const handleToggleSetting = (field) => {
-    setSettingsConfig(prev => {
-      const nextValue = !prev[field];
-      localStorage.setItem(`admin_setting_${field}`, String(nextValue));
-      const next = { ...prev, [field]: nextValue };
-      triggerToast(`${field.replace(/([A-Z])/g, ' $1')} updated successfully`, "success");
-      return next;
-    });
+  // Quick action toggles connected to DB
+  const handleToggleSetting = async (field) => {
+    const nextValue = !settingsConfig[field];
+    const nextConfig = { ...settingsConfig, [field]: nextValue };
+    setSettingsConfig(nextConfig);
+    localStorage.setItem(`admin_setting_${field}`, String(nextValue));
+
+    try {
+      await updateAdminSettings(nextConfig);
+      if (field === "maintenanceMode") {
+        if (nextValue) {
+          triggerToast("🛡️ Maintenance Shield Activated: Data uploads & content publishing are now paused for non-admin users.", "warning");
+        } else {
+          triggerToast("✅ Maintenance Shield Deactivated: Data uploads & publishing restored for all users.", "success");
+        }
+      } else {
+        triggerToast(`${field.replace(/([A-Z])/g, ' $1')} updated successfully`, "success");
+      }
+    } catch (err) {
+      console.error("Failed to update system setting:", err);
+      triggerToast("Failed to persist setting update to server", "error");
+    }
   };
 
   // Extract unique genres for filtration
