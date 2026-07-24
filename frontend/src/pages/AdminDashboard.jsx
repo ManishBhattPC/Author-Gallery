@@ -262,13 +262,13 @@ const AdminDashboard = () => {
       title: "Purge eBook Listing",
       message: "Are you sure you want to delete this book? This will permanently delete its Cloudinary assets (Cover & PDF), along with associated reviews and reports.",
       type: "danger",
-      onConfirm: async () => {
+       onConfirm: async () => {
         try {
           await deleteBookByAdmin(bookId);
           triggerToast("Book and Cloudinary assets successfully purged", "success");
           loadDashboardData();
         } catch (err) {
-          triggerToast("Failed to delete book", "error");
+          triggerToast(err.response?.data?.message || "Failed to delete book", "error");
         }
         setConfirmModal(null);
       }
@@ -286,7 +286,7 @@ const AdminDashboard = () => {
           triggerToast("Author account blocked and data deleted successfully", "success");
           loadDashboardData();
         } catch (err) {
-          triggerToast("Failed to delete author", "error");
+          triggerToast(err.response?.data?.message || "Failed to delete author", "error");
         }
         setConfirmModal(null);
       }
@@ -299,7 +299,7 @@ const AdminDashboard = () => {
       triggerToast("Report dismissed successfully", "success");
       loadDashboardData();
     } catch (err) {
-      triggerToast("Failed to dismiss report", "error");
+      triggerToast(err.response?.data?.message || "Failed to dismiss report", "error");
     }
   };
 
@@ -314,7 +314,7 @@ const AdminDashboard = () => {
           triggerToast("Review comment successfully deleted", "success");
           loadDashboardData();
         } catch (err) {
-          triggerToast("Failed to delete review", "error");
+          triggerToast(err.response?.data?.message || "Failed to delete review", "error");
         }
         setConfirmModal(null);
       }
