@@ -144,22 +144,22 @@ const AdminDashboard = () => {
   const handleApproveTransaction = async (requestId) => {
     try {
       await approvePurchaseRequest(requestId);
-      setToast({ show: true, message: "Request approved and book access granted successfully.", type: "success" });
+      triggerToast("Request approved and book access granted successfully.", "success");
       loadTransactions();
     } catch (err) {
       console.error("Failed to approve transaction:", err);
-      setToast({ show: true, message: err.message || "Failed to approve transaction", type: "error" });
+      triggerToast(err.message || "Failed to approve transaction", "error");
     }
   };
 
   const handleDeclineTransaction = async (requestId) => {
     try {
       await declinePurchaseRequest(requestId);
-      setToast({ show: true, message: "Request declined successfully.", type: "success" });
+      triggerToast("Request declined successfully.", "success");
       loadTransactions();
     } catch (err) {
       console.error("Failed to decline transaction:", err);
-      setToast({ show: true, message: err.message || "Failed to decline transaction", type: "error" });
+      triggerToast(err.message || "Failed to decline transaction", "error");
     }
   };
 

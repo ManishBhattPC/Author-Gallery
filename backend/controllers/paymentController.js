@@ -139,8 +139,11 @@ export const approveRequest = async (req, res) => {
       return res.status(404).json({ message: "Purchase request not found" });
     }
 
-    // Verify current user is the author of this book
-    if (order.book.author.toString() !== req.user._id.toString()) {
+    // Verify current user is the author of this book OR is an admin
+    const isAuthor = order.book.author.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === "admin";
+
+    if (!isAuthor && !isAdmin) {
       return res.status(403).json({ message: "You are not authorized to approve this request" });
     }
 
@@ -178,8 +181,11 @@ export const declineRequest = async (req, res) => {
       return res.status(404).json({ message: "Purchase request not found" });
     }
 
-    // Verify current user is the author of this book
-    if (order.book.author.toString() !== req.user._id.toString()) {
+    // Verify current user is the author of this book OR is an admin
+    const isAuthor = order.book.author.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === "admin";
+
+    if (!isAuthor && !isAdmin) {
       return res.status(403).json({ message: "You are not authorized to decline this request" });
     }
 
