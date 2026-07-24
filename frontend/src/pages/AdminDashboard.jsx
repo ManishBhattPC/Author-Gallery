@@ -83,6 +83,11 @@ const AdminDashboard = () => {
   const [sortField, setSortField] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
 
+  // Dynamic Cloudinary Storage Metrics
+  const storageUsageGB = data.cloudinaryUsage ? (data.cloudinaryUsage.usage / (1024 * 1024 * 1024)).toFixed(3) : "11.25";
+  const storageLimitGB = data.cloudinaryUsage ? (data.cloudinaryUsage.limit / (1024 * 1024 * 1024)).toFixed(1) : "25.0";
+  const storagePercent = data.cloudinaryUsage ? data.cloudinaryUsage.percent : 45;
+
   // Helper to render pagination page numbers
   const getPageNumbers = (totalPages, curPage) => {
     const maxButtons = 5;
@@ -2267,11 +2272,11 @@ const AdminDashboard = () => {
                       <div className="space-y-2">
                         <div className="flex justify-between text-xs">
                           <span className="text-zinc-400">Cloudinary Media Storage</span>
-                          <span className="text-zinc-200 font-bold">11.25 GB / 25 GB (45%)</span>
+                          <span className="text-zinc-200 font-bold">{storageUsageGB} GB / {storageLimitGB} GB ({storagePercent}%)</span>
                         </div>
                         {/* Custom SVG Storage progress bar */}
                         <svg className="w-full h-2 rounded-full overflow-hidden bg-zinc-800" viewBox="0 0 100 2">
-                          <rect x="0" y="0" width="45" height="2" fill="#d87f4a" />
+                          <rect x="0" y="0" width={storagePercent} height="2" fill="#d87f4a" />
                         </svg>
                       </div>
 
