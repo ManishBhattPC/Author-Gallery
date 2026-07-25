@@ -54,12 +54,44 @@ apiClient.interceptors.response.use(
     }
 
     // Handle 401 Unauthorized errors (expired or invalid token)
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !config._retry) {
       const currentPath = window.location.pathname;
-      localStorage.removeItem("author_gallery_user");
-      if (!currentPath.includes("/login") && !currentPath.includes("/register")) {
-        window.location.href = "/login?expired=true";
+      if (currentPath.includes("/login") || currentPath.includes("/register")) {
+        localStorage.removeItem("author_gallery_user");
+        return Promise.reject(error);
       }
+
+      config._retry = true;
+      try {
+        console.log("Access token expired. Attempting dynamic silent refresh...");
+        const refreshResponse = await axios.post(
+          `${API_BASE_URL}/api/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
+        const { accessToken } = refreshResponse.data;
+
+        // Update local storage with new access token
+        const stored = localStorage.getItem("author_gallery_user");
+        if (stored) {
+          const user = JSON.parse(stored);
+          user.token = accessToken;
+          localStorage.setItem("author_gallery_user", JSON.stringify(user));
+        }
+
+        // Retry the original request with new access token
+        config.headers.Authorization = `Bearer ${accessToken}`;
+        return apiClient(config);
+      } catch (refreshError) {
+        console.error("Token refresh failed or expired:", refreshError);
+        localStorage.removeItem("author_gallery_user");
+        window.location.href = "/login?expired=true";
+        return Promise.reject(refreshError);
+      }
+    } else if (error.response?.status === 401) {
+      // If we already retried and still got 401, force logout
+      localStorage.removeItem("author_gallery_user");
+      window.location.href = "/login?expired=true";
     }
 
     const message =

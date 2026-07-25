@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
+import apiClient from "./services/apiClient.js";
 
 const AUTH_STORAGE_KEY = "author_gallery_user";
 const AuthContext = createContext();
@@ -19,9 +20,15 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(data));
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+  const logout = async () => {
+    try {
+      await apiClient.post("/api/auth/logout");
+    } catch (err) {
+      console.warn("Backend logout failed:", err.message);
+    } finally {
+      setUser(null);
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+    }
   };
 
   const updateUser = (updatedFields) => {

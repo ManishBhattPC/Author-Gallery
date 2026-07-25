@@ -1,7 +1,9 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import User from "../models/User.js";
 import AuthorProfile from "../models/authorProfile.js";
+import RefreshToken from "../models/RefreshToken.js";
 import OTP from "../models/OTP.js";
 import PasswordReset from "../models/PasswordReset.js";
 import { sendOTPEmail, sendResetPasswordOTPEmail } from "../utils/mailService.js";
@@ -61,6 +63,74 @@ const getCookieOptions = () => {
     sameSite: isProduction ? "none" : "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   };
+};
+
+const getAccessTokenCookieOptions = () => {
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "strict",
+    maxAge: 15 * 60 * 1000, // 15 minutes
+  };
+};
+
+const getRefreshTokenCookieOptions = () => {
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  };
+};
+
+const clearAccessTokenCookieOptions = () => {
+  const opts = getAccessTokenCookieOptions();
+  delete opts.maxAge;
+  return opts;
+};
+
+const clearRefreshTokenCookieOptions = () => {
+  const opts = getRefreshTokenCookieOptions();
+  delete opts.maxAge;
+  return opts;
+};
+
+const sendTokens = async (user, res, statusCode, message, customResponseData = {}) => {
+  // 1. Generate short-lived Access Token (15m expiry)
+  const accessToken = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  // 2. Generate long-lived Refresh Token (random hex string)
+  const refreshTokenString = crypto.randomBytes(40).toString("hex");
+  const refreshTokenExpiry = new Date();
+  refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 7); // 7 days
+
+  // 3. Save Refresh Token in MongoDB
+  await RefreshToken.create({
+    token: refreshTokenString,
+    user: user._id,
+    expiresAt: refreshTokenExpiry,
+  });
+
+  // 4. Set cookies
+  res.cookie("token", accessToken, getAccessTokenCookieOptions());
+  res.cookie("refreshToken", refreshTokenString, getRefreshTokenCookieOptions());
+
+  // 5. Respond
+  res.status(statusCode).json({
+    message,
+    user: {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      token: accessToken, // for backward compatibility/frontend headers
+      ...customResponseData,
+    },
+  });
 };
 
 export const registerUser = async (req, res) => {
@@ -207,25 +277,9 @@ export const verifyOTP = async (req, res) => {
     // Delete verification record
     await record.deleteOne();
 
-    // Auto-login after verification
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.cookie("token", token, getCookieOptions());
-
-    res.status(201).json({
-      message: "Verification successful. Registration complete.",
-      user: {
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        profileImage: "",
-        token,
-      },
+    // Auto-login after verification using sendTokens helper
+    await sendTokens(user, res, 201, "Verification successful. Registration complete.", {
+      profileImage: "",
     });
   } catch (error) {
     res.status(500).json({
@@ -299,26 +353,11 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.cookie("token", token, getCookieOptions());
-
     const profile = await AuthorProfile.findOne({ user: user._id });
 
-    return res.status(200).json({
-      message: "Login successful",
-      user: {
-        _id: user._id,
-        name: profile?.displayName || user.name,
-        email: user.email,
-        profileImage: profile?.profileImage || "",
-        role: user.role,
-        token,
-      },
+    await sendTokens(user, res, 200, "Login successful", {
+      name: profile?.displayName || user.name,
+      profileImage: profile?.profileImage || "",
     });
   } catch (error) {
     res.status(500).json({
@@ -389,26 +428,11 @@ export const googleLogin = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.cookie("token", token, getCookieOptions());
-
     const profile = await AuthorProfile.findOne({ user: user._id });
 
-    return res.status(200).json({
-      message: "Google login successful",
-      user: {
-        _id: user._id,
-        name: profile?.displayName || user.name,
-        email: user.email,
-        profileImage: profile?.profileImage || "",
-        role: user.role,
-        token,
-      },
+    await sendTokens(user, res, 200, "Google login successful", {
+      name: profile?.displayName || user.name,
+      profileImage: profile?.profileImage || "",
     });
   } catch (error) {
     console.error("Google authentication error:", error);
@@ -532,5 +556,69 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({
       message: error.message,
     });
+  }
+};
+
+export const refreshAccessToken = async (req, res) => {
+  try {
+    const refreshTokenString = req.cookies.refreshToken;
+    if (!refreshTokenString) {
+      return res.status(401).json({ message: "Refresh token is missing" });
+    }
+
+    const savedToken = await RefreshToken.findOne({ token: refreshTokenString }).populate("user");
+    if (!savedToken) {
+      return res.status(403).json({ message: "Invalid or expired refresh token" });
+    }
+
+    if (savedToken.expiresAt < new Date()) {
+      await savedToken.deleteOne();
+      return res.status(403).json({ message: "Refresh token has expired" });
+    }
+
+    // Generate new Access Token (15m expiry)
+    const newAccessToken = jwt.sign(
+      { id: savedToken.user._id, role: savedToken.user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    // Rotate refresh token (highly secure: delete old, issue new)
+    const newRefreshTokenString = crypto.randomBytes(40).toString("hex");
+    const refreshTokenExpiry = new Date();
+    refreshTokenExpiry.setDate(refreshTokenExpiry.getDate() + 7);
+
+    // Update refresh token in DB
+    savedToken.token = newRefreshTokenString;
+    savedToken.expiresAt = refreshTokenExpiry;
+    await savedToken.save();
+
+    // Set new cookies
+    res.cookie("token", newAccessToken, getAccessTokenCookieOptions());
+    res.cookie("refreshToken", newRefreshTokenString, getRefreshTokenCookieOptions());
+
+    res.status(200).json({
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const logoutUser = async (req, res) => {
+  try {
+    const refreshTokenString = req.cookies.refreshToken;
+    if (refreshTokenString) {
+      // Delete from DB
+      await RefreshToken.deleteOne({ token: refreshTokenString });
+    }
+
+    // Clear cookies
+    res.clearCookie("token", clearAccessTokenCookieOptions());
+    res.clearCookie("refreshToken", clearRefreshTokenCookieOptions());
+
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

@@ -6,7 +6,9 @@ import {
   resendOTP, 
   googleLogin,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  refreshAccessToken,
+  logoutUser
 } from "../controllers/authController.js"
 import { protect } from "../middleware/authMiddleware.js"
 
@@ -19,6 +21,8 @@ router.post("/login", loginUser)
 router.post("/google", googleLogin)
 router.post("/forgot-password", forgotPassword)
 router.post("/reset-password", resetPassword)
+router.post("/refresh", refreshAccessToken)
+router.post("/logout", logoutUser)
 
 router.get("/profile", protect, (req, res) => {
   res.json(req.user)
