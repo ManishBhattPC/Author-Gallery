@@ -17,6 +17,7 @@ import reportRoutes from "./routes/reportRoutes.js"
 import contactRoutes from "./routes/contactRoutes.js"
 import paymentRoutes from "./routes/paymentRoutes.js"
 import settingsRoutes from "./routes/settingsRoutes.js"
+import audiobookRoutes from "./routes/audiobookRoutes.js"
 
 dotenv.config()
 
@@ -92,6 +93,7 @@ app.use("/api/reviews", reviewRoutes)
 app.use("/api/reports", reportRoutes)
 app.use("/api/contact", contactRoutes)
 app.use("/api/payments", paymentRoutes)
+app.use("/api/audiobooks", audiobookRoutes)
 
 app.get("/", (req, res) => {
   res.send("Author Gallery API is running...")

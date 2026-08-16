@@ -2,8 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { fetchBookById, incrementBookDownloads } from "../../services/bookService.js";
 import { useAuth } from "../../AuthContext.jsx";
+import { useAudio } from "../../context/AudioContext.jsx";
 import { createPortal } from "react-dom";
-import { Flag, Info, Plus } from "lucide-react";
+import { Flag, Info, Plus, Headphones } from "lucide-react";
 import ReviewSection from "../ReviewSection.jsx";
 import ReportModal from "../ReportModal.jsx";
 import { requestOfflinePayment, createPaymentOrder, verifyPaymentSignature } from "../../services/paymentService.js";
@@ -48,6 +49,13 @@ const BookDetails = () => {
   const [showNewLibForm, setShowNewLibForm] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
+
+  const handleListenAudiobook = () => {
+    if (book) {
+      playAudiobook(book);
+      openDrawer();
+    }
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -682,6 +690,14 @@ const BookDetails = () => {
                   >
                     <FaBookOpen />
                     Start Reading
+                  </button>
+
+                  <button
+                    onClick={handleListenAudiobook}
+                    className="flex-1 flex items-center justify-center gap-2 bg-amber-900 hover:bg-amber-950 text-white px-6 py-4 rounded-xl font-bold transition duration-200 cursor-pointer shadow-md shadow-amber-950/20 active:scale-[0.98]"
+                  >
+                    <Headphones size={18} />
+                    Listen to Audiobook
                   </button>
 
                   {book?.pdfFile && (

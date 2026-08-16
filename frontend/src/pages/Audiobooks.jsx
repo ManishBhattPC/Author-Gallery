@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAudio } from "../context/AudioContext.jsx";
-import { getBooks } from "../services/bookService.js";
+import { getAudiobooks } from "../services/audiobookService.js";
 import {
   Headphones,
   Play,
-  Heart,
   Star,
   Clock,
   Sparkles,
   Search,
   BookOpen,
   ChevronRight,
+  ChevronLeft,
   BookmarkPlus,
   Flame,
-  Mic
+  Mic,
+  SlidersHorizontal,
+  RotateCcw
 } from "lucide-react";
 
-// Mock featured audiobook data if backend books do not have full chapters yet
-const FEATURED_AUDIOBOOK = {
+// Mock dataset for rich fallback demonstration if DB cold starts
+const DEFAULT_FEATURED = {
   _id: "featured-1",
   title: "The Silent River",
   author: { name: "Arjun Sharma" },
@@ -47,18 +49,18 @@ const FEATURED_AUDIOBOOK = {
 
 const CONTINUE_LISTENING = [
   {
-    _id: "featured-1",
+    _id: "cont-1",
     title: "The Silent River",
-    chapter: "Chapter 8",
+    chapter: "Chapter 8 - The Journey",
     progress: 64,
     coverImage: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80",
     author: { name: "Arjun Sharma" },
-    chapters: FEATURED_AUDIOBOOK.chapters,
+    chapters: DEFAULT_FEATURED.chapters,
   },
   {
     _id: "cont-2",
     title: "Whispers of the Past",
-    chapter: "Chapter 3",
+    chapter: "Chapter 3 - The Echoes",
     progress: 28,
     coverImage: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=800&q=80",
     author: { name: "Kabir Malhotra" },
@@ -71,7 +73,7 @@ const CONTINUE_LISTENING = [
   {
     _id: "cont-3",
     title: "Letters to the Wind",
-    chapter: "Chapter 5",
+    chapter: "Chapter 5 - Oceans Away",
     progress: 49,
     coverImage: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80",
     author: { name: "Rohan Dev" },
@@ -85,57 +87,133 @@ const CONTINUE_LISTENING = [
 const GENRES = ["All", "Poetry", "Romance", "Mystery", "Fantasy", "Drama", "Self Growth", "History"];
 
 const Audiobooks = () => {
-  const { playAudiobook, openDrawer, activeAudiobook } = useAudio();
-  const [selectedGenre, setSelectedGenre] = useState("All");
+  const { playAudiobook, openDrawer } = useAudio();
+
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState("All");
+  const [sortBy, setSortBy] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalAudiobooks, setTotalAudiobooks] = useState(0);
+
   const [booksList, setBooksList] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Fetch paginated audiobooks from backend
   useEffect(() => {
+    let isMounted = true;
+
     const loadAudiobooks = async () => {
       try {
         setLoading(true);
-        const data = await getBooks();
-        const extractedBooks = Array.isArray(data) ? data : (data?.books || []);
-        setBooksList(extractedBooks);
+        const params = {
+          page,
+          limit: 10,
+          sortBy,
+          ...(selectedGenre !== "All" && { genre: selectedGenre }),
+          ...(searchQuery.trim() && { search: searchQuery.trim() }),
+        };
+
+        const response = await getAudiobooks(params);
+
+        if (!isMounted) return;
+
+        if (response && response.audiobooks) {
+          setBooksList(response.audiobooks);
+          setTotalPages(response.totalPages || 1);
+          setTotalAudiobooks(response.totalAudiobooks || response.audiobooks.length);
+        } else {
+          // Fallback to default catalog
+          setBooksList([
+            {
+              _id: "tb-1",
+              title: "The Last Light",
+              author: { name: "Neera Iyer" },
+              rating: 4.7,
+              duration: "7h 12m",
+              coverImage: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=600&q=80",
+              chapters: [{ title: "Chapter 1", duration: 340 }]
+            },
+            {
+              _id: "tb-2",
+              title: "Before We Forget",
+              author: { name: "Kabir Malhotra" },
+              rating: 4.6,
+              duration: "5h 48m",
+              coverImage: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=600&q=80",
+              chapters: [{ title: "Chapter 1", duration: 380 }]
+            },
+            {
+              _id: "tb-3",
+              title: "Shadows of Time",
+              author: { name: "Ishita Verma" },
+              rating: 4.9,
+              duration: "8h 03m",
+              coverImage: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=600&q=80",
+              chapters: [{ title: "Chapter 1", duration: 420 }]
+            },
+            {
+              _id: "tb-4",
+              title: "And The Stars Listened",
+              author: { name: "Rohan Dev" },
+              rating: 4.8,
+              duration: "6h 15m",
+              coverImage: "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=600&q=80",
+              chapters: [{ title: "Chapter 1", duration: 310 }]
+            },
+            {
+              _id: "tb-5",
+              title: "The October Junction",
+              author: { name: "Arjun Sharma" },
+              rating: 4.7,
+              duration: "6h 42m",
+              coverImage: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80",
+              chapters: [{ title: "Chapter 1", duration: 390 }]
+            },
+          ]);
+          setTotalPages(1);
+          setTotalAudiobooks(5);
+        }
       } catch (err) {
         console.error("Failed to load audiobooks:", err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
+
     loadAudiobooks();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [page, selectedGenre, searchQuery, sortBy]);
 
   const handleStartListening = (book) => {
     playAudiobook(book);
     openDrawer();
   };
 
-  const safeBooksList = Array.isArray(booksList) ? booksList : [];
-  const filteredBooks = safeBooksList.filter((book) => {
-    const matchesSearch =
-      book.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.author?.name?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesGenre =
-      selectedGenre === "All" || (book.genres && book.genres.includes(selectedGenre));
-    return matchesSearch && matchesGenre;
-  });
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPage(newPage);
+      window.scrollTo({ top: 400, behavior: "smooth" });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-28 animate-fade-in">
       
-      {/* Top Hero Banner (Featured Audiobook) */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-100/80 via-slate-50 to-slate-50 pt-8 pb-12 px-4 sm:px-8 md:px-12 border-b border-slate-200/50">
+      {/* Hero Banner Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-100/90 via-slate-50 to-slate-50 pt-8 pb-12 px-4 sm:px-8 md:px-12 border-b border-slate-200/50">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           {/* Hero 3D Book Cover */}
           <div className="lg:col-span-4 flex justify-center">
-            <div className="relative group cursor-pointer" onClick={() => handleStartListening(FEATURED_AUDIOBOOK)}>
+            <div className="relative group cursor-pointer" onClick={() => handleStartListening(DEFAULT_FEATURED)}>
               <div className="w-64 h-88 sm:w-72 sm:h-96 rounded-2xl overflow-hidden shadow-2xl border border-slate-200/80 transition-transform duration-500 group-hover:scale-105 group-hover:-rotate-1">
                 <img
-                  src={FEATURED_AUDIOBOOK.coverImage}
-                  alt={FEATURED_AUDIOBOOK.title}
+                  src={DEFAULT_FEATURED.coverImage}
+                  alt={DEFAULT_FEATURED.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent" />
@@ -159,40 +237,40 @@ const Audiobooks = () => {
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-serif font-bold text-slate-900 tracking-tight leading-tight">
-              {FEATURED_AUDIOBOOK.title}
+              {DEFAULT_FEATURED.title}
             </h1>
 
             <p className="text-lg font-semibold text-amber-800">
-              by {FEATURED_AUDIOBOOK.author.name}
+              by {DEFAULT_FEATURED.author.name}
             </p>
 
             {/* Metrics */}
             <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-600">
               <div className="flex items-center gap-1 text-amber-500 font-bold">
                 <Star size={16} className="fill-amber-400" />
-                <span>{FEATURED_AUDIOBOOK.rating}</span>
-                <span className="text-slate-400 font-normal">({FEATURED_AUDIOBOOK.reviewsCount} reviews)</span>
+                <span>{DEFAULT_FEATURED.rating}</span>
+                <span className="text-slate-400 font-normal">({DEFAULT_FEATURED.reviewsCount} reviews)</span>
               </div>
               <span>•</span>
               <div className="flex items-center gap-1">
                 <Clock size={15} />
-                <span>{FEATURED_AUDIOBOOK.duration}</span>
+                <span>{DEFAULT_FEATURED.duration}</span>
               </div>
               <span>•</span>
               <div className="flex items-center gap-1">
                 <BookOpen size={15} />
-                <span>{FEATURED_AUDIOBOOK.chaptersCount} Chapters</span>
+                <span>{DEFAULT_FEATURED.chaptersCount} Chapters</span>
               </div>
             </div>
 
             <p className="text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed">
-              {FEATURED_AUDIOBOOK.description}
+              {DEFAULT_FEATURED.description}
             </p>
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <button
-                onClick={() => handleStartListening(FEATURED_AUDIOBOOK)}
+                onClick={() => handleStartListening(DEFAULT_FEATURED)}
                 className="flex items-center gap-2.5 bg-amber-800 hover:bg-amber-900 text-white font-bold px-7 py-3.5 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 text-sm cursor-pointer"
               >
                 <Play size={18} className="fill-white" />
@@ -205,7 +283,7 @@ const Audiobooks = () => {
               </button>
             </div>
 
-            {/* Waveform Graphic */}
+            {/* Audio Waveform Graphic */}
             <div className="pt-4 flex items-center gap-1 opacity-70">
               {[40, 65, 30, 85, 95, 50, 70, 45, 90, 60, 35, 75, 55, 80, 40, 65, 90, 30, 85, 50].map((h, i) => (
                 <div
@@ -221,29 +299,36 @@ const Audiobooks = () => {
         </div>
       </section>
 
-      {/* Main Container */}
+      {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-12 space-y-12 pt-10">
 
-        {/* Search & Filter Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/70 shadow-sm">
-          {/* Search Input */}
-          <div className="relative w-full md:w-80">
+        {/* Search, Filter & Sort Control Bar */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/70 shadow-sm">
+          
+          {/* Search Bar */}
+          <div className="relative w-full lg:w-80">
             <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search audiobooks or narrators..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-800/30 border border-slate-200/60"
             />
           </div>
 
           {/* Genre Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+          <div className="flex items-center gap-2 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0">
             {GENRES.map((genre) => (
               <button
                 key={genre}
-                onClick={() => setSelectedGenre(genre)}
+                onClick={() => {
+                  setSelectedGenre(genre);
+                  setPage(1);
+                }}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition whitespace-nowrap cursor-pointer ${
                   selectedGenre === genre
                     ? "bg-amber-800 text-white shadow-sm"
@@ -254,6 +339,23 @@ const Audiobooks = () => {
               </button>
             ))}
           </div>
+
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-2 self-end lg:self-center">
+            <SlidersHorizontal size={16} className="text-slate-400" />
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setPage(1);
+              }}
+              className="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 px-3 py-2 rounded-xl focus:outline-none"
+            >
+              <option value="newest">Newest Releases</option>
+              <option value="trending">Most Popular</option>
+            </select>
+          </div>
+
         </div>
 
         {/* Continue Listening Section */}
@@ -263,10 +365,6 @@ const Audiobooks = () => {
               <Clock size={20} className="text-amber-800" />
               <span>Continue Listening</span>
             </h2>
-            <button className="text-xs font-bold text-amber-800 hover:underline flex items-center gap-1">
-              <span>View all</span>
-              <ChevronRight size={14} />
-            </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -284,7 +382,7 @@ const Audiobooks = () => {
                   <h3 className="text-sm font-bold text-slate-900 truncate">
                     {item.title}
                   </h3>
-                  <p className="text-xs text-slate-500">{item.chapter}</p>
+                  <p className="text-xs text-slate-500 truncate">{item.chapter}</p>
                   
                   {/* Progress Bar */}
                   <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
@@ -297,7 +395,7 @@ const Audiobooks = () => {
                     <span>{item.progress}% completed</span>
                     <button
                       onClick={() => handleStartListening(item)}
-                      className="text-amber-800 hover:text-amber-900 font-bold flex items-center gap-1"
+                      className="text-amber-800 hover:text-amber-900 font-bold flex items-center gap-1 cursor-pointer"
                     >
                       <Play size={12} className="fill-amber-800" />
                       <span>Continue</span>
@@ -309,110 +407,155 @@ const Audiobooks = () => {
           </div>
         </section>
 
-        {/* Trending Audiobooks Section */}
-        <section className="space-y-4">
+        {/* Audiobook Catalog Grid */}
+        <section className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-serif font-bold text-slate-900 flex items-center gap-2">
-              <Flame size={20} className="text-amber-800" />
-              <span>Trending Audiobooks</span>
-            </h2>
-            <Link to="/books" className="text-xs font-bold text-amber-800 hover:underline flex items-center gap-1">
-              <span>Explore all</span>
-              <ChevronRight size={14} />
-            </Link>
-          </div>
+            <div>
+              <h2 className="text-xl font-serif font-bold text-slate-900 flex items-center gap-2">
+                <Flame size={20} className="text-amber-800" />
+                <span>Audiobook Catalog</span>
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Showing {booksList.length} of {totalAudiobooks} audiobooks
+              </p>
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-            {(filteredBooks.length > 0 ? filteredBooks : [
-              {
-                _id: "tb-1",
-                title: "The Last Light",
-                author: { name: "Neera Iyer" },
-                rating: 4.7,
-                duration: "7h 12m",
-                coverImage: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&w=600&q=80",
-                chapters: [{ title: "Chapter 1", duration: 340 }]
-              },
-              {
-                _id: "tb-2",
-                title: "Before We Forget",
-                author: { name: "Kabir Malhotra" },
-                rating: 4.6,
-                duration: "5h 48m",
-                coverImage: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=600&q=80",
-                chapters: [{ title: "Chapter 1", duration: 380 }]
-              },
-              {
-                _id: "tb-3",
-                title: "Shadows of Time",
-                author: { name: "Ishita Verma" },
-                rating: 4.9,
-                duration: "8h 03m",
-                coverImage: "https://images.unsplash.com/photo-1476275466078-4007374efbbe?auto=format&fit=crop&w=600&q=80",
-                chapters: [{ title: "Chapter 1", duration: 420 }]
-              },
-              {
-                _id: "tb-4",
-                title: "And The Stars Listened",
-                author: { name: "Rohan Dev" },
-                rating: 4.8,
-                duration: "6h 15m",
-                coverImage: "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=600&q=80",
-                chapters: [{ title: "Chapter 1", duration: 310 }]
-              },
-              {
-                _id: "tb-5",
-                title: "The October Junction",
-                author: { name: "Arjun Sharma" },
-                rating: 4.7,
-                duration: "6h 42m",
-                coverImage: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80",
-                chapters: [{ title: "Chapter 1", duration: 390 }]
-              },
-            ]).map((book) => (
-              <div
-                key={book._id}
-                className="bg-white rounded-2xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col group"
-              >
-                <div className="relative aspect-[3/4] overflow-hidden bg-slate-100">
-                  <img
-                    src={book.coverImage || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80"}
-                    alt={book.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <button
-                    onClick={() => handleStartListening(book)}
-                    className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-amber-800 text-white flex items-center justify-center shadow-lg transition-transform group-hover:scale-110"
-                  >
-                    <Play size={18} className="fill-white ml-0.5" />
-                  </button>
-                  <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <Headphones size={11} className="text-amber-400" />
-                    <span>Audio</span>
-                  </div>
-                </div>
-
-                <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2">
-                  <div>
-                    <h3 className="text-sm font-serif font-bold text-slate-900 truncate group-hover:text-amber-800 transition">
-                      {book.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 truncate">
-                      {book.author?.name || book.author || "Unknown Author"}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-2 border-t border-slate-100">
-                    <div className="flex items-center gap-1 text-amber-500">
-                      <Star size={13} className="fill-amber-400" />
-                      <span>{book.rating || 4.7}</span>
-                    </div>
-                    <span>{book.duration || "6h 15m"}</span>
-                  </div>
-                </div>
+            {/* Pagination Top Indicator */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
+                <button
+                  disabled={page === 1}
+                  onClick={() => handlePageChange(page - 1)}
+                  className="p-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-100 transition"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <span>Page {page} of {totalPages}</span>
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => handlePageChange(page + 1)}
+                  className="p-1.5 rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-100 transition"
+                >
+                  <ChevronRight size={16} />
+                </button>
               </div>
-            ))}
+            )}
           </div>
+
+          {/* Shimmer Skeleton Loaders */}
+          {loading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <div key={n} className="bg-white rounded-2xl p-3 border border-slate-200/60 space-y-3 animate-pulse">
+                  <div className="w-full aspect-[3/4] bg-slate-200 rounded-xl" />
+                  <div className="h-4 bg-slate-200 rounded w-3/4" />
+                  <div className="h-3 bg-slate-200 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : booksList.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-2xl border border-slate-200/60 space-y-3">
+              <Headphones size={36} className="mx-auto text-slate-400" />
+              <h3 className="text-sm font-bold text-slate-800">No Audiobooks Found</h3>
+              <p className="text-xs text-slate-500">Try adjusting your search query or genre filter.</p>
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedGenre("All");
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer"
+              >
+                <RotateCcw size={14} />
+                <span>Reset Filters</span>
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {booksList.map((book) => (
+                <div
+                  key={book._id}
+                  className="bg-white rounded-2xl overflow-hidden border border-slate-200/70 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col group"
+                >
+                  <div className="relative aspect-[3/4] overflow-hidden bg-slate-100">
+                    <img
+                      src={book.coverImage || "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80"}
+                      alt={book.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <button
+                      onClick={() => handleStartListening(book)}
+                      className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-amber-800 text-white flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 cursor-pointer"
+                    >
+                      <Play size={18} className="fill-white ml-0.5" />
+                    </button>
+                    <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Headphones size={11} className="text-amber-400" />
+                      <span>Audio</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3.5 flex-1 flex flex-col justify-between space-y-2">
+                    <div>
+                      <h3 className="text-sm font-serif font-bold text-slate-900 truncate group-hover:text-amber-800 transition">
+                        {book.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 truncate">
+                        {book.author?.name || book.author || "Unknown Author"}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs font-semibold text-slate-500 pt-2 border-t border-slate-100">
+                      <div className="flex items-center gap-1 text-amber-500">
+                        <Star size={13} className="fill-amber-400" />
+                        <span>{book.rating || 4.8}</span>
+                      </div>
+                      <span>{book.totalDuration || book.duration || "5h 30m"}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Bottom Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-6">
+              <button
+                disabled={page === 1}
+                onClick={() => handlePageChange(page - 1)}
+                className="flex items-center gap-1 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition shadow-sm cursor-pointer"
+              >
+                <ChevronLeft size={16} />
+                <span>Previous</span>
+              </button>
+
+              <div className="flex items-center gap-1 px-3">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((pNum) => (
+                  <button
+                    key={pNum}
+                    onClick={() => handlePageChange(pNum)}
+                    className={`w-8 h-8 rounded-xl text-xs font-bold transition cursor-pointer ${
+                      page === pNum
+                        ? "bg-amber-800 text-white shadow-sm"
+                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    {pNum}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                disabled={page === totalPages}
+                onClick={() => handlePageChange(page + 1)}
+                className="flex items-center gap-1 px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 transition shadow-sm cursor-pointer"
+              >
+                <span>Next</span>
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+
         </section>
 
         {/* New Voices Section */}

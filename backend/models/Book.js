@@ -93,11 +93,40 @@ const bookSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // Audiobook Extension Fields
+    isAudiobook: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    narrator: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    totalDuration: {
+      type: String,
+      trim: true,
+      default: "0h 0m",
+    },
+    chapters: [
+      {
+        chapterNumber: { type: Number },
+        title: { type: String, trim: true },
+        duration: { type: Number, default: 300 }, // Duration in seconds
+        textContent: { type: String, trim: true },
+        audioUrl: { type: String, trim: true },
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
+
+// Compound Indexes for fast paginated queries
+bookSchema.index({ isAudiobook: 1, createdAt: -1 });
+bookSchema.index({ genres: 1, isAudiobook: 1 });
 
 const signCloudinaryPdfUrl = (url) => {
   if (!url) return url;
