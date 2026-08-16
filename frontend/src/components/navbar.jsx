@@ -331,6 +331,14 @@ const Navbar = () => {
                       <span>Write a Book</span>
                     </Link>
                     <Link
+                      to="/dashboard/create-audiobook"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"
+                    >
+                      <Headphones size={16} className="text-slate-400" />
+                      <span>Create Audiobook</span>
+                    </Link>
+                    <Link
                       to="/dashboard/my-collection"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-2.5 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-amber-800 transition"

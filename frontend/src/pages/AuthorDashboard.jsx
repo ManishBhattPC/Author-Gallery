@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Headphones } from "lucide-react";
 import DashboardHeader from "../components/DashboardComponents/DashboardHeader";
 import QuickUpload from "../components/DashboardComponents/QuickUpload";
 import AuthorStats from "../components/DashboardComponents/AuthorStats";
@@ -122,6 +123,29 @@ const Dashboard = () => {
           {/* Right Sidebar (1/3 width on lg, 1/4 width on xl) */}
           <div className="lg:col-span-1 xl:col-span-1 space-y-6">
             
+            {/* Create Audiobook Studio Sidebar Action */}
+            <div className="bg-gradient-to-br from-amber-900 via-amber-800 to-amber-950 rounded-2xl p-5 text-amber-50 shadow-md border border-amber-800/40 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="p-2 bg-amber-700/40 rounded-xl text-amber-300">
+                  <Headphones size={20} />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Audiobook Studio</h3>
+                  <p className="text-[11px] text-amber-200/80">Turn books into audiobooks</p>
+                </div>
+              </div>
+              <p className="text-xs text-amber-100/90 leading-relaxed">
+                Publish AI Speech narration or upload your custom studio audio files for your readers.
+              </p>
+              <Link
+                to="/dashboard/create-audiobook"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-amber-50 hover:bg-white text-amber-950 rounded-xl text-xs font-bold shadow-sm transition active:scale-95"
+              >
+                <span>🎙️ Create Audiobook</span>
+                <span>→</span>
+              </Link>
+            </div>
+
             {/* Author Statistics */}
             <AuthorStats stats={dashboard.stats} loading={loading} />
             
