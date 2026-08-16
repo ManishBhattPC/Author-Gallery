@@ -5,6 +5,7 @@ import Layout from "./components/Layout.jsx"
 import Home from "./pages/Home.jsx"
 import Explore from "./pages/Explore.jsx"
 import Books from "./pages/Books.jsx"
+import Audiobooks from "./pages/Audiobooks.jsx"
 import About from "./pages/About.jsx"
 import Authors from "./pages/Authors.jsx"
 import Contact from "./pages/Contact.jsx"
@@ -41,6 +42,7 @@ const AppRoutes = () => {
         <Route index element={<Home />} />
         <Route path="explore" element={<Explore />} />
         <Route path="books" element={<Books />} />
+        <Route path="audiobooks" element={<Audiobooks />} />
         <Route path="books/:id" element={<BookDetails />} />
         <Route path="about" element={<About />} />
         <Route path="authors" element={<Authors />} />

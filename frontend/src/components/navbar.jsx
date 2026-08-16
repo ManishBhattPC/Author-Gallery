@@ -23,7 +23,8 @@ import {
   Library,
   Volume2,
   VolumeX,
-  Megaphone
+  Megaphone,
+  Headphones
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -31,6 +32,7 @@ const NAV_ITEMS = [
   { label: "Explore", to: "/explore", icon: <Compass size={18} /> },
   { label: "Authors", to: "/authors", icon: <Users size={18} /> },
   { label: "Books", to: "/books", icon: <BookOpen size={18} /> },
+  { label: "Audiobooks", to: "/audiobooks", icon: <Headphones size={18} /> },
   { label: "About", to: "/about", icon: <Info size={18} /> },
 ];
 
