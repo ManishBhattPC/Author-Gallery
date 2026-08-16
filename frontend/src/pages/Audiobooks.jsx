@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAudio } from "../context/AudioContext.jsx";
-import { fetchBooks } from "../services/bookService.js";
+import { getBooks } from "../services/bookService.js";
 import {
   Headphones,
   Play,
@@ -95,7 +95,7 @@ const Audiobooks = () => {
     const loadAudiobooks = async () => {
       try {
         setLoading(true);
-        const data = await fetchBooks();
+        const data = await getBooks();
         setBooksList(data || []);
       } catch (err) {
         console.error("Failed to load audiobooks:", err);
