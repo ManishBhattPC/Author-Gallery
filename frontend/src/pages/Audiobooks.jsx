@@ -96,7 +96,8 @@ const Audiobooks = () => {
       try {
         setLoading(true);
         const data = await getBooks();
-        setBooksList(data || []);
+        const extractedBooks = Array.isArray(data) ? data : (data?.books || []);
+        setBooksList(extractedBooks);
       } catch (err) {
         console.error("Failed to load audiobooks:", err);
       } finally {
@@ -111,7 +112,8 @@ const Audiobooks = () => {
     openDrawer();
   };
 
-  const filteredBooks = booksList.filter((book) => {
+  const safeBooksList = Array.isArray(booksList) ? booksList : [];
+  const filteredBooks = safeBooksList.filter((book) => {
     const matchesSearch =
       book.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.author?.name?.toLowerCase().includes(searchQuery.toLowerCase());
