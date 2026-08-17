@@ -1,8 +1,9 @@
 import apiClient from "./apiClient.js";
 import { apiCache } from "./cacheManager.js";
+import { getBooks } from "./bookService.js";
 
 /**
- * Fetch Paginated Audiobooks
+ * Fetch Paginated Audiobooks with Fallback to All MongoDB Books
  * @param {object} params { page, limit, search, genre, sortBy }
  */
 export const getAudiobooks = async (params = {}) => {
@@ -11,13 +12,35 @@ export const getAudiobooks = async (params = {}) => {
   if (cachedData) return cachedData;
 
   try {
+    // 1. Try dedicated audiobooks endpoint
     const response = await apiClient.get("/api/audiobooks", { params });
-    apiCache.set(cacheKey, response.data, 30); // Cache for 30 seconds
-    return response.data;
+    if (response.data && response.data.audiobooks && response.data.audiobooks.length > 0) {
+      apiCache.set(cacheKey, response.data, 30);
+      return response.data;
+    }
   } catch (err) {
-    console.warn("Audiobook API endpoint fallback to local dataset:", err);
-    return null;
+    console.warn("Audiobook API endpoint notice, falling back to books API:", err);
   }
+
+  try {
+    // 2. Fallback to /api/books to fetch ALL author books directly from MongoDB
+    const booksData = await getBooks(params);
+    if (booksData) {
+      const booksArray = Array.isArray(booksData) ? booksData : (booksData.books || []);
+      const formattedResult = {
+        audiobooks: booksArray,
+        currentPage: booksData.currentPage || params.page || 1,
+        totalPages: booksData.totalPages || 1,
+        totalAudiobooks: booksData.totalBooks || booksArray.length,
+      };
+      apiCache.set(cacheKey, formattedResult, 30);
+      return formattedResult;
+    }
+  } catch (err) {
+    console.error("Error fetching fallback books for audiobooks:", err);
+  }
+
+  return null;
 };
 
 /**
@@ -28,9 +51,16 @@ export const getAudiobookById = async (id) => {
   const cachedData = apiCache.get(cacheKey);
   if (cachedData) return cachedData;
 
-  const response = await apiClient.get(`/api/audiobooks/${id}`);
-  apiCache.set(cacheKey, response.data, 30);
-  return response.data;
+  try {
+    const response = await apiClient.get(`/api/audiobooks/${id}`);
+    apiCache.set(cacheKey, response.data, 30);
+    return response.data;
+  } catch (err) {
+    // Fallback to /api/books/:id
+    const response = await apiClient.get(`/api/books/${id}`);
+    apiCache.set(cacheKey, response.data, 30);
+    return response.data;
+  }
 };
 
 /**
