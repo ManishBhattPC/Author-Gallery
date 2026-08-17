@@ -18,6 +18,10 @@ import contactRoutes from "./routes/contactRoutes.js"
 import paymentRoutes from "./routes/paymentRoutes.js"
 import settingsRoutes from "./routes/settingsRoutes.js"
 import audiobookRoutes from "./routes/audiobookRoutes.js"
+import bookshelfRoutes from "./routes/bookshelfRoutes.js"
+import commentRoutes from "./routes/commentRoutes.js"
+import discussionRoutes from "./routes/discussionRoutes.js"
+import aiAssistantRoutes from "./routes/aiAssistantRoutes.js"
 
 dotenv.config()
 
@@ -94,6 +98,10 @@ app.use("/api/reports", reportRoutes)
 app.use("/api/contact", contactRoutes)
 app.use("/api/payments", paymentRoutes)
 app.use("/api/audiobooks", audiobookRoutes)
+app.use("/api/bookshelves", bookshelfRoutes)
+app.use("/api/comments", commentRoutes)
+app.use("/api/discussions", discussionRoutes)
+app.use("/api/ai-assistant", aiAssistantRoutes)
 
 app.get("/", (req, res) => {
   res.send("Author Gallery API is running...")
