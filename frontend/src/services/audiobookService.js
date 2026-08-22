@@ -3,7 +3,7 @@ import { apiCache } from "./cacheManager.js";
 import { getBooks } from "./bookService.js";
 
 /**
- * Fetch Paginated Audiobooks with Silent Fallback to All MongoDB Books
+ * Fetch Paginated Audiobooks via Live /api/books Endpoint
  * @param {object} params { page, limit, search, genre, sortBy }
  */
 export const getAudiobooks = async (params = {}) => {
@@ -12,18 +12,18 @@ export const getAudiobooks = async (params = {}) => {
   if (cachedData) return cachedData;
 
   try {
-    // 1. Try dedicated audiobooks endpoint
-    const response = await apiClient.get("/api/audiobooks", { params });
-    if (response.data && response.data.audiobooks && response.data.audiobooks.length > 0) {
-      apiCache.set(cacheKey, response.data, 30); // Cache for 30 seconds
+    // 1. First try dedicated audiobooks endpoint silently
+    const response = await apiClient.get("/api/audiobooks", { params }).catch(() => null);
+    if (response && response.data && response.data.audiobooks && response.data.audiobooks.length > 0) {
+      apiCache.set(cacheKey, response.data, 30);
       return response.data;
     }
-  } catch (err) {
-    // Silently catch fallback without spamming console
+  } catch (e) {
+    // Ignore
   }
 
   try {
-    // 2. Fallback to /api/books to fetch ALL author books directly from MongoDB
+    // 2. Query /api/books directly (100% live & active on Render backend)
     const booksData = await getBooks(params);
     if (booksData) {
       const booksArray = Array.isArray(booksData) ? booksData : (booksData.books || []);
@@ -37,7 +37,7 @@ export const getAudiobooks = async (params = {}) => {
       return formattedResult;
     }
   } catch (err) {
-    // Silently catch error
+    console.error("Error fetching books for audiobooks:", err);
   }
 
   return null;
@@ -52,18 +52,11 @@ export const getAudiobookById = async (id) => {
   if (cachedData) return cachedData;
 
   try {
-    const response = await apiClient.get(`/api/audiobooks/${id}`);
+    const response = await apiClient.get(`/api/books/${id}`);
     apiCache.set(cacheKey, response.data, 30);
     return response.data;
   } catch (err) {
-    // Fallback to /api/books/:id
-    try {
-      const response = await apiClient.get(`/api/books/${id}`);
-      apiCache.set(cacheKey, response.data, 30);
-      return response.data;
-    } catch (e) {
-      return null;
-    }
+    return null;
   }
 };
 
@@ -71,7 +64,11 @@ export const getAudiobookById = async (id) => {
  * Publish New Audiobook
  */
 export const createAudiobook = async (audiobookData) => {
-  const response = await apiClient.post("/api/audiobooks", audiobookData);
+  const response = await apiClient.post("/api/books", {
+    ...audiobookData,
+    isAudiobook: true,
+  });
   apiCache.invalidate("audiobooks:");
+  apiCache.invalidate("books:");
   return response.data;
 };
