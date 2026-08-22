@@ -3,7 +3,7 @@ import { apiCache } from "./cacheManager.js";
 import { getBooks } from "./bookService.js";
 
 /**
- * Fetch Paginated Audiobooks with Fallback to All MongoDB Books
+ * Fetch Paginated Audiobooks with Silent Fallback to All MongoDB Books
  * @param {object} params { page, limit, search, genre, sortBy }
  */
 export const getAudiobooks = async (params = {}) => {
@@ -15,11 +15,11 @@ export const getAudiobooks = async (params = {}) => {
     // 1. Try dedicated audiobooks endpoint
     const response = await apiClient.get("/api/audiobooks", { params });
     if (response.data && response.data.audiobooks && response.data.audiobooks.length > 0) {
-      apiCache.set(cacheKey, response.data, 30);
+      apiCache.set(cacheKey, response.data, 30); // Cache for 30 seconds
       return response.data;
     }
   } catch (err) {
-    console.warn("Audiobook API endpoint notice, falling back to books API:", err);
+    // Silently catch fallback without spamming console
   }
 
   try {
@@ -37,7 +37,7 @@ export const getAudiobooks = async (params = {}) => {
       return formattedResult;
     }
   } catch (err) {
-    console.error("Error fetching fallback books for audiobooks:", err);
+    // Silently catch error
   }
 
   return null;
@@ -57,9 +57,13 @@ export const getAudiobookById = async (id) => {
     return response.data;
   } catch (err) {
     // Fallback to /api/books/:id
-    const response = await apiClient.get(`/api/books/${id}`);
-    apiCache.set(cacheKey, response.data, 30);
-    return response.data;
+    try {
+      const response = await apiClient.get(`/api/books/${id}`);
+      apiCache.set(cacheKey, response.data, 30);
+      return response.data;
+    } catch (e) {
+      return null;
+    }
   }
 };
 

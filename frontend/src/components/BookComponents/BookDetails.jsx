@@ -39,6 +39,7 @@ const BookDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
+  const { playAudiobook, openDrawer } = useAudio();
 
   const [libraryModalOpen, setLibraryModalOpen] = useState(false);
   const [libraries, setLibraries] = useState(() => {
@@ -686,18 +687,18 @@ const BookDetails = () => {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <button
                     onClick={() => setReaderOpen(true)}
-                    className="flex-1 flex items-center justify-center gap-2 bg-amber-700 hover:bg-amber-800 text-white px-6 py-4 rounded-xl font-bold transition duration-200 cursor-pointer shadow-md shadow-amber-800/10 active:scale-[0.98]"
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#8C4E35] hover:bg-[#6F5E4E] text-[#FAF6F0] px-5 py-3.5 rounded-xl font-bold transition duration-200 cursor-pointer shadow-md active:scale-[0.98]"
                   >
                     <FaBookOpen />
-                    Start Reading
+                    <span>Start Reading</span>
                   </button>
 
                   <button
                     onClick={handleListenAudiobook}
-                    className="flex-1 flex items-center justify-center gap-2 bg-amber-900 hover:bg-amber-950 text-white px-6 py-4 rounded-xl font-bold transition duration-200 cursor-pointer shadow-md shadow-amber-950/20 active:scale-[0.98]"
+                    className="flex-1 flex items-center justify-center gap-2 bg-[#2C1F15] hover:bg-[#1A1614] text-[#F5EFE6] border border-[#5C3A21]/40 px-5 py-3.5 rounded-xl font-bold transition duration-200 cursor-pointer shadow-md active:scale-[0.98]"
                   >
-                    <Headphones size={18} />
-                    Listen to Audiobook
+                    <Headphones size={18} className="text-[#D87F4A]" />
+                    <span>Listen to Audiobook</span>
                   </button>
 
                   {book?.pdfFile && (
@@ -707,10 +708,10 @@ const BookDetails = () => {
                       target="_blank"
                       rel="noreferrer"
                       onClick={handleDownloadClick}
-                      className="flex-1 flex items-center justify-center gap-2 border-2 border-slate-200 hover:border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100 px-6 py-3 rounded-xl font-semibold transition duration-200"
+                      className="flex-1 flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-5 py-3.5 rounded-xl font-semibold transition duration-200 shadow-sm"
                     >
                       <FaDownload />
-                      Download PDF
+                      <span>Download PDF</span>
                     </a>
                   )}
                 </div>
