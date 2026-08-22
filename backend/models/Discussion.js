@@ -49,6 +49,7 @@ const discussionSchema = new mongoose.Schema(
 );
 
 discussionSchema.index({ createdAt: -1 });
+discussionSchema.index({ genre: 1, createdAt: -1 });
 
 const Discussion = mongoose.model("Discussion", discussionSchema);
 export default Discussion;

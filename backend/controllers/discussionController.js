@@ -1,13 +1,17 @@
 import Discussion from "../models/Discussion.js";
 
+const escapeRegExp = (string) => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+};
+
 /**
- * Get Discussion Forum Threads
+ * Get Paginated Discussion Forum Threads
  * @route GET /api/discussions
  * @access Public
  */
 export const getDiscussions = async (req, res) => {
   try {
-    const { genre, search } = req.query;
+    const { genre, search, page = 1, limit = 10 } = req.query;
     const query = {};
 
     if (genre && genre !== "All") {
@@ -15,21 +19,66 @@ export const getDiscussions = async (req, res) => {
     }
 
     if (search && search.trim()) {
+      const safeSearch = escapeRegExp(search.trim());
       query.$or = [
-        { title: { $regex: search.trim(), $options: "i" } },
-        { content: { $regex: search.trim(), $options: "i" } },
+        { title: { $regex: safeSearch, $options: "i" } },
+        { content: { $regex: safeSearch, $options: "i" } },
       ];
     }
 
-    const discussions = await Discussion.find(query)
-      .populate("author", "name profileImage")
-      .populate("replies.user", "name profileImage")
-      .sort({ createdAt: -1 });
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.max(1, Math.min(50, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * limitNum;
 
-    res.status(200).json(discussions);
+    const [discussions, totalDiscussions] = await Promise.all([
+      Discussion.find(query)
+        .populate("author", "name profileImage")
+        .populate("replies.user", "name profileImage")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Discussion.countDocuments(query),
+    ]);
+
+    res.status(200).json({
+      discussions,
+      currentPage: pageNum,
+      totalPages: Math.ceil(totalDiscussions / limitNum) || 1,
+      totalDiscussions,
+    });
   } catch (error) {
     console.error("Error fetching discussions:", error);
     res.status(500).json({ message: "Server error fetching discussions" });
+  }
+};
+
+/**
+ * Get Single Discussion Thread by ID and Increment View Count
+ * @route GET /api/discussions/:id
+ * @access Public
+ */
+export const getDiscussionById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const discussion = await Discussion.findByIdAndUpdate(
+      id,
+      { $inc: { views: 1 } },
+      { new: true }
+    )
+      .populate("author", "name profileImage role")
+      .populate("replies.user", "name profileImage role")
+      .lean();
+
+    if (!discussion) {
+      return res.status(404).json({ message: "Discussion thread not found" });
+    }
+
+    res.status(200).json(discussion);
+  } catch (error) {
+    console.error("Error fetching discussion thread:", error);
+    res.status(500).json({ message: "Server error fetching thread" });
   }
 };
 

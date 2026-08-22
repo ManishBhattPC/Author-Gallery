@@ -36,5 +36,7 @@ const seriesSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+seriesSchema.index({ author: 1, createdAt: -1 });
+
 const Series = mongoose.model("Series", seriesSchema);
 export default Series;

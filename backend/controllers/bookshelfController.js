@@ -1,17 +1,33 @@
 import Bookshelf from "../models/Bookshelf.js";
 
+const DEFAULT_CATEGORIES = ["Want to Read", "Currently Reading", "Completed", "Favorites"];
+
 /**
- * Get User Bookshelves
+ * Get User Bookshelves with auto-initialization & lean optimization
  * @route GET /api/bookshelves
  * @access Private
  */
 export const getUserBookshelves = async (req, res) => {
   try {
-    let shelves = await Bookshelf.find({ user: req.user._id }).populate({
-      path: "books",
-      select: "title author coverImage price genres",
-      populate: { path: "author", select: "name" },
-    });
+    let shelves = await Bookshelf.find({ user: req.user._id })
+      .populate({
+        path: "books",
+        select: "title author coverImage price genres rating",
+        populate: { path: "author", select: "name profileImage" },
+      })
+      .lean();
+
+    // Auto-initialize default empty shelves for first-time users
+    if (!shelves || shelves.length === 0) {
+      const initOps = DEFAULT_CATEGORIES.map((cat) => ({
+        user: req.user._id,
+        category: cat,
+        books: [],
+      }));
+
+      const created = await Bookshelf.insertMany(initOps);
+      return res.status(200).json(created);
+    }
 
     res.status(200).json(shelves);
   } catch (error) {
@@ -31,6 +47,10 @@ export const addBookToShelf = async (req, res) => {
 
     if (!bookId || !category) {
       return res.status(400).json({ message: "Book ID and Category are required" });
+    }
+
+    if (!DEFAULT_CATEGORIES.includes(category)) {
+      return res.status(400).json({ message: "Invalid category" });
     }
 
     let shelf = await Bookshelf.findOne({ user: req.user._id, category });

@@ -1,25 +1,40 @@
 import Comment from "../models/Comment.js";
 
 /**
- * Get Comments for a Book or Chapter
+ * Get Paginated Comments for a Book or Chapter
  * @route GET /api/comments/book/:bookId
  * @access Public
  */
 export const getCommentsByBook = async (req, res) => {
   try {
     const { bookId } = req.params;
-    const { chapterNumber } = req.query;
+    const { chapterNumber, page = 1, limit = 20 } = req.query;
 
     const query = { book: bookId };
     if (chapterNumber) {
       query.chapterNumber = Number(chapterNumber);
     }
 
-    const comments = await Comment.find(query)
-      .populate("user", "name profileImage")
-      .sort({ createdAt: -1 });
+    const pageNum = Math.max(1, parseInt(page, 10));
+    const limitNum = Math.max(1, Math.min(50, parseInt(limit, 10)));
+    const skip = (pageNum - 1) * limitNum;
 
-    res.status(200).json(comments);
+    const [comments, totalComments] = await Promise.all([
+      Comment.find(query)
+        .populate("user", "name profileImage role")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      Comment.countDocuments(query),
+    ]);
+
+    res.status(200).json({
+      comments,
+      currentPage: pageNum,
+      totalPages: Math.ceil(totalComments / limitNum) || 1,
+      totalComments,
+    });
   } catch (error) {
     console.error("Error fetching comments:", error);
     res.status(500).json({ message: "Server error fetching comments" });
@@ -48,7 +63,7 @@ export const postComment = async (req, res) => {
     });
 
     await comment.save();
-    await comment.populate("user", "name profileImage");
+    await comment.populate("user", "name profileImage role");
 
     res.status(201).json({ message: "Comment posted successfully", comment });
   } catch (error) {
