@@ -708,7 +708,7 @@ const BookDetails = () => {
                       target="_blank"
                       rel="noreferrer"
                       onClick={handleDownloadClick}
-                      className="flex-1 flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 px-5 py-3.5 rounded-xl font-semibold transition duration-200 shadow-sm"
+                      className="flex-1 flex items-center justify-center gap-2 border-2 border-slate-700 text-white bg-slate-900 hover:bg-slate-800 px-6 py-4 rounded-xl font-bold transition duration-200 cursor-pointer shadow-md active:scale-[0.98]"
                     >
                       <FaDownload />
                       <span>Download PDF</span>

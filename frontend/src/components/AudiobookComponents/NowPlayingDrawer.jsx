@@ -58,6 +58,8 @@ const NowPlayingDrawer = () => {
 
   const [activeTab, setActiveTab] = useState("chapters");
   const [isLiked, setIsLiked] = useState(false);
+  const [copiedToast, setCopiedToast] = useState(false);
+  const [downloadToast, setDownloadToast] = useState(false);
 
   if (!isDrawerOpen || !activeAudiobook) return null;
 
@@ -144,13 +146,33 @@ const NowPlayingDrawer = () => {
             >
               <Heart size={20} className={isLiked ? "fill-rose-500" : ""} />
             </button>
-            <button className="p-2 rounded-full hover:text-amber-800 hover:bg-slate-200/50 transition">
+            <button
+              onClick={handleDownloadAudio}
+              className="p-2 rounded-full hover:text-amber-800 hover:bg-slate-200/50 transition cursor-pointer"
+              title="Download Chapter"
+            >
               <Download size={20} />
             </button>
-            <button className="p-2 rounded-full hover:text-amber-800 hover:bg-slate-200/50 transition">
+            <button
+              onClick={handleShareAudiobook}
+              className="p-2 rounded-full hover:text-amber-800 hover:bg-slate-200/50 transition cursor-pointer"
+              title="Share Audiobook"
+            >
               <Share2 size={20} />
             </button>
           </div>
+
+          {/* Feedback Toasts */}
+          {copiedToast && (
+            <div className="mb-4 text-center text-xs font-bold bg-slate-900 text-white py-2 px-4 rounded-xl animate-fade-in shadow-lg">
+              ✨ Audiobook link copied to clipboard!
+            </div>
+          )}
+          {downloadToast && (
+            <div className="mb-4 text-center text-xs font-bold bg-amber-800 text-white py-2 px-4 rounded-xl animate-fade-in shadow-lg">
+              📥 Audio download initialized!
+            </div>
+          )}
 
           {/* Scrubber & Progress */}
           <div className="w-full space-y-2 mb-6">
